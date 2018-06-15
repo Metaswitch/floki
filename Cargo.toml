@@ -1,0 +1,12 @@
+[package]
+name = "floki"
+version = "0.0.20"
+authors = ["Richard Lupton <richard.lupton@gmail.com>"]
+
+[dependencies]
+quicli = "0.3"
+serde = "1.0"
+serde_derive = "1.0"
+serde_yaml = "0.7"
+failure = "0.1.1"
+uuid = { version = "0.6", features = ["v4"] }
