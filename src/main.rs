@@ -23,9 +23,9 @@ use std::process::ExitStatus;
 
 /// Turn the init section of a floki.yaml file into a command
 /// that can be given to a shell
-fn subshell_command(config: &FlokiConfig, command: &String) -> String {
-    let mut args = config.init.clone();
-    args.push(command.clone());
+fn subshell_command(init: &Vec<String>, command: &str) -> String {
+    let mut args = init.clone();
+    args.push(command.into());
     args.join(" && ")
 }
 
@@ -35,7 +35,7 @@ fn mount_current_spec(host_directory: &str, mount_directory: &str) -> (String, S
 }
 
 /// Build a spec for the docker container, and then run it
-fn run_container(config: &FlokiConfig, command: &String) -> Result<ExitStatus> {
+fn run_container(config: &FlokiConfig, command: &str) -> Result<ExitStatus> {
     // Gather information from the users environment
     let environ = environment::Environment::gather()?;
 
@@ -77,7 +77,7 @@ fn run_container(config: &FlokiConfig, command: &String) -> Result<ExitStatus> {
         cmd = cmd.add_docker_switch(&switch);
     }
 
-    Ok(cmd.run(subshell_command(&config, command))?)
+    Ok(cmd.run(subshell_command(&config.init, command))?)
 }
 
 /// Decide which commands to run given the input from the shell
@@ -106,7 +106,7 @@ fn run_floki_from_args(args: &Cli) -> Result<()> {
 
         _ => {
             debug!("Running container");
-            run_container(&config, &config.shell.inner_shell().into())
+            run_container(&config, config.shell.inner_shell())
         }
     }?;
 
