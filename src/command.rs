@@ -1,7 +1,6 @@
 use dind;
 use errors::FlokiError;
 use quicli::prelude::*;
-use std::env;
 use std::path;
 use std::process::{Command, ExitStatus, Stdio};
 
@@ -97,15 +96,14 @@ impl DockerCommandBuilder {
     }
 }
 
-pub fn enable_forward_ssh_agent(command: DockerCommandBuilder) -> Result<DockerCommandBuilder> {
-    let agent_socket = env::var("SSH_AUTH_SOCK")?;
+pub fn enable_forward_ssh_agent(command: DockerCommandBuilder, agent_socket: &str) -> Result<DockerCommandBuilder> {
     debug!("Got SSH_AUTH_SOCK={}", agent_socket);
     if let Some(dir) = path::Path::new(&agent_socket)
         .parent()
         .and_then(|p| p.to_str())
     {
         Ok(command
-            .add_environment(&("SSH_AUTH_SOCK".into(), agent_socket.clone()))
+            .add_environment(&("SSH_AUTH_SOCK".into(), agent_socket.to_string()))
             .add_volume(&(dir.into(), dir.into())))
     } else {
         Err(FlokiError::NoSshAuthSock {})?

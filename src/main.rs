@@ -18,7 +18,6 @@ use cli::{Cli, Subcommand};
 use config::FlokiConfig;
 use dind::Dind;
 use quicli::prelude::*;
-use std::env::current_dir;
 use std::process::ExitStatus;
 
 
@@ -30,20 +29,21 @@ fn subshell_command(config: &FlokiConfig, command: &String) -> String {
     args.join(" && ")
 }
 
-/// Get the current working directory as a String
-fn get_current_working_directory() -> Result<String> {
-    Ok(format!("{}", current_dir()?.display()))
-}
-
 /// Obtain information for a volume bind of the current working directory
-fn mount_current_spec(config: &FlokiConfig) -> Result<(String, String)> {
-    Ok((get_current_working_directory()?, config.mount_pwd.clone()))
+fn mount_current_spec(host_directory: &str, mount_directory: &str) -> (String, String) {
+    (host_directory.to_string(), mount_directory.to_string())
 }
 
 /// Build a spec for the docker container, and then run it
 fn run_container(config: &FlokiConfig, command: &String) -> Result<ExitStatus> {
+    // Gather information from the users environment
+    let environ = environment::Environment::gather()?;
+
     // Get the mount locations.
-    let mount = mount_current_spec(&config)?;
+    let mount = mount_current_spec(
+        &environ.current_directory,
+        &config.mount_pwd
+    );
 
     // Assign a container for docker-in-docker - we don't spawn it yet
     let mut dind = Dind::new(&mount);
@@ -56,7 +56,7 @@ fn run_container(config: &FlokiConfig, command: &String) -> Result<ExitStatus> {
         cmd = command::enable_docker_in_docker(cmd, &mut dind)?;
     }
 
-    let (user, group) = environment::get_user_details()?;
+    let (user, group) = environ.user_details;
 
     cmd = cmd.add_environment(&("FLOKI_HOST_UID".to_string(), user.clone()));
     cmd = cmd.add_environment(&("FLOKI_HOST_GID".to_string(), group.clone()));
@@ -66,7 +66,11 @@ fn run_container(config: &FlokiConfig, command: &String) -> Result<ExitStatus> {
     }
 
     if config.forward_ssh_agent {
-        cmd = command::enable_forward_ssh_agent(cmd)?;
+        if let Some(path) = environ.ssh_agent_socket {
+            cmd = command::enable_forward_ssh_agent(cmd, &path)?;
+        } else {
+            Err(errors::FlokiError::NoSshAuthSock {})?
+        }
     }
 
     for switch in &config.docker_switches {
