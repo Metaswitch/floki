@@ -116,8 +116,7 @@ fn run_image_pull(config: &FlokiConfig) -> Result<()> {
                 Ok(())
             } else {
                 debug!("Pulling image: {}", config.image.name());
-                image::pull_image(config.image.name())?;
-                Ok(())
+                image::pull_image(config.image.name())
             }
         }
     }
@@ -137,6 +136,13 @@ fn run_floki_from_args(args: &Cli) -> Result<()> {
 
     // Dispatch depending on whether we have received a subcommand
     let exit_status = match &args.subcommand {
+        // If we pull an image, we don't run a container - do an early return
+        Some(Subcommand::Pull {}) => {
+            debug!("Trying to pull image {:?}", &config.image);
+            run_image_pull(&config)?;
+            return Ok(());
+        }
+
         Some(Subcommand::Run { command }) => {
             // Make sure our command runs in a subshell (we might switch user)
             let inner_shell: String = config.shell.inner_shell().into();
@@ -144,6 +150,7 @@ fn run_floki_from_args(args: &Cli) -> Result<()> {
             debug!("Running container with command '{}'", &command_string);
             run_container(&config, &command_string)
         }
+
         _ => {
             debug!("Running container");
             run_container(&config, &config.shell.inner_shell().into())

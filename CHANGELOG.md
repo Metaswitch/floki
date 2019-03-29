@@ -9,7 +9,13 @@ version number is tracked in the file `VERSION`.
 ## Unreleased
 ### Changed
 - Remove `forward_tmux_socket` - BREAKING
+- Remove `--pull` switch - BREAKING
+- Remove pull specifications from configuration file - BREAKING
+- Refactor to collect environment at start of day - PATCH
+- Only mount the ssh_agent socket file - BREAKING
+
 ### Added
+- Make `pull` a subcommand of `floki` - MINOR
 
 ## [0.0.20] - 2019-02-12
 ### Changed

@@ -4,8 +4,13 @@ use quicli::prelude::*;
 /// Subcommands of the main floki command
 #[derive(Debug, StructOpt)]
 pub(crate) enum Subcommand {
+    /// Run a specific command within a container
     #[structopt(name = "run")]
     Run { command: Vec<String> },
+
+    /// Pull the image in the configuration file
+    #[structopt(name = "pull")]
+    Pull{}
 }
 
 /// Main CLI interface
