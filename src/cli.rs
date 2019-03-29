@@ -4,7 +4,8 @@ use quicli::prelude::*;
 /// Subcommands of the main floki command
 #[derive(Debug, StructOpt)]
 pub(crate) enum Subcommand {
-    /// Run a specific command within a container
+
+    /// Run a command within the container
     #[structopt(name = "run")]
     Run { command: Vec<String> },
 
