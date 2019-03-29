@@ -99,8 +99,7 @@ impl DockerCommandBuilder {
 pub fn enable_forward_ssh_agent(command: DockerCommandBuilder, agent_socket: &str) -> Result<DockerCommandBuilder> {
     debug!("Got SSH_AUTH_SOCK={}", agent_socket);
     if let Some(dir) = path::Path::new(&agent_socket)
-        .parent()
-        .and_then(|p| p.to_str())
+        .to_str()
     {
         Ok(command
             .add_environment(&("SSH_AUTH_SOCK".into(), agent_socket.to_string()))
