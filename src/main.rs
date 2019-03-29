@@ -42,7 +42,7 @@ fn run_container(config: &FlokiConfig, command: &str) -> Result<ExitStatus> {
     // Get the mount locations.
     let mount = mount_current_spec(
         &environ.current_directory,
-        &config.mount_pwd
+        &config.mount
     );
 
     // Assign a container for docker-in-docker - we don't spawn it yet
@@ -77,7 +77,7 @@ fn run_container(config: &FlokiConfig, command: &str) -> Result<ExitStatus> {
         cmd = cmd.add_docker_switch(&switch);
     }
 
-    cmd = cmd.set_working_directory(&config.mount_pwd);
+    cmd = cmd.set_working_directory(&config.mount);
 
     Ok(cmd.run(subshell_command(&config.init, command))?)
 }

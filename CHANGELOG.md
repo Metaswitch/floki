@@ -14,6 +14,7 @@ version number is tracked in the file `VERSION`.
 - Refactor to collect environment at start of day - PATCH
 - Only mount the ssh_agent socket file - BREAKING
 - Start working in the mount_pwd path - BREAKING
+- Rename mount_pwd to mount - BREAKING
 
 ### Added
 - Make `pull` a subcommand of `floki` - MINOR

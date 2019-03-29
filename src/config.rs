@@ -40,7 +40,7 @@ pub(crate) struct FlokiConfig {
     #[serde(default = "default_shell")]
     pub(crate) shell: Shell,
     #[serde(default = "default_mount")]
-    pub(crate) mount_pwd: String,
+    pub(crate) mount: String,
     #[serde(default = "Vec::new")]
     pub(crate) docker_switches: Vec<String>,
     #[serde(default = "default_to_false")]
