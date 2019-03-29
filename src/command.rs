@@ -61,9 +61,16 @@ impl DockerCommandBuilder {
         self
     }
 
-    pub fn add_docker_switch(mut self, switch: &String) -> Self {
-        self.switches.push(switch.clone());
+    pub fn add_docker_switch(mut self, switch: &str) -> Self {
+        self.switches.push(switch.into());
         self
+    }
+
+    pub fn set_working_directory(self, directory: &str) -> Self {
+        let mut cmd = self;
+        cmd = cmd.add_docker_switch("-w");
+        cmd = cmd.add_docker_switch(directory);
+        cmd
     }
 
     fn build_volume_switches(&self) -> Vec<String> {

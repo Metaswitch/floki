@@ -77,6 +77,8 @@ fn run_container(config: &FlokiConfig, command: &str) -> Result<ExitStatus> {
         cmd = cmd.add_docker_switch(&switch);
     }
 
+    cmd = cmd.set_working_directory(&config.mount_pwd);
+
     Ok(cmd.run(subshell_command(&config.init, command))?)
 }
 

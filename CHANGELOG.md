@@ -13,6 +13,7 @@ version number is tracked in the file `VERSION`.
 - Remove pull specifications from configuration file - BREAKING
 - Refactor to collect environment at start of day - PATCH
 - Only mount the ssh_agent socket file - BREAKING
+- Start working in the mount_pwd path - BREAKING
 
 ### Added
 - Make `pull` a subcommand of `floki` - MINOR
