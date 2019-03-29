@@ -17,6 +17,7 @@ version number is tracked in the file `VERSION`.
 - Rename mount_pwd to mount - BREAKING
 - Enforce reproducibility (override with `--local`) - BREAKING
 - Move from `trim_right` to `trim_end` - PATCH
+- (Refactor) Simplify addition of environment variables to docker run - PATCH
 
 ### Added
 - Make `pull` a subcommand of `floki` - MINOR

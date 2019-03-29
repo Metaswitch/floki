@@ -58,8 +58,8 @@ fn run_container(config: &FlokiConfig, command: &str) -> Result<ExitStatus> {
 
     let (user, group) = environ.user_details;
 
-    cmd = cmd.add_environment(&("FLOKI_HOST_UID".to_string(), user.clone()));
-    cmd = cmd.add_environment(&("FLOKI_HOST_GID".to_string(), group.clone()));
+    cmd = cmd.add_environment("FLOKI_HOST_UID", &user);
+    cmd = cmd.add_environment("FLOKI_HOST_GID", &group);
 
     if config.forward_user {
         cmd = cmd.add_docker_switch(&format!("--user {}:{}", user, group));

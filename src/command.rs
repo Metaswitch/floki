@@ -56,8 +56,8 @@ impl DockerCommandBuilder {
         self
     }
 
-    pub fn add_environment(mut self, spec: &(String, String)) -> Self {
-        self.environment.push(spec.clone());
+    pub fn add_environment(mut self, var: &str, bind: &str) -> Self {
+        self.environment.push((var.to_string(), bind.to_string()));
         self
     }
 
@@ -109,7 +109,7 @@ pub fn enable_forward_ssh_agent(command: DockerCommandBuilder, agent_socket: &st
         .to_str()
     {
         Ok(command
-            .add_environment(&("SSH_AUTH_SOCK".into(), agent_socket.to_string()))
+            .add_environment("SSH_AUTH_SOCK", agent_socket)
             .add_volume(&(dir.into(), dir.into())))
     } else {
         Err(FlokiError::NoSshAuthSock {})?
@@ -125,5 +125,5 @@ pub fn enable_docker_in_docker(
     dind.launch()?;
     Ok(command
         .add_docker_switch(&format!("--link {}:floki-docker", dind.name))
-        .add_environment(&("DOCKER_HOST".into(), "tcp://floki-docker:2375".into())))
+        .add_environment("DOCKER_HOST", "tcp://floki-docker:2375"))
 }
