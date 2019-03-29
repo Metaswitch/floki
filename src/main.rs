@@ -129,11 +129,6 @@ fn run_floki_from_args(args: &Cli) -> Result<()> {
     let config = load_config_from_file(&args)?;
     debug!("Got configuration {:?}", &config);
 
-    if args.pull {
-        debug!("Trying to pull image {:?}", &config.image);
-        run_image_pull(&config)?;
-    }
-
     // Dispatch depending on whether we have received a subcommand
     let exit_status = match &args.subcommand {
         // If we pull an image, we don't run a container - do an early return

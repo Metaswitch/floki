@@ -22,11 +22,6 @@ pub(crate) enum Subcommand {
 pub(crate) struct Cli {
     #[structopt(long = "config", short = "c", default_value = "floki.yaml")]
     pub(crate) config_file: String,
-    #[structopt(
-        long = "pull",
-        help = "Update the image in your configuration file"
-    )]
-    pub(crate) pull: bool,
     #[structopt(flatten)]
     pub(crate) verbosity: Verbosity,
     #[structopt(subcommand)]
