@@ -2,8 +2,6 @@
 #[macro_use]
 extern crate quicli;
 #[macro_use]
-extern crate serde_derive;
-#[macro_use]
 extern crate failure;
 extern crate serde_yaml;
 extern crate uuid;
@@ -21,32 +19,8 @@ use config::FlokiConfig;
 use dind::Dind;
 use quicli::prelude::*;
 use std::env::current_dir;
-use std::fs::File;
-use std::io::Read;
 use std::process::ExitStatus;
 
-/// Obtain configuration from a file (which is possibly specified
-/// on the command line)
-fn load_config_from_file(args: &Cli) -> Result<FlokiConfig> {
-    let mut f = File::open(args.config_file.clone()).map_err(|e| {
-        errors::FlokiError::ProblemOpeningConfigYaml {
-            name: args.config_file.clone(),
-            error: e,
-        }
-    })?;
-    let mut raw = String::new();
-    f.read_to_string(&mut raw)
-        .map_err(|e| errors::FlokiError::ProblemReadingConfigYaml {
-            name: args.config_file.clone(),
-            error: e,
-        })?;
-    let config =
-        serde_yaml::from_str(&raw).map_err(|e| errors::FlokiError::ProblemParsingConfigYaml {
-            name: args.config_file.clone(),
-            error: e,
-        })?;
-    Ok(config)
-}
 
 /// Turn the init section of a floki.yaml file into a command
 /// that can be given to a shell
@@ -106,7 +80,7 @@ fn run_container(config: &FlokiConfig, command: &String) -> Result<ExitStatus> {
 fn run_floki_from_args(args: &Cli) -> Result<()> {
     debug!("Got command line arguments: {:?}", &args);
 
-    let config = load_config_from_file(&args)?;
+    let config = FlokiConfig::from_file(&args.config_file)?;
     debug!("Got configuration {:?}", &config);
 
     // Dispatch depending on whether we have received a subcommand
