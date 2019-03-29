@@ -18,6 +18,7 @@ version number is tracked in the file `VERSION`.
 - Enforce reproducibility (override with `--local`) - BREAKING
 - Move from `trim_right` to `trim_end` - PATCH
 - (Refactor) Simplify addition of environment variables to docker run - PATCH
+- Refactor - PATCH
 
 ### Added
 - Make `pull` a subcommand of `floki` - MINOR

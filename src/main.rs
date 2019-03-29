@@ -13,9 +13,11 @@ mod dind;
 mod environment;
 mod errors;
 mod image;
+mod verify;
 
 use cli::{Cli, Subcommand};
 use config::FlokiConfig;
+use verify::verify_command;
 use dind::Dind;
 use quicli::prelude::*;
 use std::process::ExitStatus;
@@ -80,14 +82,6 @@ fn run_container(config: &FlokiConfig, command: &str) -> Result<ExitStatus> {
     cmd = cmd.set_working_directory(&config.mount);
 
     Ok(cmd.run(subshell_command(&config.init, command))?)
-}
-
-fn verify_command(args: &Cli, config: &FlokiConfig) -> Result<()> {
-    if config.docker_switches.len() > 0 && !args.local {
-        Err(errors::FlokiError::NonLocalDockerSwitches{})?
-    } else {
-        Ok(())
-    }
 }
 
 /// Decide which commands to run given the input from the shell
