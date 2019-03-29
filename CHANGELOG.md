@@ -16,6 +16,7 @@ version number is tracked in the file `VERSION`.
 - Start working in the mount_pwd path - BREAKING
 - Rename mount_pwd to mount - BREAKING
 - Enforce reproducibility (override with `--local`) - BREAKING
+- Move from `trim_right` to `trim_end` - PATCH
 
 ### Added
 - Make `pull` a subcommand of `floki` - MINOR

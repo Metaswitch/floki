@@ -24,7 +24,7 @@ impl Environment {
 
 fn run_and_get_raw_output(cmd: &mut Command) -> Result<String> {
     let output = String::from_utf8(cmd.output()?.stdout)?;
-    Ok(output.trim_right().into())
+    Ok(output.trim_end().into())
 }
 
 pub fn get_user_details() -> Result<(String, String)> {
