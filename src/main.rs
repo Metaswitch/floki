@@ -102,26 +102,6 @@ fn run_container(config: &FlokiConfig, command: &String) -> Result<ExitStatus> {
     Ok(cmd.run(subshell_command(&config, command))?)
 }
 
-/// Try and pull an image, given configuration (fails if we have a
-/// build specification)
-fn run_image_pull(config: &FlokiConfig) -> Result<()> {
-    match config.image {
-        image::Image::Build { build: _ } => Err(errors::FlokiError::ImageNotPullable {})?,
-        _ => {
-            if config.image.will_pull() {
-                warn!(
-                    "{} will be pulled anyway - you've specified this in your configuration",
-                    config.image.name()
-                );
-                Ok(())
-            } else {
-                debug!("Pulling image: {}", config.image.name());
-                image::pull_image(config.image.name())
-            }
-        }
-    }
-}
-
 /// Decide which commands to run given the input from the shell
 fn run_floki_from_args(args: &Cli) -> Result<()> {
     debug!("Got command line arguments: {:?}", &args);
@@ -134,8 +114,8 @@ fn run_floki_from_args(args: &Cli) -> Result<()> {
         // If we pull an image, we don't run a container - do an early return
         Some(Subcommand::Pull {}) => {
             debug!("Trying to pull image {:?}", &config.image);
-            run_image_pull(&config)?;
-            return Ok(());
+            debug!("Pulling image: {}", config.image.name());
+            return image::pull_image(config.image.name());
         }
 
         Some(Subcommand::Run { command }) => {

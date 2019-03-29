@@ -85,8 +85,6 @@ pub enum FlokiError {
     #[fail(display = "Unable to forward ssh socket - cannot find SSH_AUTH_SOCK in environment")]
     NoSshAuthSock {},
 
-    #[fail(display = "Tried to pull and image which can only be built")]
-    ImageNotPullable {},
 }
 
 /// Generate a summary string for a process exiting

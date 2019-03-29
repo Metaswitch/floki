@@ -95,13 +95,6 @@ impl Image {
         }
     }
 
-    /// Will we pull the image by default?
-    pub fn will_pull(&self) -> bool {
-        match *self {
-            Image::Expanded(ref spec) => spec.pull == PullConfiguration::Always,
-            _ => false,
-        }
-    }
 }
 
 // Now we have some functions which are useful in general
