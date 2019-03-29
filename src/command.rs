@@ -112,36 +112,6 @@ pub fn enable_forward_ssh_agent(command: DockerCommandBuilder) -> Result<DockerC
     }
 }
 
-pub fn enable_forward_tmux_socket(command: DockerCommandBuilder) -> Result<DockerCommandBuilder> {
-    let tmux_env = env::var("TMUX")?;
-    debug!("Got TMUX={}", tmux_env);
-    let tmux_params: Vec<&str> = tmux_env.split(',').collect();
-    match tmux_params.get(0) {
-        Some(path) => {
-            let tmux_path = path::Path::new(path);
-            if let (Some(dir), Some(name)) = (
-                tmux_path.parent().and_then(|d| d.to_str()),
-                tmux_path.file_name().and_then(|f| f.to_str()),
-            ) {
-                debug!(
-                    "tmux socket directory: {}, tmux socket filename: {}",
-                    dir, name
-                );
-                Ok(command
-                    .add_environment(&("TMUX_SOCKET".into(), String::from("/run/tmux/") + name))
-                    .add_volume(&(dir.into(), "/run/tmux".into())))
-            } else {
-                Err(FlokiError::TmuxForwardError {
-                    msg: "tmux socket in env has bad filename".into(),
-                })?
-            }
-        }
-        None => Err(FlokiError::TmuxForwardError {
-            msg: "Could not get tmux socket from environment".into(),
-        })?,
-    }
-}
-
 pub fn enable_docker_in_docker(
     command: DockerCommandBuilder,
     dind: &mut dind::Dind,

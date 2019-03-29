@@ -8,6 +8,7 @@ version number is tracked in the file `VERSION`.
 
 ## Unreleased
 ### Changed
+- Remove `forward_tmux_socket` - BREAKING
 ### Added
 
 ## [0.0.20] - 2019-02-12

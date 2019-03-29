@@ -41,8 +41,6 @@ pub(crate) struct FlokiConfig {
     #[serde(default = "default_to_false")]
     pub(crate) forward_ssh_agent: bool,
     #[serde(default = "default_to_false")]
-    pub(crate) forward_tmux_socket: bool,
-    #[serde(default = "default_to_false")]
     pub(crate) dind: bool,
     #[serde(default = "default_to_false")]
     pub(crate) forward_user: bool,

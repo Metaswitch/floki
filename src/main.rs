@@ -95,13 +95,6 @@ fn run_container(config: &FlokiConfig, command: &String) -> Result<ExitStatus> {
         cmd = command::enable_forward_ssh_agent(cmd)?;
     }
 
-    if config.forward_tmux_socket {
-        match command::enable_forward_tmux_socket(cmd.clone()) {
-            Ok(c) => cmd = c,
-            Err(e) => warn!("Could not forward tmux socket - continuing anyway: {}", e),
-        }
-    }
-
     for switch in &config.docker_switches {
         cmd = cmd.add_docker_switch(&switch);
     }
