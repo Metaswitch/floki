@@ -15,6 +15,7 @@ version number is tracked in the file `VERSION`.
 - Only mount the ssh_agent socket file - BREAKING
 - Start working in the mount_pwd path - BREAKING
 - Rename mount_pwd to mount - BREAKING
+- Enforce reproducibility (override with `--local`) - BREAKING
 
 ### Added
 - Make `pull` a subcommand of `floki` - MINOR

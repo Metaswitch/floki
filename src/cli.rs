@@ -23,8 +23,15 @@ pub(crate) enum Subcommand {
 pub(crate) struct Cli {
     #[structopt(long = "config", short = "c", default_value = "floki.yaml")]
     pub(crate) config_file: String,
+
+    /// Run floki regardless of reproducibility
+    #[structopt(long = "local", short = "l")]
+    pub(crate) local: bool,
+
     #[structopt(flatten)]
     pub(crate) verbosity: Verbosity,
+
     #[structopt(subcommand)]
     pub(crate) subcommand: Option<Subcommand>,
 }
+

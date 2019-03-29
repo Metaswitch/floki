@@ -82,12 +82,22 @@ fn run_container(config: &FlokiConfig, command: &str) -> Result<ExitStatus> {
     Ok(cmd.run(subshell_command(&config.init, command))?)
 }
 
+fn verify_command(args: &Cli, config: &FlokiConfig) -> Result<()> {
+    if config.docker_switches.len() > 0 && !args.local {
+        Err(errors::FlokiError::NonLocalDockerSwitches{})?
+    } else {
+        Ok(())
+    }
+}
+
 /// Decide which commands to run given the input from the shell
 fn run_floki_from_args(args: &Cli) -> Result<()> {
     debug!("Got command line arguments: {:?}", &args);
 
     let config = FlokiConfig::from_file(&args.config_file)?;
     debug!("Got configuration {:?}", &config);
+
+    verify_command(&args, &config)?;
 
     // Dispatch depending on whether we have received a subcommand
     let exit_status = match &args.subcommand {
