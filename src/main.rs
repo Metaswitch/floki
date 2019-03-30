@@ -14,6 +14,7 @@ mod environment;
 mod errors;
 mod image;
 mod verify;
+mod interpret;
 
 use cli::{Cli, Subcommand};
 use config::FlokiConfig;
@@ -54,32 +55,12 @@ fn run_container(config: &FlokiConfig, command: &str) -> Result<ExitStatus> {
 
     let mut cmd = command::DockerCommandBuilder::new(&image, config.shell.outer_shell()).add_volume(&mount);
 
-    if config.dind {
-        cmd = command::enable_docker_in_docker(cmd, &mut dind)?;
-    }
-
-    let (user, group) = environ.user_details;
-
-    cmd = cmd.add_environment("FLOKI_HOST_UID", &user);
-    cmd = cmd.add_environment("FLOKI_HOST_GID", &group);
-
-    if config.forward_user {
-        cmd = cmd.add_docker_switch(&format!("--user {}:{}", user, group));
-    }
-
-    if config.forward_ssh_agent {
-        if let Some(path) = environ.ssh_agent_socket {
-            cmd = command::enable_forward_ssh_agent(cmd, &path)?;
-        } else {
-            Err(errors::FlokiError::NoSshAuthSock {})?
-        }
-    }
-
-    for switch in &config.docker_switches {
-        cmd = cmd.add_docker_switch(&switch);
-    }
-
-    cmd = cmd.set_working_directory(&config.mount);
+    cmd = interpret::configure_dind(cmd, &config, &mut dind)?;
+    cmd = interpret::configure_floki_user_env(cmd, &environ);
+    cmd = interpret::configure_forward_user(cmd, &config, &environ);
+    cmd = interpret::configure_forward_ssh_agent(cmd, &config, &environ)?;
+    cmd = interpret::configure_docker_switches(cmd, &config);
+    cmd = interpret::configure_working_directory(cmd, &config);
 
     Ok(cmd.run(subshell_command(&config.init, command))?)
 }
