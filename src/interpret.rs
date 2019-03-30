@@ -62,6 +62,21 @@ pub(crate) fn configure_working_directory(cmd: DockerCommandBuilder, config: &Fl
 }
 
 
-pub(crate) fn get_mount_specification<'a>(config: &'a FlokiConfig, env: &'a Environment) -> (&'a str, &'a str) {
+fn get_mount_specification<'a>(config: &'a FlokiConfig, env: &'a Environment) -> (&'a str, &'a str) {
     (&env.current_directory, &config.mount)
+}
+
+
+pub(crate) fn build_basic_command(config: &FlokiConfig, env: &Environment) -> (DockerCommandBuilder, Dind) {
+    let mount = get_mount_specification(&config, &env);
+
+    // Assign a container for docker-in-docker - we don't spawn it yet
+    let dind = Dind::new(mount);
+
+    let image = &config.image.name();
+    let outer_shell = config.shell.outer_shell();
+    let cmd = command::DockerCommandBuilder::new(image, outer_shell)
+        .add_volume(mount);
+
+    (cmd, dind)
 }

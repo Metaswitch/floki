@@ -19,7 +19,6 @@ mod interpret;
 use cli::{Cli, Subcommand};
 use config::FlokiConfig;
 use verify::verify_command;
-use dind::Dind;
 use quicli::prelude::*;
 use std::process::ExitStatus;
 
@@ -35,18 +34,12 @@ fn subshell_command(init: &Vec<String>, command: &str) -> String {
 
 /// Build a spec for the docker container, and then run it
 fn run_container(config: &FlokiConfig, command: &str) -> Result<ExitStatus> {
-    let image = config.image.obtain_image()?;
+    config.image.obtain_image()?;
 
     // Gather information from the users environment
     let environ = environment::Environment::gather()?;
 
-    let mount = interpret::get_mount_specification(&config, &environ);
-
-    // Assign a container for docker-in-docker - we don't spawn it yet
-    let mut dind = Dind::new(mount);
-
-
-    let mut cmd = command::DockerCommandBuilder::new(&image, config.shell.outer_shell()).add_volume(mount);
+    let (mut cmd, mut dind) = interpret::build_basic_command(&config, &environ);
 
     cmd = interpret::configure_dind(cmd, &config, &mut dind)?;
     cmd = interpret::configure_floki_user_env(cmd, &environ);
