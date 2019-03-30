@@ -14,7 +14,7 @@ pub struct DockerCommandBuilder {
 }
 
 impl DockerCommandBuilder {
-    pub fn run(&self, subshell_command: String) -> Result<ExitStatus> {
+    pub fn run(&self, subshell_command: &str) -> Result<ExitStatus> {
         debug!(
             "Spawning docker command with configuration: {:?} args: {}",
             self, &subshell_command
@@ -127,4 +127,13 @@ pub fn enable_docker_in_docker(
     Ok(command
         .add_docker_switch(&format!("--link {}:floki-docker", dind.name))
         .add_environment("DOCKER_HOST", "tcp://floki-docker:2375"))
+}
+
+
+/// Turn the init section of a floki.yaml file into a command
+/// that can be given to a shell
+pub(crate) fn subshell_command(init: &Vec<String>, command: &str) -> String {
+    let mut args = init.clone();
+    args.push(command.into());
+    args.join(" && ")
 }

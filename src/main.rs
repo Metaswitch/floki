@@ -23,15 +23,6 @@ use quicli::prelude::*;
 use std::process::ExitStatus;
 
 
-/// Turn the init section of a floki.yaml file into a command
-/// that can be given to a shell
-fn subshell_command(init: &Vec<String>, command: &str) -> String {
-    let mut args = init.clone();
-    args.push(command.into());
-    args.join(" && ")
-}
-
-
 /// Build a spec for the docker container, and then run it
 fn run_container(config: &FlokiConfig, command: &str) -> Result<ExitStatus> {
     config.image.obtain_image()?;
@@ -48,7 +39,8 @@ fn run_container(config: &FlokiConfig, command: &str) -> Result<ExitStatus> {
     cmd = interpret::configure_docker_switches(cmd, &config);
     cmd = interpret::configure_working_directory(cmd, &config);
 
-    Ok(cmd.run(subshell_command(&config.init, command))?)
+    let subshell_command = command::subshell_command(&config.init, command);
+    Ok(cmd.run(&subshell_command)?)
 }
 
 /// Decide which commands to run given the input from the shell
