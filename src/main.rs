@@ -32,28 +32,21 @@ fn subshell_command(init: &Vec<String>, command: &str) -> String {
     args.join(" && ")
 }
 
-/// Obtain information for a volume bind of the current working directory
-fn mount_current_spec(host_directory: &str, mount_directory: &str) -> (String, String) {
-    (host_directory.to_string(), mount_directory.to_string())
-}
 
 /// Build a spec for the docker container, and then run it
 fn run_container(config: &FlokiConfig, command: &str) -> Result<ExitStatus> {
+    let image = config.image.obtain_image()?;
+
     // Gather information from the users environment
     let environ = environment::Environment::gather()?;
 
-    // Get the mount locations.
-    let mount = mount_current_spec(
-        &environ.current_directory,
-        &config.mount
-    );
+    let mount = interpret::get_mount_specification(&config, &environ);
 
     // Assign a container for docker-in-docker - we don't spawn it yet
-    let mut dind = Dind::new(&mount);
+    let mut dind = Dind::new(mount);
 
-    let image = config.image.obtain_image()?;
 
-    let mut cmd = command::DockerCommandBuilder::new(&image, config.shell.outer_shell()).add_volume(&mount);
+    let mut cmd = command::DockerCommandBuilder::new(&image, config.shell.outer_shell()).add_volume(mount);
 
     cmd = interpret::configure_dind(cmd, &config, &mut dind)?;
     cmd = interpret::configure_floki_user_env(cmd, &environ);

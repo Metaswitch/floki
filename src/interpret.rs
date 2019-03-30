@@ -60,3 +60,8 @@ pub(crate) fn configure_docker_switches(cmd: DockerCommandBuilder, config: &Flok
 pub(crate) fn configure_working_directory(cmd: DockerCommandBuilder, config: &FlokiConfig) -> DockerCommandBuilder {
     cmd.set_working_directory(&config.mount)
 }
+
+
+pub(crate) fn get_mount_specification<'a>(config: &'a FlokiConfig, env: &'a Environment) -> (&'a str, &'a str) {
+    (&env.current_directory, &config.mount)
+}

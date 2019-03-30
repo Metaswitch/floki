@@ -51,8 +51,9 @@ impl DockerCommandBuilder {
         }
     }
 
-    pub fn add_volume(mut self, spec: &(String, String)) -> Self {
-        self.volumes.push(spec.clone());
+    pub fn add_volume(mut self, spec: (&str, &str)) -> Self {
+        let (src, dst) = spec;
+        self.volumes.push((src.to_string(), dst.to_string()));
         self
     }
 
@@ -110,7 +111,7 @@ pub fn enable_forward_ssh_agent(command: DockerCommandBuilder, agent_socket: &st
     {
         Ok(command
             .add_environment("SSH_AUTH_SOCK", agent_socket)
-            .add_volume(&(dir.into(), dir.into())))
+            .add_volume((dir, dir)))
     } else {
         Err(FlokiError::NoSshAuthSock {})?
     }

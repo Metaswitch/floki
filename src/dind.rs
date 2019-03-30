@@ -17,11 +17,12 @@ pub struct Dind {
 }
 
 impl Dind {
-    pub fn new(mount: &(String, String)) -> Self {
+    pub fn new(mount: (&str, &str)) -> Self {
+        let (src, dst) = mount;
         Dind {
             name: uuid::Uuid::new_v4().to_string(),
-            mount_source: mount.0.clone(),
-            mount_target: mount.1.clone(),
+            mount_source: src.to_string(),
+            mount_target: dst.to_string(),
             started: false,
         }
     }
