@@ -19,6 +19,7 @@ version number is tracked in the file `VERSION`.
 - Move from `trim_right` to `trim_end` - PATCH
 - (Refactor) Simplify addition of environment variables to docker run - PATCH
 - Refactor - PATCH
+- Add Travis CI file
 
 ### Added
 - Make `pull` a subcommand of `floki` - MINOR
