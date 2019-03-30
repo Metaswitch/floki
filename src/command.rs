@@ -1,8 +1,8 @@
 use dind;
-use errors::FlokiError;
+use errors::{FlokiError, FlokiSubprocessExitStatus};
 use quicli::prelude::*;
 use std::path;
-use std::process::{Command, ExitStatus, Stdio};
+use std::process::{Command, Stdio};
 
 #[derive(Debug, Clone)]
 pub struct DockerCommandBuilder {
@@ -14,7 +14,7 @@ pub struct DockerCommandBuilder {
 }
 
 impl DockerCommandBuilder {
-    pub fn run(&self, subshell_command: &str) -> Result<ExitStatus> {
+    pub fn run(&self, subshell_command: &str) -> Result<()> {
         debug!(
             "Spawning docker command with configuration: {:?} args: {}",
             self, &subshell_command
@@ -37,8 +37,16 @@ impl DockerCommandBuilder {
         let exit_status = command
             .wait()
             .map_err(|e| FlokiError::FailedToCompleteDockerCommand { error: e })?;
-
-        Ok(exit_status)
+        if exit_status.success() {
+            Ok(())
+        } else {
+            Err(FlokiError::RunContainerFailed {
+                exit_status: FlokiSubprocessExitStatus {
+                    process_description: "docker run".into(),
+                    exit_status: exit_status,
+                },
+            })?
+        }
     }
 
     pub fn new(image: &str, shell: &str) -> Self {
@@ -132,8 +140,8 @@ pub fn enable_docker_in_docker(
 
 /// Turn the init section of a floki.yaml file into a command
 /// that can be given to a shell
-pub(crate) fn subshell_command(init: &Vec<String>, command: &str) -> String {
+pub(crate) fn subshell_command(init: &Vec<String>, command: String) -> String {
     let mut args = init.clone();
-    args.push(command.into());
+    args.push(command);
     args.join(" && ")
 }

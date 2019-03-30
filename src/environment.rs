@@ -4,6 +4,7 @@ use std::process::Command;
 use std::env;
 
 
+#[derive(Debug)]
 pub struct Environment {
     pub user_details: (String, String),
     pub current_directory: String,
