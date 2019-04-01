@@ -21,29 +21,9 @@ fn default_context() -> String {
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
-pub enum PullConfiguration {
-    #[serde(rename = "default")]
-    Default,
-    #[serde(rename = "always")]
-    Always,
-}
-
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
-pub struct ImageSpec {
-    name: String,
-    #[serde(default = "default_pull_configuration")]
-    pull: PullConfiguration,
-}
-
-fn default_pull_configuration() -> PullConfiguration {
-    PullConfiguration::Default
-}
-
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum Image {
     Name(String),
-    Expanded(ImageSpec),
     Build { build: BuildSpec },
 }
 
@@ -52,7 +32,6 @@ impl Image {
     pub fn name(&self) -> String {
         match *self {
             Image::Name(ref s) => s.clone(),
-            Image::Expanded(ref spec) => spec.name.clone(),
             Image::Build { ref build } => build.name.clone() + ":floki",
         }
     }
@@ -61,11 +40,6 @@ impl Image {
     /// it's name
     pub fn obtain_image(&self) -> Result<String> {
         match *self {
-            // Deal with the case where we always want to pull the image
-            Image::Expanded(ref spec) if spec.pull == PullConfiguration::Always => {
-                pull_image(self.name())?;
-                Ok(spec.name.clone())
-            }
 
             // Deal with the case where want to build an image
             Image::Build { ref build } => {
@@ -95,13 +69,6 @@ impl Image {
         }
     }
 
-    /// Will we pull the image by default?
-    pub fn will_pull(&self) -> bool {
-        match *self {
-            Image::Expanded(ref spec) => spec.pull == PullConfiguration::Always,
-            _ => false,
-        }
-    }
 }
 
 // Now we have some functions which are useful in general
@@ -158,19 +125,6 @@ mod test {
         let yaml = "image: foo";
         let expected = TestImage {
             image: Image::Name("foo".into()),
-        };
-        let actual: TestImage = serde_yaml::from_str(yaml).unwrap();
-        assert!(actual == expected);
-    }
-
-    #[test]
-    fn test_image_spec_by_full_spec() {
-        let yaml = "image:\n  name: foo\n  pull: always";
-        let expected = TestImage {
-            image: Image::Expanded(ImageSpec {
-                name: "foo".into(),
-                pull: PullConfiguration::Always,
-            }),
         };
         let actual: TestImage = serde_yaml::from_str(yaml).unwrap();
         assert!(actual == expected);

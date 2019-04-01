@@ -4,8 +4,14 @@ use quicli::prelude::*;
 /// Subcommands of the main floki command
 #[derive(Debug, StructOpt)]
 pub(crate) enum Subcommand {
+
+    /// Run a command within the container
     #[structopt(name = "run")]
     Run { command: Vec<String> },
+
+    /// Pull the image in the configuration file
+    #[structopt(name = "pull")]
+    Pull{}
 }
 
 /// Main CLI interface
@@ -17,13 +23,15 @@ pub(crate) enum Subcommand {
 pub(crate) struct Cli {
     #[structopt(long = "config", short = "c", default_value = "floki.yaml")]
     pub(crate) config_file: String,
-    #[structopt(
-        long = "pull",
-        help = "Update the image in your configuration file"
-    )]
-    pub(crate) pull: bool,
+
+    /// Run floki regardless of reproducibility
+    #[structopt(long = "local", short = "l")]
+    pub(crate) local: bool,
+
     #[structopt(flatten)]
     pub(crate) verbosity: Verbosity,
+
     #[structopt(subcommand)]
     pub(crate) subcommand: Option<Subcommand>,
 }
+

@@ -8,7 +8,21 @@ version number is tracked in the file `VERSION`.
 
 ## Unreleased
 ### Changed
+- Remove `forward_tmux_socket` - BREAKING
+- Remove `--pull` switch - BREAKING
+- Remove pull specifications from configuration file - BREAKING
+- Refactor to collect environment at start of day - PATCH
+- Only mount the ssh_agent socket file - BREAKING
+- Start working in the mount_pwd path - BREAKING
+- Rename mount_pwd to mount - BREAKING
+- Enforce reproducibility (override with `--local`) - BREAKING
+- Move from `trim_right` to `trim_end` - PATCH
+- (Refactor) Simplify addition of environment variables to docker run - PATCH
+- Refactor - PATCH
+- Add Travis CI file
+
 ### Added
+- Make `pull` a subcommand of `floki` - MINOR
 
 ## [0.0.20] - 2019-02-12
 ### Changed

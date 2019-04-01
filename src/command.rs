@@ -1,9 +1,8 @@
 use dind;
-use errors::FlokiError;
+use errors::{FlokiError, FlokiSubprocessExitStatus};
 use quicli::prelude::*;
-use std::env;
 use std::path;
-use std::process::{Command, ExitStatus, Stdio};
+use std::process::{Command, Stdio};
 
 #[derive(Debug, Clone)]
 pub struct DockerCommandBuilder {
@@ -15,7 +14,7 @@ pub struct DockerCommandBuilder {
 }
 
 impl DockerCommandBuilder {
-    pub fn run(&self, subshell_command: String) -> Result<ExitStatus> {
+    pub fn run(&self, subshell_command: &str) -> Result<()> {
         debug!(
             "Spawning docker command with configuration: {:?} args: {}",
             self, &subshell_command
@@ -38,8 +37,16 @@ impl DockerCommandBuilder {
         let exit_status = command
             .wait()
             .map_err(|e| FlokiError::FailedToCompleteDockerCommand { error: e })?;
-
-        Ok(exit_status)
+        if exit_status.success() {
+            Ok(())
+        } else {
+            Err(FlokiError::RunContainerFailed {
+                exit_status: FlokiSubprocessExitStatus {
+                    process_description: "docker run".into(),
+                    exit_status: exit_status,
+                },
+            })?
+        }
     }
 
     pub fn new(image: &str, shell: &str) -> Self {
@@ -52,19 +59,27 @@ impl DockerCommandBuilder {
         }
     }
 
-    pub fn add_volume(mut self, spec: &(String, String)) -> Self {
-        self.volumes.push(spec.clone());
+    pub fn add_volume(mut self, spec: (&str, &str)) -> Self {
+        let (src, dst) = spec;
+        self.volumes.push((src.to_string(), dst.to_string()));
         self
     }
 
-    pub fn add_environment(mut self, spec: &(String, String)) -> Self {
-        self.environment.push(spec.clone());
+    pub fn add_environment(mut self, var: &str, bind: &str) -> Self {
+        self.environment.push((var.to_string(), bind.to_string()));
         self
     }
 
-    pub fn add_docker_switch(mut self, switch: &String) -> Self {
-        self.switches.push(switch.clone());
+    pub fn add_docker_switch(mut self, switch: &str) -> Self {
+        self.switches.push(switch.into());
         self
+    }
+
+    pub fn set_working_directory(self, directory: &str) -> Self {
+        let mut cmd = self;
+        cmd = cmd.add_docker_switch("-w");
+        cmd = cmd.add_docker_switch(directory);
+        cmd
     }
 
     fn build_volume_switches(&self) -> Vec<String> {
@@ -97,48 +112,16 @@ impl DockerCommandBuilder {
     }
 }
 
-pub fn enable_forward_ssh_agent(command: DockerCommandBuilder) -> Result<DockerCommandBuilder> {
-    let agent_socket = env::var("SSH_AUTH_SOCK")?;
+pub fn enable_forward_ssh_agent(command: DockerCommandBuilder, agent_socket: &str) -> Result<DockerCommandBuilder> {
     debug!("Got SSH_AUTH_SOCK={}", agent_socket);
     if let Some(dir) = path::Path::new(&agent_socket)
-        .parent()
-        .and_then(|p| p.to_str())
+        .to_str()
     {
         Ok(command
-            .add_environment(&("SSH_AUTH_SOCK".into(), agent_socket.clone()))
-            .add_volume(&(dir.into(), dir.into())))
+            .add_environment("SSH_AUTH_SOCK", agent_socket)
+            .add_volume((dir, dir)))
     } else {
         Err(FlokiError::NoSshAuthSock {})?
-    }
-}
-
-pub fn enable_forward_tmux_socket(command: DockerCommandBuilder) -> Result<DockerCommandBuilder> {
-    let tmux_env = env::var("TMUX")?;
-    debug!("Got TMUX={}", tmux_env);
-    let tmux_params: Vec<&str> = tmux_env.split(',').collect();
-    match tmux_params.get(0) {
-        Some(path) => {
-            let tmux_path = path::Path::new(path);
-            if let (Some(dir), Some(name)) = (
-                tmux_path.parent().and_then(|d| d.to_str()),
-                tmux_path.file_name().and_then(|f| f.to_str()),
-            ) {
-                debug!(
-                    "tmux socket directory: {}, tmux socket filename: {}",
-                    dir, name
-                );
-                Ok(command
-                    .add_environment(&("TMUX_SOCKET".into(), String::from("/run/tmux/") + name))
-                    .add_volume(&(dir.into(), "/run/tmux".into())))
-            } else {
-                Err(FlokiError::TmuxForwardError {
-                    msg: "tmux socket in env has bad filename".into(),
-                })?
-            }
-        }
-        None => Err(FlokiError::TmuxForwardError {
-            msg: "Could not get tmux socket from environment".into(),
-        })?,
     }
 }
 
@@ -151,5 +134,14 @@ pub fn enable_docker_in_docker(
     dind.launch()?;
     Ok(command
         .add_docker_switch(&format!("--link {}:floki-docker", dind.name))
-        .add_environment(&("DOCKER_HOST".into(), "tcp://floki-docker:2375".into())))
+        .add_environment("DOCKER_HOST", "tcp://floki-docker:2375"))
+}
+
+
+/// Turn the init section of a floki.yaml file into a command
+/// that can be given to a shell
+pub(crate) fn subshell_command(init: &Vec<String>, command: String) -> String {
+    let mut args = init.clone();
+    args.push(command);
+    args.join(" && ")
 }

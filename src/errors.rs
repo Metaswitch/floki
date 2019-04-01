@@ -85,14 +85,12 @@ pub enum FlokiError {
     #[fail(display = "Unable to forward ssh socket - cannot find SSH_AUTH_SOCK in environment")]
     NoSshAuthSock {},
 
-    #[fail(display = "Unable to forward tmux socket: {}", msg)]
-    TmuxForwardError { msg: String },
+    #[fail(display = "Cannot guarantee reproducibility of docker_switches. Run 'floki --local' if docker_switches are needed.")]
+    NonLocalDockerSwitches {}
 
-    #[fail(display = "Tried to pull and image which can only be built")]
-    ImageNotPullable {},
 }
 
-/// Generate a summart string for a process exiting
+/// Generate a summary string for a process exiting
 fn exit_code_diagnosis(exit_status: &ExitStatus) -> String {
     match exit_status.code() {
         Some(rc) => format!("exited with return code {}", rc),

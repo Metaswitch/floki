@@ -1,13 +1,4 @@
 image: ekidd/rust-musl-builder
-mount_pwd: /home/rust/src
+mount: /home/rust/src
 forward_ssh_agent: true
-dind: true
-shell:
-  outer: bash
-  inner: sudo -E su build
-init:
-  - echo External uid is $FLOKI_HOST_UID
-  - echo Extern gid is $FLOKI_HOST_GID
-  - sudo groupadd -g $FLOKI_HOST_GID build
-  - sudo useradd -u $FLOKI_HOST_UID -g $FLOKI_HOST_GID build
-
+shell: bash

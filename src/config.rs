@@ -1,5 +1,10 @@
 /// Configuration file format for floki
 use image;
+use quicli::prelude::*;
+use errors;
+
+use std::fs::File;
+use std::io::Read;
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
@@ -35,17 +40,41 @@ pub(crate) struct FlokiConfig {
     #[serde(default = "default_shell")]
     pub(crate) shell: Shell,
     #[serde(default = "default_mount")]
-    pub(crate) mount_pwd: String,
+    pub(crate) mount: String,
     #[serde(default = "Vec::new")]
     pub(crate) docker_switches: Vec<String>,
     #[serde(default = "default_to_false")]
     pub(crate) forward_ssh_agent: bool,
     #[serde(default = "default_to_false")]
-    pub(crate) forward_tmux_socket: bool,
-    #[serde(default = "default_to_false")]
     pub(crate) dind: bool,
     #[serde(default = "default_to_false")]
     pub(crate) forward_user: bool,
+}
+
+impl FlokiConfig {
+    pub fn from_file(file: &str) -> Result<FlokiConfig> {
+        let mut f = File::open(file).map_err(|e| {
+            errors::FlokiError::ProblemOpeningConfigYaml {
+                name: file.to_string(),
+                error: e,
+            }
+        })?;
+
+        let mut raw = String::new();
+        f.read_to_string(&mut raw)
+            .map_err(|e| errors::FlokiError::ProblemReadingConfigYaml {
+                name: file.to_string(),
+                error: e,
+            })?;
+
+        let config =
+            serde_yaml::from_str(&raw).map_err(|e| errors::FlokiError::ProblemParsingConfigYaml {
+                name: file.to_string(),
+                error: e,
+            })?;
+
+        Ok(config)
+    }
 }
 
 fn default_shell() -> Shell {
