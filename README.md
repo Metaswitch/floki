@@ -14,6 +14,10 @@ This has several advantages over the usual approaches (custom scripts, or, more 
 
 ## Documentation
 
+For installation, and basic usage, see [getting started](https://metaswitch.github.io/floki/documentation/getting-started/).
+
+Full documentation can be found [here](https://metaswitch.github.io/floki/).
+
 ## Install
 
 ## Prerequisites
