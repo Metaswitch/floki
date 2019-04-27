@@ -1,0 +1,3 @@
+[submodule "docs/themes/purehugo"]
+	path = docs/themes/purehugo
+	url = https://github.com/dplesca/purehugo.git

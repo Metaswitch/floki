@@ -1,0 +1,8 @@
+baseURL = "https://metaswitch.github.io/floki"
+languageCode = "en-us"
+title = "floki"
+theme = "purehugo"
+publishDir = "../public"
+
+[params]
+  githubName = "Metaswitch/floki"
