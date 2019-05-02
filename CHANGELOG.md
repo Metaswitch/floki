@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/). The
 version number is tracked in the file `VERSION`.
 
 ## Unreleased
+
+Nothing yet.
+
+## [0.0.21] - 2019-05-02
 ### Changed
 - Remove `forward_tmux_socket` - BREAKING
 - Remove `--pull` switch - BREAKING
@@ -19,7 +23,8 @@ version number is tracked in the file `VERSION`.
 - Move from `trim_right` to `trim_end` - PATCH
 - (Refactor) Simplify addition of environment variables to docker run - PATCH
 - Refactor - PATCH
-- Add Travis CI file
+- Add Travis CI file - PATCH
+- Use 2018 edition of rust. - PATCH
 
 ### Added
 - Make `pull` a subcommand of `floki` - MINOR

@@ -1,6 +1,6 @@
-use cli::Cli;
-use config::FlokiConfig;
-use errors;
+use crate::cli::Cli;
+use crate::config::FlokiConfig;
+use crate::errors;
 use quicli::prelude::*;
 
 
@@ -15,8 +15,8 @@ pub(crate) fn verify_command(args: &Cli, config: &FlokiConfig) -> Result<()> {
 #[cfg(test)]
 mod test{
     use super::*;
-    use image::Image::Name;
-    use config::Shell::Shell;
+    use crate::image::Image::Name;
+    use crate::config::Shell::Shell;
 
     #[test]
     fn test_nonlocal_docker_switches_non_empty() {

@@ -3,8 +3,8 @@ use quicli::prelude::*;
 use std::process::{Command, Stdio};
 use uuid;
 
-use errors::FlokiError;
-use image::{image_exists_locally, pull_image};
+use crate::errors::FlokiError;
+use crate::image::{image_exists_locally, pull_image};
 
 #[derive(Debug)]
 pub struct Dind {
