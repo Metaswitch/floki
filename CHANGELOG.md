@@ -7,10 +7,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/). The
 version number is tracked in the file `VERSION`.
 
 ## Unreleased
-
-Nothing yet.
-
-## [0.0.21] - 2019-05-02
 ### Changed
 - Remove `forward_tmux_socket` - BREAKING
 - Remove `--pull` switch - BREAKING
