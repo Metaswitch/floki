@@ -1,5 +1,4 @@
-use dind;
-use errors::{FlokiError, FlokiSubprocessExitStatus};
+use crate::errors::{FlokiError, FlokiSubprocessExitStatus};
 use quicli::prelude::*;
 use std::path;
 use std::process::{Command, Stdio};
@@ -127,10 +126,10 @@ pub fn enable_forward_ssh_agent(command: DockerCommandBuilder, agent_socket: &st
 
 pub fn enable_docker_in_docker(
     command: DockerCommandBuilder,
-    dind: &mut dind::Dind,
+    dind: &mut crate::dind::Dind,
 ) -> Result<DockerCommandBuilder> {
     debug!("docker-in-docker: {:?}", &dind);
-    dind::dind_preflight()?;
+    crate::dind::dind_preflight()?;
     dind.launch()?;
     Ok(command
         .add_docker_switch(&format!("--link {}:floki-docker", dind.name))

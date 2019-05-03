@@ -19,7 +19,8 @@ version number is tracked in the file `VERSION`.
 - Move from `trim_right` to `trim_end` - PATCH
 - (Refactor) Simplify addition of environment variables to docker run - PATCH
 - Refactor - PATCH
-- Add Travis CI file
+- Add Travis CI file - PATCH
+- Use 2018 edition of rust. - PATCH
 
 ### Added
 - Make `pull` a subcommand of `floki` - MINOR

@@ -1,7 +1,7 @@
 /// Configuration file format for floki
-use image;
+use crate::image;
 use quicli::prelude::*;
-use errors;
+use crate::errors;
 
 use std::fs::File;
 use std::io::Read;

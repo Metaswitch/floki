@@ -1,7 +1,7 @@
 use quicli::prelude::*;
 use std::process::{Command, Stdio};
 
-use errors::{FlokiError, FlokiSubprocessExitStatus};
+use crate::errors::{FlokiError, FlokiSubprocessExitStatus};
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct BuildSpec {

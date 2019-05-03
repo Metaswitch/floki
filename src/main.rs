@@ -1,10 +1,5 @@
 /// floki - the development container launcher
-#[macro_use]
-extern crate quicli;
-#[macro_use]
-extern crate failure;
-extern crate serde_yaml;
-extern crate uuid;
+#[macro_use] extern crate failure_derive;
 
 mod cli;
 mod command;
@@ -20,7 +15,7 @@ use cli::{Cli, Subcommand};
 use config::FlokiConfig;
 use verify::verify_command;
 use quicli::prelude::*;
-
+use quicli::main;
 
 main!(
     |args: Cli, log_level: verbosity| match run_floki_from_args(&args) {
