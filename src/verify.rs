@@ -1,10 +1,10 @@
 use crate::cli::Cli;
 use crate::config::FlokiConfig;
 use crate::errors;
-use quicli::prelude::*;
+use failure::Error;
 
 
-pub(crate) fn verify_command(args: &Cli, config: &FlokiConfig) -> Result<()> {
+pub(crate) fn verify_command(args: &Cli, config: &FlokiConfig) -> Result<(), Error> {
     if config.docker_switches.len() > 0 && !args.local {
         Err(errors::FlokiError::NonLocalDockerSwitches{})?
     } else {

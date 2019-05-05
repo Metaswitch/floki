@@ -5,10 +5,12 @@ authors = ["Richard Lupton <richard.lupton@gmail.com>"]
 edition = '2018'
 
 [dependencies]
-quicli = "0.3"
+failure = "0.1.5"
+failure_derive = "0.1.5"
+log = "0.4"
+quicli = "0.4"
 serde = "1.0"
 serde_derive = "1.0"
 serde_yaml = "0.7"
-failure = "0.1.5"
-failure_derive = "0.1.5"
+structopt = "0.2"
 uuid = { version = "0.6", features = ["v4"] }

@@ -5,11 +5,11 @@ use crate::command::DockerCommandBuilder;
 use crate::command;
 use crate::errors;
 
-use quicli::prelude::*;
+use failure::Error;
 
 
 /// Build a spec for the docker container, and then run it
-pub(crate) fn run_container(config: &FlokiConfig, environ: &Environment, command: &str) -> Result<()> {
+pub(crate) fn run_container(config: &FlokiConfig, environ: &Environment, command: &str) -> Result<(), Error> {
     let (mut cmd, mut dind) = build_basic_command(&config, &environ);
 
     cmd = configure_dind(cmd, &config, &mut dind)?;
@@ -31,7 +31,7 @@ pub(crate) fn command_in_shell(shell: &str, command: &Vec<String>) -> String {
 }
 
 
-fn configure_dind(cmd: DockerCommandBuilder, config: &FlokiConfig, dind: &mut Dind) -> Result<DockerCommandBuilder> {
+fn configure_dind(cmd: DockerCommandBuilder, config: &FlokiConfig, dind: &mut Dind) -> Result<DockerCommandBuilder, Error> {
     if config.dind {
         Ok(command::enable_docker_in_docker(cmd, dind)?)
     } else {
@@ -57,7 +57,7 @@ fn configure_forward_user(cmd: DockerCommandBuilder, config: &FlokiConfig, env: 
 }
 
 
-fn configure_forward_ssh_agent(cmd: DockerCommandBuilder, config: &FlokiConfig, env: &Environment) -> Result<DockerCommandBuilder> {
+fn configure_forward_ssh_agent(cmd: DockerCommandBuilder, config: &FlokiConfig, env: &Environment) -> Result<DockerCommandBuilder, Error> {
     if config.forward_ssh_agent {
         if let Some(ref path) = env.ssh_agent_socket {
             Ok(command::enable_forward_ssh_agent(cmd, path)?)

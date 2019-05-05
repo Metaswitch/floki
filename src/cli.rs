@@ -1,5 +1,6 @@
 /// Description of the CLI interface to floki
 use quicli::prelude::*;
+use structopt::StructOpt;
 
 /// Subcommands of the main floki command
 #[derive(Debug, StructOpt)]
