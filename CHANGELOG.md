@@ -21,6 +21,7 @@ version number is tracked in the file `VERSION`.
 - Refactor - PATCH
 - Add Travis CI file - PATCH
 - Use 2018 edition of rust. - PATCH
+- Update quicli to 0.4 - PATCH
 
 ### Added
 - Make `pull` a subcommand of `floki` - MINOR

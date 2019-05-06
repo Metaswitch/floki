@@ -1,5 +1,5 @@
 /// Docker-in-docker structures
-use quicli::prelude::*;
+use failure::Error;
 use std::process::{Command, Stdio};
 use uuid;
 
@@ -27,7 +27,7 @@ impl Dind {
         }
     }
 
-    pub fn launch(&mut self) -> Result<()> {
+    pub fn launch(&mut self) -> Result<(), Error> {
         info!("Starting docker:dind container with name {}", &self.name);
         Command::new("docker")
             .args(&[
@@ -75,7 +75,7 @@ impl Drop for Dind {
 }
 
 /// Check the docker dind image is available
-pub fn dind_preflight() -> Result<()> {
+pub fn dind_preflight() -> Result<(), Error> {
     if image_exists_locally("docker:stable-dind".into())? {
         Ok(())
     } else {

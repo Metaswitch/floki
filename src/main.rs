@@ -1,5 +1,6 @@
 /// floki - the development container launcher
 #[macro_use] extern crate failure_derive;
+#[macro_use] extern crate log;
 
 mod cli;
 mod command;
@@ -14,22 +15,30 @@ mod interpret;
 use cli::{Cli, Subcommand};
 use config::FlokiConfig;
 use verify::verify_command;
-use quicli::prelude::*;
-use quicli::main;
 
-main!(
-    |args: Cli, log_level: verbosity| match run_floki_from_args(&args) {
+use failure::Error;
+use quicli::prelude::*;
+use structopt::StructOpt;
+
+
+fn main() -> CliResult {
+    let args = Cli::from_args();
+    args.verbosity.setup_env_logger("floki")?;
+
+    match run_floki_from_args(&args) {
         Ok(()) => (),
         Err(e) => {
             error!("A problem occured: {}", e);
             std::process::exit(1);
         }
     }
-);
+    Ok(())
+
+}
 
 
 /// Decide which commands to run given the input from the shell
-fn run_floki_from_args(args: &Cli) -> Result<()> {
+fn run_floki_from_args(args: &Cli) -> Result<(), Error> {
     debug!("Got command line arguments: {:?}", &args);
 
     let config = FlokiConfig::from_file(&args.config_file)?;
@@ -62,7 +71,7 @@ fn run_floki_from_args(args: &Cli) -> Result<()> {
 
 
 /// Launch a floki container running the inner command
-fn run_floki_container(config: &FlokiConfig, inner_command: String) -> Result<()> {
+fn run_floki_container(config: &FlokiConfig, inner_command: String) -> Result<(), Error> {
     let environ = environment::Environment::gather()?;
     debug!("Got environment {:?}", &environ);
 

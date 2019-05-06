@@ -1,5 +1,5 @@
 use crate::errors::{FlokiError, FlokiSubprocessExitStatus};
-use quicli::prelude::*;
+use failure::Error;
 use std::path;
 use std::process::{Command, Stdio};
 
@@ -13,7 +13,7 @@ pub struct DockerCommandBuilder {
 }
 
 impl DockerCommandBuilder {
-    pub fn run(&self, subshell_command: &str) -> Result<()> {
+    pub fn run(&self, subshell_command: &str) -> Result<(), Error> {
         debug!(
             "Spawning docker command with configuration: {:?} args: {}",
             self, &subshell_command
@@ -111,7 +111,7 @@ impl DockerCommandBuilder {
     }
 }
 
-pub fn enable_forward_ssh_agent(command: DockerCommandBuilder, agent_socket: &str) -> Result<DockerCommandBuilder> {
+pub fn enable_forward_ssh_agent(command: DockerCommandBuilder, agent_socket: &str) -> Result<DockerCommandBuilder, Error> {
     debug!("Got SSH_AUTH_SOCK={}", agent_socket);
     if let Some(dir) = path::Path::new(&agent_socket)
         .to_str()
@@ -127,7 +127,7 @@ pub fn enable_forward_ssh_agent(command: DockerCommandBuilder, agent_socket: &st
 pub fn enable_docker_in_docker(
     command: DockerCommandBuilder,
     dind: &mut crate::dind::Dind,
-) -> Result<DockerCommandBuilder> {
+) -> Result<DockerCommandBuilder, Error> {
     debug!("docker-in-docker: {:?}", &dind);
     crate::dind::dind_preflight()?;
     dind.launch()?;

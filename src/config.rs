@@ -1,6 +1,7 @@
 /// Configuration file format for floki
 use crate::image;
 use quicli::prelude::*;
+use failure::Error;
 use crate::errors;
 
 use std::fs::File;
@@ -52,7 +53,7 @@ pub(crate) struct FlokiConfig {
 }
 
 impl FlokiConfig {
-    pub fn from_file(file: &str) -> Result<FlokiConfig> {
+    pub fn from_file(file: &str) -> Result<FlokiConfig, Error> {
         let mut f = File::open(file).map_err(|e| {
             errors::FlokiError::ProblemOpeningConfigYaml {
                 name: file.to_string(),

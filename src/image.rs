@@ -1,4 +1,5 @@
 use quicli::prelude::*;
+use failure::Error;
 use std::process::{Command, Stdio};
 
 use crate::errors::{FlokiError, FlokiSubprocessExitStatus};
@@ -38,7 +39,7 @@ impl Image {
 
     /// Do the required work to get the image, and then return
     /// it's name
-    pub fn obtain_image(&self) -> Result<String> {
+    pub fn obtain_image(&self) -> Result<String, Error> {
         match *self {
 
             // Deal with the case where want to build an image
@@ -74,7 +75,7 @@ impl Image {
 // Now we have some functions which are useful in general
 
 /// Wrapper to pull an image by it's name
-pub fn pull_image(name: String) -> Result<()> {
+pub fn pull_image(name: String) -> Result<(), Error> {
     let exit_status = Command::new("docker")
         .arg("pull")
         .arg(name.clone())
@@ -95,7 +96,7 @@ pub fn pull_image(name: String) -> Result<()> {
 }
 
 /// Determine whether an image exists locally
-pub fn image_exists_locally(name: String) -> Result<bool> {
+pub fn image_exists_locally(name: String) -> Result<bool, Error> {
     let ret = Command::new("docker")
         .args(&["history", "docker:stable-dind"])
         .stdin(Stdio::null())
