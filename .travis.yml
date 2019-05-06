@@ -1,3 +1,11 @@
+services:
+  - docker
+os:
+  - linux
+  - osx
+
+
+# Build and test
 language: rust
 rust:
   - stable
@@ -7,3 +15,41 @@ matrix:
   allow_failures:
     - rust: nightly
   fast_finish: true
+
+
+# Build release binaries and deploy
+before_deploy: |
+
+  LABEL=${TRAVIS_TAG}-${TRAVIS_OS_NAME}
+
+  rm -rf target
+  echo "Starting release build for ${LABEL}"
+
+
+  case `uname -s` in
+      Linux)
+          echo "Building statically linked linux binary"
+          docker run --rm -v $(pwd):/home/rust/src -w /home/rust/src ekidd/rust-musl-builder \
+            sh -c 'sudo chown -R rust:rust . && cargo build --release && cp target/x86_64-unknown-linux-musl/release/floki .'
+          sudo chown -R travis:travis .
+          tar -cvzf floki-${LABEL}.tar.gz floki
+          ;;
+      *)
+          echo "Building releae binary"
+          cargo build --release
+          zip -j floki-${LABEL}.zip target/release/floki
+          ;;
+  esac
+
+  echo "Release build complete"
+
+deploy:
+  provider: releases
+  api_key:
+    secure: V9Nzptxermzw2lCgS88DLMMLnx2vMt50mHG4z1abUiP6mda+rawrL82anyoNlT+HCVwxJM7f2zR0RbyhrM6cJ/8ot4Jts7V3T5lNX6kGBw02Y5n5PfUZJmz/c6g1orjT7g96D7cnaE0wFSimLsll3aOTHb1uveS2tOSm2fcWbvYqz6hoC/nVMCU5cAXZ6+7hfGHxs1PTPRFKnmvUy2ycqx4PIdATo9NNVMxkOBh5MfLd+uAsyuRRzfZhs54FwfSNjDwtCT3Z9eDiPK8m2ncRfLQO/+KmP5mhW+5aeyaZZlgeXk8rct44Wqzu0+l91CRvBlJPN/6oOZzLMOwkyLeXDsnkuR6meONSk+TVTZUbs/3/FDm1UUFuLSX4BSY/txi+Sk2w5Ms+jmx0hAu3fCjDUMaPUHyXj2wAyOietFBUC/Ruo/88Qmcmj5XU9VYUPmZ27nsDkL6bg/sB+f97XcIXOF7etK32twBXjglq31ca3Gr4eNfIF7NJhEaIO55lZRqp6waPCslwXd8dVbtw9Tr2JmSE2FctEZk3rCLkl0FpRppoSfzBJsQB5vaJhiOzxpXCuvqMNxhvjyZlIk5per525nmCXfQs+EbkQZVfmhx9yiXHaAQ4obPSspBemsINr0c5sMNkFugOuyZ+MZjeAgG1fwE1l5mmPodB9jQbtkNtKjM=
+  file_glob: true
+  file: "floki-${TRAVIS_TAG}-${TRAVIS_OS_NAME}.*"
+  skip_cleanup: true
+  on:
+    rust: stable
+    tags: true
