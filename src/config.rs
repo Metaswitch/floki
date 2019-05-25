@@ -79,7 +79,7 @@ impl FlokiConfig {
 }
 
 fn default_shell() -> Shell {
-    Shell::Shell("bash".into())
+    Shell::Shell("sh".into())
 }
 
 fn default_mount() -> String {
