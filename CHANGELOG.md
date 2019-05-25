@@ -8,6 +8,10 @@ version number is tracked in the file `VERSION`.
 
 ## Unreleased
 ### Changed
+### Added
+
+## [0.1.0] - 2019-05-26
+### Changed
 - Remove `forward_tmux_socket` - BREAKING
 - Remove `--pull` switch - BREAKING
 - Remove pull specifications from configuration file - BREAKING
@@ -133,4 +137,3 @@ version number is tracked in the file `VERSION`.
 ### Added
 - Initial primitive version
 ### Changed
-
