@@ -23,6 +23,7 @@ version number is tracked in the file `VERSION`.
 - Use 2018 edition of rust. - PATCH
 - Update quicli to 0.4 - PATCH
 - Deploy to GitHub - PATCH
+- Make `sh` the default shell - BREAKING
 
 ### Added
 - Make `pull` a subcommand of `floki` - MINOR

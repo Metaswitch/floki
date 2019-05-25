@@ -48,6 +48,8 @@ image:
 
 Different containers require different shells, so `floki` allows you to configure this. Sometimes you will want a different shell to run the `init` commands to the shell presented to the user, and so `floki` also allows you to set an outer (used for `init`) and inner (used by the user) shell.
 
+The default shell is `sh`.
+
 ## Single shell
 
 A shell can be set for a container using the top-level `shell` key:
