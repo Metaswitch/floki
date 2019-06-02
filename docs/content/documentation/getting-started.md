@@ -6,7 +6,28 @@ draft: false
 
 ## Installation
 
-Statically linked binaries are built as part of CI for tags, and can be copied directly onto your system.
+Precompiled binaries can be downloaded from the releases page (for linux (statically linked) and OSX).
+
+To obtain `curl` and extract the latest linux binary directly in your shell, run
+
+```
+$ curl -L https://github.com/Metaswitch/floki/releases/download/0.1.0/floki-0.1.0-linux.tar.gz | tar xzvf -
+```
+
+You should be able to run `floki` from your working directory:
+
+```
+$ ./floki --version
+floki 0.1.0
+```
+
+Move it onto your path to run it from anywhere. E.g.
+
+```
+# mv floki /usr/local/bin/
+```
+
+Enjoy!
 
 ## Getting started
 
@@ -34,3 +55,8 @@ You can use a different configuration file with `floki` by telling it to use a d
 floki -c config.yaml
 ```
 
+### Features you may want to look at next
+
+- Forwarding of `ssh-agent` (useful for authenticating with remote private git servers to pull private dependencies)
+- Docker-in-docker support
+- Forwarding of host user information (allows non-root users to be added and used).
