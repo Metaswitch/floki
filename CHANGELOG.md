@@ -9,6 +9,7 @@ version number is tracked in the file `VERSION`.
 ## Unreleased
 ### Changed
 ### Added
+- Forward host working directory as `FLOKI_HOST_WORKDIR` - MINOR
 
 ## [0.1.0] - 2019-05-26
 ### Changed

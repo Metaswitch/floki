@@ -107,6 +107,10 @@ Note that the docker CLI tools are still required in the container, and the dock
 
 These can be used to configure users in the container dynamically. This can be a little fiddly, especially if the container already uses a non-root user with the same id as the host user.
 
+## Host working directory
+
+The host working directory is forwarded into the `floki` container as an environment variable, `FLOKI_HOST_WORKDIR`.
+
 ## SSH agent
 
 Sometimes it is useful to be able to pull dependencies for source code management servers for builds. To make this easier to do in an automated fashion, `floki` can forward and `ssh-agent` socket into the container, and expose its path through `SSH_AUTH_SOCK`.
