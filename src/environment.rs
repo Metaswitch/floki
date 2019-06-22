@@ -13,6 +13,7 @@ pub struct Environment {
 
 
 impl Environment {
+    /// Gather information on the environment floki is running in
     pub fn gather() -> Result<Self, Error> {
         Ok(Environment{
             user_details: get_user_details()?,
@@ -23,12 +24,14 @@ impl Environment {
 }
 
 
+/// Run a command and extract stdout as a String
 fn run_and_get_raw_output(cmd: &mut Command) -> Result<String, Error> {
     let output = String::from_utf8(cmd.output()?.stdout)?;
     Ok(output.trim_end().into())
 }
 
-pub fn get_user_details() -> Result<(String, String), Error> {
+/// Get the user and group ids of the current user
+fn get_user_details() -> Result<(String, String), Error> {
     let user = run_and_get_raw_output(Command::new("id").arg("-u"))?;
     debug!("User's current id: {:?}", user);
     let group = run_and_get_raw_output(Command::new("id").arg("-g"))?;
@@ -38,7 +41,7 @@ pub fn get_user_details() -> Result<(String, String), Error> {
 
 /// Get the current working directory as a String
 fn get_current_working_directory() -> Result<String, Error> {
-    Ok(format!("{}", env::current_dir()?.display()))
+    Ok(env::current_dir()?.display().to_string())
 }
 
 
