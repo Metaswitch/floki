@@ -8,6 +8,7 @@ version number is tracked in the file `VERSION`.
 
 ## Unreleased
 ### Changed
+- Small tidyups of environment collection module - PATCH
 ### Added
 - Forward host working directory as `FLOKI_HOST_WORKDIR` - MINOR
 
