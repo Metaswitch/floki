@@ -9,6 +9,7 @@ version number is tracked in the file `VERSION`.
 ## Unreleased
 ### Changed
 - Small tidyups of environment collection module - PATCH
+- Have dind use host's /etc/docker to ensure networks use safe subnets - MINOR
 ### Added
 - Forward host working directory as `FLOKI_HOST_WORKDIR` - MINOR
 
