@@ -37,6 +37,8 @@ impl Dind {
                 "--name",
                 &self.name,
                 "-v",
+                "/etc/docker:/etc/docker:ro",
+                "-v",
                 &format!("{}:{}", self.mount_source, self.mount_target),
                 "-d",
                 "docker:stable-dind",
