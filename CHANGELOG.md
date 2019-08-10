@@ -8,6 +8,10 @@ version number is tracked in the file `VERSION`.
 
 ## Unreleased
 ### Changed
+### Added
+
+## [0.2.0] - 2019-08-10
+### Changed
 - Small tidyups of environment collection module - PATCH
 - Disable TLS in `dind` to fix failing `dind` functionality on newer `dind:stable` images - PATCH
 ### Added
