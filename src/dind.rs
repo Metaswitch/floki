@@ -40,6 +40,10 @@ impl Dind {
                 &format!("{}:{}", self.mount_source, self.mount_target),
                 "-d",
                 "docker:stable-dind",
+                // Newer dind images enable TLS by default, which we want to
+                // disable, so we specify the dind command by hand.
+                "dockerd",
+                "--host=tcp://0.0.0.0:2375"
             ])
             .stdin(Stdio::null())
             .stdout(Stdio::null())
