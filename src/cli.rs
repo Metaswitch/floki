@@ -1,4 +1,5 @@
 /// Description of the CLI interface to floki
+use std::path;
 use quicli::prelude::*;
 use structopt::StructOpt;
 
@@ -22,8 +23,10 @@ pub(crate) enum Subcommand {
     about = "The interactive container launcher."
 )]
 pub(crate) struct Cli {
-    #[structopt(long = "config", short = "c", default_value = "floki.yaml")]
-    pub(crate) config_file: String,
+    /// Use the specified config instead of searching the tree for a
+    /// "floki.yaml" file.
+    #[structopt(long = "config", short = "c")]
+    pub(crate) config_file: Option<path::PathBuf>,
 
     /// Run floki regardless of reproducibility
     #[structopt(long = "local", short = "l")]

@@ -6,19 +6,24 @@ use crate::command;
 use crate::errors;
 
 use failure::Error;
-
+use std::path;
 
 /// Build a spec for the docker container, and then run it
-pub(crate) fn run_container(config: &FlokiConfig, environ: &Environment, command: &str) -> Result<(), Error> {
-    let (mut cmd, mut dind) = build_basic_command(&config, &environ);
+pub(crate) fn run_container(
+    environ: &Environment,
+    floki_root: &path::Path,
+    config: &FlokiConfig,
+    command: &str,
+) -> Result<(), Error> {
+    let (mut cmd, mut dind) = build_basic_command(&floki_root, &config);
 
     cmd = configure_dind(cmd, &config, &mut dind)?;
     cmd = configure_floki_user_env(cmd, &environ);
-    cmd = configure_floki_workdir_env(cmd, &environ);
+    cmd = configure_floki_host_mountdir_env(cmd, &floki_root);
     cmd = configure_forward_user(cmd, &config, &environ);
     cmd = configure_forward_ssh_agent(cmd, &config, &environ)?;
     cmd = configure_docker_switches(cmd, &config);
-    cmd = configure_working_directory(cmd, &config);
+    cmd = configure_working_directory(cmd, &environ, &floki_root, &config);
 
     cmd.run(command)
 }
@@ -47,9 +52,16 @@ fn configure_floki_user_env(cmd: DockerCommandBuilder, env: &Environment) -> Doc
     new_cmd.add_environment("FLOKI_HOST_GID", &group)
 }
 
-
-fn configure_floki_workdir_env(cmd: DockerCommandBuilder, env: &Environment) -> DockerCommandBuilder {
-    cmd.add_environment("FLOKI_HOST_WORKDIR", &env.current_directory)
+fn configure_floki_host_mountdir_env(
+    cmd: DockerCommandBuilder,
+    floki_root: &path::Path,
+) -> DockerCommandBuilder {
+    cmd.add_environment(
+        "FLOKI_HOST_MOUNTDIR",
+        &floki_root
+            .to_str()
+            .expect("failed to set FLOKI_HOST_MOUNTDIR - unable to convert floki_root to str"),
+    )
 }
 
 
@@ -86,18 +98,47 @@ fn configure_docker_switches(cmd: DockerCommandBuilder, config: &FlokiConfig) ->
 }
 
 
-fn configure_working_directory(cmd: DockerCommandBuilder, config: &FlokiConfig) -> DockerCommandBuilder {
-    cmd.set_working_directory(&config.mount)
+fn configure_working_directory(
+    cmd: DockerCommandBuilder,
+    env: &Environment,
+    floki_root: &path::Path,
+    config: &FlokiConfig,
+) -> DockerCommandBuilder {
+    cmd.set_working_directory(
+        get_working_directory(
+            &env.current_directory,
+            &floki_root,
+            &path::PathBuf::from(&config.mount),
+        )
+        .to_str()
+        .unwrap(),
+    )
+}
+
+fn get_working_directory(
+    current_directory: &path::Path,
+    floki_root: &path::Path,
+    mount: &path::Path,
+) -> path::PathBuf {
+    mount.join(current_directory.strip_prefix(&floki_root).expect(
+        "failed to deduce working directory - \
+         floki_root should always be an ancestor of current_directory",
+    ))
+}
+
+fn get_mount_specification<'a, 'b>(
+    floki_root: &'a path::Path,
+    config: &'b FlokiConfig,
+) -> (&'a str, &'b str) {
+    (&floki_root.to_str().unwrap(), &config.mount)
 }
 
 
-fn get_mount_specification<'a>(config: &'a FlokiConfig, env: &'a Environment) -> (&'a str, &'a str) {
-    (&env.current_directory, &config.mount)
-}
-
-
-fn build_basic_command(config: &FlokiConfig, env: &Environment) -> (DockerCommandBuilder, Dind) {
-    let mount = get_mount_specification(&config, &env);
+fn build_basic_command(
+    floki_root: &path::Path,
+    config: &FlokiConfig
+) -> (DockerCommandBuilder, Dind) {
+    let mount = get_mount_specification(&floki_root, &config);
 
     // Assign a container for docker-in-docker - we don't spawn it yet
     let dind = Dind::new(mount);
@@ -109,7 +150,6 @@ fn build_basic_command(config: &FlokiConfig, env: &Environment) -> (DockerComman
 
     (cmd, dind)
 }
-
 
 #[cfg(test)]
 mod test {
@@ -123,5 +163,17 @@ mod test {
         let expected = String::from("bash -c \"foo bar\"");
 
         assert!(result == expected);
+    }
+
+    #[test]
+    fn test_get_working_directory() {
+        let current_directory = path::PathBuf::from("/host/workingdir/");
+        let floki_root = path::PathBuf::from("/host");
+        let mount = path::PathBuf::from("/guest");
+
+        assert!(
+            get_working_directory(&current_directory, &floki_root, &mount)
+                == path::PathBuf::from("/guest/workingdir/")
+        )
     }
 }

@@ -14,6 +14,9 @@ pub struct FlokiSubprocessExitStatus {
 /// Error types for Floki
 #[derive(Debug, Fail)]
 pub enum FlokiError {
+    #[fail(display = "No floki.yaml found in tree")]
+    ProblemFindingConfigYaml {},
+
     #[fail(
         display = "There was a problem opening the configuration file '{}': {}",
         name,

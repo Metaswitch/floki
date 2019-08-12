@@ -1,11 +1,10 @@
-use crate::cli::Cli;
 use crate::config::FlokiConfig;
 use crate::errors;
 use failure::Error;
 
 
-pub(crate) fn verify_command(args: &Cli, config: &FlokiConfig) -> Result<(), Error> {
-    if config.docker_switches.len() > 0 && !args.local {
+pub(crate) fn verify_command(local: bool, config: &FlokiConfig) -> Result<(), Error> {
+    if config.docker_switches.len() > 0 && !local {
         Err(errors::FlokiError::NonLocalDockerSwitches{})?
     } else {
         Ok(())
@@ -18,53 +17,30 @@ mod test{
     use crate::image::Image::Name;
     use crate::config::Shell::Shell;
 
-    #[test]
-    fn test_nonlocal_docker_switches_non_empty() {
-        let args = Cli {
-            config_file: "floki.yaml".into(),
-            local: false,
-            // Dummy verbosity which we don't use. This is gross.
-            verbosity: unsafe { std::mem::transmute(0 as u8) },
-            subcommand: None
-        };
-
-        let config = FlokiConfig {
+    fn get_test_config(docker_switches: Vec<String>) -> FlokiConfig {
+        FlokiConfig {
             image: Name("foo".into()),
             init: vec![],
             shell: Shell("bash".into()),
             mount: "/mnt".into(),
-            docker_switches: vec!["dummy".into(), "switches".into()],
+            docker_switches,
             forward_ssh_agent: false,
             dind: false,
-            forward_user: false
-        };
+            forward_user: false,
+        }
+    }
 
-        let res = verify_command(&args, &config);
+    #[test]
+    fn test_nonlocal_docker_switches_non_empty() {
+        let config = get_test_config(vec!["dummy".into(), "switches".into()]);
+        let res = verify_command(false, &config);
         assert!(res.is_err());
     }
 
     #[test]
     fn test_local_docker_switches_non_empty() {
-        let args = Cli {
-            config_file: "floki.yaml".into(),
-            local: true,
-            // Dummy verbosity which we don't use. This is gross.
-            verbosity: unsafe { std::mem::transmute(0 as u8) },
-            subcommand: None
-        };
-
-        let config = FlokiConfig {
-            image: Name("foo".into()),
-            init: vec![],
-            shell: Shell("bash".into()),
-            mount: "/mnt".into(),
-            docker_switches: vec!["dummy".into(), "switches".into()],
-            forward_ssh_agent: false,
-            dind: false,
-            forward_user: false
-        };
-
-        let res = verify_command(&args, &config);
+        let config = get_test_config(vec!["dummy".into(), "switches".into()]);
+        let res = verify_command(true, &config);
         assert!(res.is_ok());
     }
 }

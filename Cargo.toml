@@ -1,6 +1,6 @@
 [package]
 name = "floki"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Richard Lupton <richard.lupton@gmail.com>"]
 edition = '2018'
 
@@ -14,3 +14,6 @@ serde_derive = "1.0"
 serde_yaml = "0.7"
 structopt = "0.2"
 uuid = { version = "0.6", features = ["v4"] }
+
+[dev-dependencies]
+tempdir = "0.3.7"

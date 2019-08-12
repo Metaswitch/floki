@@ -8,7 +8,14 @@ version number is tracked in the file `VERSION`.
 
 ## Unreleased
 ### Changed
+- Rename `FLOKI_HOST_WORKDIR` to `FLOKI_HOST_MOUNTDIR` - BREAKING
+- Also search ancestors of the working directory for a `floki.yaml` - MINOR
+### Added
+
+## [0.2.0] - 2019-08-10
+### Changed
 - Small tidyups of environment collection module - PATCH
+- Disable TLS in `dind` to fix failing `dind` functionality on newer `dind:stable` images - PATCH
 ### Added
 - Forward host working directory as `FLOKI_HOST_WORKDIR` - MINOR
 
