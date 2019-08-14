@@ -47,6 +47,10 @@ floki
 
 A container will launch with the working directory mounted, and the container shell located there.
 
+In general, invoking `floki` in any child of this directory will launch with:
+- The directory containing `floki.yaml` mounted;
+- The container shell located in the guest directory corresponding to the child.
+
 ## Using a different configuration file
 
 You can use a different configuration file with `floki` by telling it to use a different file from the command line. For example, if you have another configuration in `config.yaml`, you can run `floki` with
@@ -54,6 +58,8 @@ You can use a different configuration file with `floki` by telling it to use a d
 ```
 floki -c config.yaml
 ```
+
+Note that, in contrast to invoking `floki` without the `-c` flag, this will always mount the current working directory.
 
 ### Features you may want to look at next
 

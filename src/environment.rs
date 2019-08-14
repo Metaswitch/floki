@@ -2,12 +2,13 @@
 use failure::Error;
 use std::process::Command;
 use std::env;
+use std::path;
 
 
 #[derive(Debug)]
 pub struct Environment {
     pub user_details: (String, String),
-    pub current_directory: String,
+    pub current_directory: path::PathBuf,
     pub ssh_agent_socket: Option<String>
 }
 
@@ -40,8 +41,8 @@ fn get_user_details() -> Result<(String, String), Error> {
 }
 
 /// Get the current working directory as a String
-fn get_current_working_directory() -> Result<String, Error> {
-    Ok(env::current_dir()?.display().to_string())
+fn get_current_working_directory() -> Result<path::PathBuf, Error> {
+    Ok(env::current_dir()?)
 }
 
 

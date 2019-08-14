@@ -109,7 +109,7 @@ These can be used to configure users in the container dynamically. This can be a
 
 ## Host working directory
 
-The host working directory is forwarded into the `floki` container as an environment variable, `FLOKI_HOST_WORKDIR`.
+The host path to the mounted directory is forwarded into the `floki` container as an environment variable, `FLOKI_HOST_MOUNTDIR`.
 
 ## SSH agent
 
