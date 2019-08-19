@@ -1,6 +1,8 @@
 /// floki - the development container launcher
-#[macro_use] extern crate failure_derive;
-#[macro_use] extern crate log;
+#[macro_use]
+extern crate failure_derive;
+#[macro_use]
+extern crate log;
 
 mod cli;
 mod command;
@@ -9,8 +11,8 @@ mod dind;
 mod environment;
 mod errors;
 mod image;
-mod verify;
 mod interpret;
+mod verify;
 
 use cli::{Cli, Subcommand};
 use config::FlokiConfig;
@@ -18,8 +20,8 @@ use verify::verify_command;
 
 use failure::Error;
 use quicli::prelude::*;
-use structopt::StructOpt;
 use std::path;
+use structopt::StructOpt;
 
 fn main() -> CliResult {
     let args = Cli::from_args();
@@ -33,9 +35,7 @@ fn main() -> CliResult {
         }
     }
     Ok(())
-
 }
-
 
 /// Decide which commands to run given the input from the shell
 fn run_floki_from_args(args: &Cli) -> Result<(), Error> {
