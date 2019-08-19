@@ -19,65 +19,44 @@ pub enum FlokiError {
 
     #[fail(
         display = "There was a problem opening the configuration file '{}': {}",
-        name,
-        error
+        name, error
     )]
     ProblemOpeningConfigYaml { name: String, error: io::Error },
 
     #[fail(
         display = "There was a problem reading the configuration file '{}': {}",
-        name,
-        error
+        name, error
     )]
     ProblemReadingConfigYaml { name: String, error: io::Error },
 
     #[fail(
         display = "There was a problem parsing the configuration file '{}': {}",
-        name,
-        error
+        name, error
     )]
     ProblemParsingConfigYaml {
         name: String,
         error: serde_yaml::Error,
     },
 
-    #[fail(
-        display = "Running docker command failed with error: {}",
-        error
-    )]
+    #[fail(display = "Running docker command failed with error: {}", error)]
     FailedToLaunchDocker { error: io::Error },
 
-    #[fail(
-        display = "Failed to complete docker command with error: {}",
-        error
-    )]
+    #[fail(display = "Failed to complete docker command with error: {}", error)]
     FailedToCompleteDockerCommand { error: io::Error },
 
-    #[fail(
-        display = "Failed to pull docker image '{}': {}",
-        image,
-        exit_status
-    )]
+    #[fail(display = "Failed to pull docker image '{}': {}", image, exit_status)]
     FailedToPullImage {
         image: String,
         exit_status: FlokiSubprocessExitStatus,
     },
 
-    #[fail(
-        display = "Failed to build docker image '{}': {}",
-        image,
-        exit_status
-    )]
+    #[fail(display = "Failed to build docker image '{}': {}", image, exit_status)]
     FailedToBuildImage {
         image: String,
         exit_status: FlokiSubprocessExitStatus,
     },
 
-    #[fail(
-        display = "Failed to check existance of image '{}': {}",
-        image,
-        error
-    )]
+    #[fail(display = "Failed to check existance of image '{}': {}", image, error)]
     FailedToCheckForImage { image: String, error: io::Error },
 
     #[fail(display = "Running container failed: {}", exit_status)]
@@ -88,9 +67,10 @@ pub enum FlokiError {
     #[fail(display = "Unable to forward ssh socket - cannot find SSH_AUTH_SOCK in environment")]
     NoSshAuthSock {},
 
-    #[fail(display = "Cannot guarantee reproducibility of docker_switches. Run 'floki --local' if docker_switches are needed.")]
-    NonLocalDockerSwitches {}
-
+    #[fail(
+        display = "Cannot guarantee reproducibility of docker_switches. Run 'floki --local' if docker_switches are needed."
+    )]
+    NonLocalDockerSwitches {},
 }
 
 /// Generate a summary string for a process exiting

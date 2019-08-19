@@ -111,11 +111,12 @@ impl DockerCommandBuilder {
     }
 }
 
-pub fn enable_forward_ssh_agent(command: DockerCommandBuilder, agent_socket: &str) -> Result<DockerCommandBuilder, Error> {
+pub fn enable_forward_ssh_agent(
+    command: DockerCommandBuilder,
+    agent_socket: &str,
+) -> Result<DockerCommandBuilder, Error> {
     debug!("Got SSH_AUTH_SOCK={}", agent_socket);
-    if let Some(dir) = path::Path::new(&agent_socket)
-        .to_str()
-    {
+    if let Some(dir) = path::Path::new(&agent_socket).to_str() {
         Ok(command
             .add_environment("SSH_AUTH_SOCK", agent_socket)
             .add_volume((dir, dir)))
@@ -135,7 +136,6 @@ pub fn enable_docker_in_docker(
         .add_docker_switch(&format!("--link {}:floki-docker", dind.name))
         .add_environment("DOCKER_HOST", "tcp://floki-docker:2375"))
 }
-
 
 /// Turn the init section of a floki.yaml file into a command
 /// that can be given to a shell

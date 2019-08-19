@@ -2,20 +2,19 @@ use crate::config::FlokiConfig;
 use crate::errors;
 use failure::Error;
 
-
 pub(crate) fn verify_command(local: bool, config: &FlokiConfig) -> Result<(), Error> {
     if config.docker_switches.len() > 0 && !local {
-        Err(errors::FlokiError::NonLocalDockerSwitches{})?
+        Err(errors::FlokiError::NonLocalDockerSwitches {})?
     } else {
         Ok(())
     }
 }
 
 #[cfg(test)]
-mod test{
+mod test {
     use super::*;
-    use crate::image::Image::Name;
     use crate::config::Shell::Shell;
+    use crate::image::Image::Name;
 
     fn get_test_config(docker_switches: Vec<String>) -> FlokiConfig {
         FlokiConfig {

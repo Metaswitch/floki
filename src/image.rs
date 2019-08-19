@@ -1,5 +1,5 @@
-use quicli::prelude::*;
 use failure::Error;
+use quicli::prelude::*;
 use std::process::{Command, Stdio};
 
 use crate::errors::{FlokiError, FlokiSubprocessExitStatus};
@@ -41,7 +41,6 @@ impl Image {
     /// it's name
     pub fn obtain_image(&self) -> Result<String, Error> {
         match *self {
-
             // Deal with the case where want to build an image
             Image::Build { ref build } => {
                 let exit_status = Command::new("docker")
@@ -69,7 +68,6 @@ impl Image {
             _ => Ok(self.name()),
         }
     }
-
 }
 
 // Now we have some functions which are useful in general
