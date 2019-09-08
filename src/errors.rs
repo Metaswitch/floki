@@ -24,12 +24,6 @@ pub enum FlokiError {
     ProblemOpeningConfigYaml { name: String, error: io::Error },
 
     #[fail(
-        display = "There was a problem reading the configuration file '{}': {}",
-        name, error
-    )]
-    ProblemReadingConfigYaml { name: String, error: io::Error },
-
-    #[fail(
         display = "There was a problem parsing the configuration file '{}': {}",
         name, error
     )]

@@ -5,7 +5,6 @@ use failure::Error;
 use quicli::prelude::*;
 
 use std::fs::File;
-use std::io::Read;
 use std::path;
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
@@ -53,19 +52,12 @@ pub(crate) struct FlokiConfig {
 
 impl FlokiConfig {
     pub fn from_file(file: &path::Path) -> Result<FlokiConfig, Error> {
-        let mut f = File::open(file).map_err(|e| errors::FlokiError::ProblemOpeningConfigYaml {
+        let f = File::open(file).map_err(|e| errors::FlokiError::ProblemOpeningConfigYaml {
             name: file.display().to_string(),
             error: e,
         })?;
 
-        let mut raw = String::new();
-        f.read_to_string(&mut raw)
-            .map_err(|e| errors::FlokiError::ProblemReadingConfigYaml {
-                name: file.display().to_string(),
-                error: e,
-            })?;
-
-        let config = serde_yaml::from_str(&raw).map_err(|e| {
+        let config = serde_yaml::from_reader(f).map_err(|e| {
             errors::FlokiError::ProblemParsingConfigYaml {
                 name: file.display().to_string(),
                 error: e,
