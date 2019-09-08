@@ -11,6 +11,7 @@ version number is tracked in the file `VERSION`.
 - Rename `FLOKI_HOST_WORKDIR` to `FLOKI_HOST_MOUNTDIR` - BREAKING
 - Also search ancestors of the working directory for a `floki.yaml` - MINOR
 - Make parsing of `floki.yaml` strict - deny unknown fields - BREAKING
+- Parse `floki.yaml` using `Read` interface to file - PATCH
 ### Added
 
 ## [0.2.0] - 2019-08-10
