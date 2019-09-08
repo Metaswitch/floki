@@ -104,3 +104,14 @@ impl fmt::Display for FlokiSubprocessExitStatus {
         )
     }
 }
+
+/// Internal error types for floki - these represent failed assumptions of
+/// the developers, and shouldn't actually manifest.
+#[derive(Debug, Fail)]
+pub enum FlokiInternalError {
+    #[fail(
+        display = "An internal assertion failed '{}'.  This is probably a bug!",
+        description
+    )]
+    InternalAssertionFailed { description: String },
+}
