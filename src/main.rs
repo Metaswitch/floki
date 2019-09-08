@@ -45,7 +45,7 @@ fn run_floki_from_args(args: &Cli) -> Result<(), Error> {
     debug!("Got environment {:?}", &environ);
 
     let (floki_root, config_file) = match &args.config_file {
-        Some(config_file) => (environ.current_directory.to_path_buf(), config_file.clone()),
+        Some(config_file) => (environ.current_directory.clone(), config_file.clone()),
         None => locate_file_in_system(find_floki_yaml(&environ.current_directory)?)?,
     };
     debug!("Selected configuration file: {:?}", &config_file);
