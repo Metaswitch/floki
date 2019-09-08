@@ -32,6 +32,7 @@ impl Shell {
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub(crate) struct FlokiConfig {
     pub(crate) image: image::Image,
     #[serde(default = "Vec::new")]
