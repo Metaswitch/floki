@@ -46,21 +46,7 @@ fn run_floki_from_args(args: &Cli) -> Result<(), Error> {
 
     let (floki_root, config_file) = match &args.config_file {
         Some(config_file) => (environ.current_directory.to_path_buf(), config_file.clone()),
-        None => {
-            let config_file = find_floki_yaml(&environ.current_directory)?;
-            (
-                config_file
-                    .parent()
-                    .ok_or_else(|| errors::FlokiInternalError::InternalAssertionFailed {
-                        description: format!(
-                            "config_file '{:?}' does not have a parent",
-                            &config_file
-                        ),
-                    })?
-                    .to_path_buf(),
-                config_file,
-            )
-        }
+        None => locate_file_in_system(find_floki_yaml(&environ.current_directory)?)?,
     };
     debug!("Selected configuration file: {:?}", &config_file);
 
@@ -111,6 +97,17 @@ fn find_floki_yaml(current_directory: &path::Path) -> Result<path::PathBuf, Erro
         .map(|a| a.join("floki.yaml"))
         .find(|f| f.is_file())
         .ok_or(errors::FlokiError::ProblemFindingConfigYaml {}.into())
+}
+
+/// Take a file path, and return a tuple consisting of it's directory and the file path
+fn locate_file_in_system(path: path::PathBuf) -> Result<(path::PathBuf, path::PathBuf), Error> {
+    let dir = path
+        .parent()
+        .ok_or_else(|| errors::FlokiInternalError::InternalAssertionFailed {
+            description: format!("config_file '{:?}' does not have a parent", &path),
+        })?
+        .to_path_buf();
+    Ok((dir, path))
 }
 
 #[cfg(test)]
