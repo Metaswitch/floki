@@ -51,9 +51,12 @@ fn run_floki_from_args(args: &Cli) -> Result<(), Error> {
             (
                 config_file
                     .parent()
-                    .expect(
-                        "failed to select config file - config_file should always have a parent",
-                    )
+                    .ok_or_else(|| errors::FlokiInternalError::InternalAssertionFailed {
+                        description: format!(
+                            "config_file '{:?}' does not have a parent",
+                            &config_file
+                        ),
+                    })?
                     .to_path_buf(),
                 config_file,
             )
@@ -101,8 +104,7 @@ fn run_floki_container(
     interpret::run_container(&environ, &floki_root, &config, &subshell_command)
 }
 
-/// Search all ancestors of the current directory for a floki.yaml file
-/// name.
+/// Search all ancestors of the current directory for a floki.yaml file name.
 fn find_floki_yaml(current_directory: &path::Path) -> Result<path::PathBuf, Error> {
     current_directory
         .ancestors()
