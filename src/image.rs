@@ -50,7 +50,6 @@ impl Image {
                 let path = yaml.key.split('.').collect::<Vec<_>>();
                 let mut val = &raw[0];
                 for key in &path {
-                    //
                     val = match key.parse::<usize>() {
                         Ok(x) => &val[x],
                         Err(_) => &val[*key],
