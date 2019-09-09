@@ -16,7 +16,7 @@ The ideal workflow is
 
 # Container images
 
-`floki` offers a couple of ways t configure the container image to use.
+`floki` offers a couple of ways to configure the container image to use.
 
 ## Prebuilt images
 
@@ -38,6 +38,16 @@ image:
     name: foo                    # Will create an image called foo:floki
     dockerfile: Dockerfile.foo   # Defaults to Dockerfile
     context: .                   # Defaults to .
+```
+
+## Referencing a key in another yaml file
+`floki` can use an image referenced in another yaml file. This can help keep local development environments sync'd with a CI environment.
+
+```
+image:
+  yaml:
+    file: .gitlab-ci.yaml
+    path: variables.RUST-IMAGE
 ```
 
 ## Updating an image

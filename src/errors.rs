@@ -53,6 +53,9 @@ pub enum FlokiError {
     #[fail(display = "Failed to check existance of image '{}': {}", image, error)]
     FailedToCheckForImage { image: String, error: io::Error },
 
+    #[fail(display = "Failed to find the specified key")]
+    FailedToFindYamlKey {},
+
     #[fail(display = "Running container failed: {}", exit_status)]
     RunContainerFailed {
         exit_status: FlokiSubprocessExitStatus,
