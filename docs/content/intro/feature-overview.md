@@ -47,7 +47,7 @@ image:
 image:
   yaml:
     file: .gitlab-ci.yaml
-    path: variables.RUST-IMAGE
+    key: variables.RUST-IMAGE
 ```
 
 ## Updating an image
