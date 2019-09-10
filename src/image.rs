@@ -18,7 +18,7 @@ pub struct BuildSpec {
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct YamlSpec {
-    file: PathBuf,
+    pub file: PathBuf,
     key: String,
 }
 
@@ -49,7 +49,10 @@ impl Image {
                 let raw = YamlLoader::load_from_str(&contents)?;
                 let path = yaml.key.split('.').collect::<Vec<_>>();
                 let mut val = &raw[0];
+
                 for key in &path {
+                    // Yaml arrays and maps with scalar keys can both be indexed by
+                    // usize, so heuristically prefer a usize index to a &str index.
                     val = match key.parse::<usize>() {
                         Ok(x) => &val[x],
                         Err(_) => &val[*key],
@@ -57,7 +60,13 @@ impl Image {
                 }
                 val.as_str()
                     .map(std::string::ToString::to_string)
-                    .ok_or_else(|| FlokiError::FailedToFindYamlKey {}.into())
+                    .ok_or_else(|| {
+                        FlokiError::FailedToFindYamlKey {
+                            key: yaml.key.to_string(),
+                            file: yaml.file.display().to_string(),
+                        }
+                        .into()
+                    })
             }
         }
     }

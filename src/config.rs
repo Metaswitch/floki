@@ -57,12 +57,28 @@ impl FlokiConfig {
             error: e,
         })?;
 
-        let config = serde_yaml::from_reader(f).map_err(|e| {
+        let mut config: FlokiConfig = serde_yaml::from_reader(f).map_err(|e| {
             errors::FlokiError::ProblemParsingConfigYaml {
                 name: file.display().to_string(),
                 error: e,
             }
         })?;
+
+        // Ensure the path to an external yaml file is correct.
+        // If the image.yaml.path file is relative, then it should
+        // be relative to the floki config file. At this point we
+        // already have the path to the floki config file, so we
+        // just prepend that to image.yaml.path.
+        if let image::Image::Yaml { ref mut yaml } = config.image {
+            if yaml.file.is_relative() {
+                yaml.file = file
+                    .parent()
+                    .ok_or_else(|| errors::FlokiInternalError::InternalAssertionFailed {
+                        description: format!("config_file '{:?}' does not have a parent", &file),
+                    })?
+                    .join(yaml.file.clone());
+            }
+        }
 
         Ok(config)
     }
