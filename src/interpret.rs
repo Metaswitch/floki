@@ -15,7 +15,7 @@ pub(crate) fn run_container(
     config: &FlokiConfig,
     command: &str,
 ) -> Result<(), Error> {
-    let (mut cmd, mut dind) = build_basic_command(&floki_root, &config);
+    let (mut cmd, mut dind) = build_basic_command(&floki_root, &config)?;
 
     cmd = configure_dind(cmd, &config, &mut dind)?;
     cmd = configure_floki_user_env(cmd, &environ);
@@ -144,17 +144,17 @@ fn get_mount_specification<'a, 'b>(
 fn build_basic_command(
     floki_root: &path::Path,
     config: &FlokiConfig,
-) -> (DockerCommandBuilder, Dind) {
+) -> Result<(DockerCommandBuilder, Dind), Error> {
     let mount = get_mount_specification(&floki_root, &config);
 
     // Assign a container for docker-in-docker - we don't spawn it yet
     let dind = Dind::new(mount);
 
-    let image = &config.image.name();
+    let image = &config.image.name()?;
     let outer_shell = config.shell.outer_shell();
     let cmd = command::DockerCommandBuilder::new(image, outer_shell).add_volume(mount);
 
-    (cmd, dind)
+    Ok((cmd, dind))
 }
 
 #[cfg(test)]
