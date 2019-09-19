@@ -74,7 +74,10 @@ impl FlokiConfig {
                 yaml.file = file
                     .parent()
                     .ok_or_else(|| errors::FlokiInternalError::InternalAssertionFailed {
-                        description: format!("config_file '{:?}' does not have a parent", &file),
+                        description: format!(
+                            "could not constuct path to external yaml file '{:?}'",
+                            &yaml.file
+                        ),
                     })?
                     .join(yaml.file.clone());
             }
