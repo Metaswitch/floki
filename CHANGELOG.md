@@ -8,6 +8,10 @@ version number is tracked in the file `VERSION`.
 
 ## Unreleased
 ### Changed
+### Added
+
+## [0.3.0] - 2019-10-01
+### Changed
 - Rename `FLOKI_HOST_WORKDIR` to `FLOKI_HOST_MOUNTDIR` - BREAKING
 - Also search ancestors of the working directory for a `floki.yaml` - MINOR
 - Make parsing of `floki.yaml` strict - deny unknown fields - BREAKING
