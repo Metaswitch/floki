@@ -15,16 +15,17 @@ pub(crate) fn run_container(
     config: &FlokiConfig,
     inner_command: &str,
 ) -> Result<(), Error> {
+    let mount = get_mount_specification(&environ.floki_root, &config);
+    let dind = Dind::new(mount);
+    let mut cmd = command::DockerCommandBuilder::new(&config.image.name()?).add_volume(mount);
+
     let volumes = resolve_volume_mounts(
         &environ.floki_root,
         &environ.floki_workspace,
         &config.volumes,
     );
-    debug!("Resolved volume mounts: {:?}", volumes);
 
-    let (mut cmd, mut dind) = build_basic_command(&environ.floki_root, &config)?;
-
-    cmd = configure_dind(cmd, &config, &mut dind)?;
+    cmd = configure_dind(cmd, &config, &dind)?;
     cmd = configure_floki_user_env(cmd, &environ);
     cmd = configure_floki_host_mountdir_env(cmd, &environ.floki_root);
     cmd = configure_forward_user(cmd, &config, &environ);
@@ -34,11 +35,8 @@ pub(crate) fn run_container(
     cmd = configure_volumes(cmd, &volumes);
 
     instantiate_volumes(&volumes)?;
-
-    let subshell_command = subshell_command(&config.init, inner_command);
-
     let _handle = launch_dind_if_needed(&config, dind)?;
-
+    let subshell_command = subshell_command(&config.init, inner_command);
     cmd.run(&[config.shell.outer_shell(), "-c", &subshell_command])
 }
 
@@ -52,7 +50,7 @@ pub(crate) fn command_in_shell(shell: &str, command: &Vec<String>) -> String {
 fn configure_dind(
     cmd: DockerCommandBuilder,
     config: &FlokiConfig,
-    dind: &mut Dind,
+    dind: &Dind,
 ) -> Result<DockerCommandBuilder, Error> {
     if config.dind {
         Ok(command::enable_docker_in_docker(cmd, dind)?)
@@ -136,6 +134,7 @@ fn configure_working_directory(
     )
 }
 
+/// Add mounts for each of the passed in volumes
 fn configure_volumes(
     cmd: DockerCommandBuilder,
     volumes: &Vec<(path::PathBuf, path::PathBuf)>,
@@ -147,6 +146,7 @@ fn configure_volumes(
     cmd
 }
 
+/// Create the backing directories for floki volumes if needed
 fn instantiate_volumes(volumes: &Vec<(path::PathBuf, path::PathBuf)>) -> Result<(), Error> {
     for (src, _) in volumes.iter() {
         std::fs::create_dir_all(src)?;
@@ -154,6 +154,7 @@ fn instantiate_volumes(volumes: &Vec<(path::PathBuf, path::PathBuf)>) -> Result<
     Ok(())
 }
 
+/// Determine what directory we are currently in
 fn get_working_directory(
     current_directory: &path::Path,
     floki_root: &path::Path,
@@ -165,6 +166,7 @@ fn get_working_directory(
     ))
 }
 
+/// Specify the primary mount for the floki container
 fn get_mount_specification<'a, 'b>(
     floki_root: &'a path::Path,
     config: &'b FlokiConfig,
@@ -172,31 +174,15 @@ fn get_mount_specification<'a, 'b>(
     (&floki_root.to_str().unwrap(), &config.mount)
 }
 
-fn build_basic_command(
-    floki_root: &path::Path,
-    config: &FlokiConfig,
-) -> Result<(DockerCommandBuilder, Dind), Error> {
-    let mount = get_mount_specification(&floki_root, &config);
-
-    // Assign a container for docker-in-docker - we don't spawn it yet
-    let dind = Dind::new(mount);
-
-    let image = &config.image.name()?;
-    let cmd = command::DockerCommandBuilder::new(image).add_volume(mount);
-
-    Ok((cmd, dind))
-}
-
 /// Turn the init section of a floki.yaml file into a command
 /// that can be given to a shell
 fn subshell_command(init: &Vec<String>, command: &str) -> String {
     let mut args: Vec<&str> = init.into_iter().map(|s| s as &str).collect::<Vec<&str>>();
-
     args.push(command);
     args.join(" && ")
 }
 
-/// Launching dind if it's needed
+/// Launch dind if specified by the configuration
 fn launch_dind_if_needed(
     config: &FlokiConfig,
     dind: Dind,
