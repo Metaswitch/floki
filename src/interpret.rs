@@ -4,6 +4,7 @@ use crate::config::FlokiConfig;
 use crate::dind::Dind;
 use crate::environment::Environment;
 use crate::errors;
+use crate::volumes::resolve_volume_mounts;
 
 use failure::Error;
 use std::path;
@@ -14,6 +15,13 @@ pub(crate) fn run_container(
     config: &FlokiConfig,
     command: &str,
 ) -> Result<(), Error> {
+    let volumes = resolve_volume_mounts(
+        &environ.floki_root,
+        &environ.floki_workspace,
+        &config.volumes,
+    );
+    debug!("Resolved volume mounts: {:?}", volumes);
+
     let (mut cmd, mut dind) = build_basic_command(&environ.floki_root, &config)?;
 
     cmd = configure_dind(cmd, &config, &mut dind)?;

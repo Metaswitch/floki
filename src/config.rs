@@ -34,8 +34,8 @@ impl Shell {
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub(crate) struct Volume {
     #[serde(default = "default_to_false")]
-    shared: bool,
-    mount: path::PathBuf,
+    pub(crate) shared: bool,
+    pub(crate) mount: path::PathBuf,
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
