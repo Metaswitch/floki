@@ -4,30 +4,38 @@ use crate::image;
 use failure::Error;
 use quicli::prelude::*;
 
+use std::collections::BTreeMap;
 use std::fs::File;
 use std::path;
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
-pub enum Shell {
+pub(crate) enum Shell {
     Shell(String),
     TwoShell { inner: String, outer: String },
 }
 
 impl Shell {
-    pub fn inner_shell(&self) -> &str {
+    pub(crate) fn inner_shell(&self) -> &str {
         match self {
             Shell::Shell(s) => s,
             Shell::TwoShell { inner: s, outer: _ } => s,
         }
     }
 
-    pub fn outer_shell(&self) -> &str {
+    pub(crate) fn outer_shell(&self) -> &str {
         match self {
             Shell::Shell(s) => s,
             Shell::TwoShell { inner: _, outer: s } => s,
         }
     }
+}
+
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+pub(crate) struct Volume {
+    #[serde(default = "default_to_false")]
+    shared: bool,
+    mount: path::PathBuf,
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
@@ -48,6 +56,8 @@ pub(crate) struct FlokiConfig {
     pub(crate) dind: bool,
     #[serde(default = "default_to_false")]
     pub(crate) forward_user: bool,
+    #[serde(default = "BTreeMap::new")]
+    pub(crate) volumes: BTreeMap<String, Volume>,
 }
 
 impl FlokiConfig {
@@ -82,6 +92,12 @@ impl FlokiConfig {
                     .join(yaml.file.clone());
             }
         }
+
+        debug!(
+            "Parsed '{}' into configuration: {:?}",
+            file.display(),
+            &config
+        );
 
         Ok(config)
     }
