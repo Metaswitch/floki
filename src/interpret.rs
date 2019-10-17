@@ -33,6 +33,8 @@ pub(crate) fn run_container(
     cmd = configure_working_directory(cmd, &environ, &config);
     cmd = configure_volumes(cmd, &volumes);
 
+    instantiate_volumes(&volumes)?;
+
     cmd.run(command)
 }
 
@@ -139,6 +141,13 @@ fn configure_volumes(
         cmd = cmd.add_volume((src.to_str().unwrap(), dst.to_str().unwrap()));
     }
     cmd
+}
+
+fn instantiate_volumes(volumes: &Vec<(path::PathBuf, path::PathBuf)>) -> Result<(), Error> {
+    for (src, _) in volumes.iter() {
+        std::fs::create_dir_all(src)?;
+    }
+    Ok(())
 }
 
 fn get_working_directory(
