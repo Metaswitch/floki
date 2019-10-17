@@ -37,6 +37,8 @@ pub(crate) fn run_container(
 
     let subshell_command = subshell_command(&config.init, inner_command);
 
+    let _handle = launch_dind_if_needed(&config, dind)?;
+
     cmd.run(&[config.shell.outer_shell(), "-c", &subshell_command])
 }
 
@@ -192,6 +194,19 @@ fn subshell_command(init: &Vec<String>, command: &str) -> String {
 
     args.push(command);
     args.join(" && ")
+}
+
+/// Launching dind if it's needed
+fn launch_dind_if_needed(
+    config: &FlokiConfig,
+    dind: Dind,
+) -> Result<Option<command::DaemonHandle>, Error> {
+    if config.dind {
+        crate::dind::dind_preflight()?;
+        Ok(Some(dind.launch()?))
+    } else {
+        Ok(None)
+    }
 }
 
 #[cfg(test)]

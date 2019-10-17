@@ -2,13 +2,41 @@ use crate::errors::{FlokiError, FlokiSubprocessExitStatus};
 use failure::Error;
 use std::path;
 use std::process::{Command, Stdio};
+use uuid;
 
 #[derive(Debug, Clone)]
 pub struct DockerCommandBuilder {
+    name: String,
     volumes: Vec<(String, String)>,
     environment: Vec<(String, String)>,
     switches: Vec<String>,
     image: String,
+}
+
+#[derive(Debug)]
+pub struct DaemonHandle {
+    name: String,
+}
+
+impl DaemonHandle {
+    fn from_builder(builder: DockerCommandBuilder) -> Self {
+        DaemonHandle { name: builder.name }
+    }
+}
+
+impl Drop for DaemonHandle {
+    fn drop(&mut self) {
+        info!("Stopping daemon docker container '{}'", self.name);
+        Command::new("docker")
+            .args(&["kill", &self.name])
+            .stdin(Stdio::null())
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .spawn()
+            .expect("Unable to kill docker container")
+            .wait()
+            .expect("Unable to wait for docker container to die");
+    }
 }
 
 impl DockerCommandBuilder {
@@ -46,13 +74,49 @@ impl DockerCommandBuilder {
         }
     }
 
+    pub fn start_as_daemon(self, command: &[&str]) -> Result<DaemonHandle, Error> {
+        debug!("Starting daemon container '{}'", self.name);
+        let exit_status = Command::new("docker")
+            .args(&["run", "--rm"])
+            .args(&["--name", &self.name])
+            .args(&self.build_volume_switches())
+            .args(&self.build_environment_switches())
+            .args(&self.build_docker_switches())
+            .arg("-d")
+            .arg(&self.image)
+            .args(command)
+            .stdin(Stdio::null())
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .spawn()
+            .map_err(|e| FlokiError::FailedToLaunchDocker { error: e })?
+            .wait()
+            .map_err(|e| FlokiError::FailedToCompleteDockerCommand { error: e })?;
+
+        if exit_status.success() {
+            Ok(DaemonHandle::from_builder(self))
+        } else {
+            Err(FlokiError::RunContainerFailed {
+                exit_status: FlokiSubprocessExitStatus {
+                    process_description: "docker run".into(),
+                    exit_status: exit_status,
+                },
+            })?
+        }
+    }
+
     pub fn new(image: &str) -> Self {
         DockerCommandBuilder {
+            name: uuid::Uuid::new_v4().to_string(),
             volumes: Vec::new(),
             environment: Vec::new(),
             switches: Vec::new(),
             image: image.into(),
         }
+    }
+
+    pub fn name(&self) -> &str {
+        &self.name
     }
 
     pub fn add_volume(mut self, spec: (&str, &str)) -> Self {
@@ -126,10 +190,7 @@ pub fn enable_docker_in_docker(
     command: DockerCommandBuilder,
     dind: &mut crate::dind::Dind,
 ) -> Result<DockerCommandBuilder, Error> {
-    debug!("docker-in-docker: {:?}", &dind);
-    crate::dind::dind_preflight()?;
-    dind.launch()?;
     Ok(command
-        .add_docker_switch(&format!("--link {}:floki-docker", dind.name))
+        .add_docker_switch(&format!("--link {}:floki-docker", dind.name()))
         .add_environment("DOCKER_HOST", "tcp://floki-docker:2375"))
 }

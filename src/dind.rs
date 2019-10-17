@@ -1,80 +1,37 @@
 /// Docker-in-docker structures
 use failure::Error;
-use std::process::{Command, Stdio};
-use uuid;
 
-use crate::errors::FlokiError;
+use crate::command::{DaemonHandle, DockerCommandBuilder};
 use crate::image::{image_exists_locally, pull_image};
 
 #[derive(Debug)]
 pub struct Dind {
-    pub name: String,
-    // The location of the mount directory to share with the dind container.
-    mount_source: String,
-    mount_target: String,
-    // Have we started a dind container?
-    started: bool,
+    command: DockerCommandBuilder,
 }
 
 impl Dind {
     pub fn new(mount: (&str, &str)) -> Self {
-        let (src, dst) = mount;
         Dind {
-            name: uuid::Uuid::new_v4().to_string(),
-            mount_source: src.to_string(),
-            mount_target: dst.to_string(),
-            started: false,
+            command: DockerCommandBuilder::new("docker:stable-dind")
+                .add_docker_switch("--privileged")
+                .add_volume(mount),
         }
     }
 
-    pub fn launch(&mut self) -> Result<(), Error> {
-        info!("Starting docker:dind container with name {}", &self.name);
-        Command::new("docker")
-            .args(&[
-                "run",
-                "--rm",
-                "--privileged",
-                "--name",
-                &self.name,
-                "-v",
-                &format!("{}:{}", self.mount_source, self.mount_target),
-                "-d",
-                "docker:stable-dind",
-                // Newer dind images enable TLS by default, which we want to
-                // disable, so we specify the dind command by hand.
-                "dockerd",
-                "--host=tcp://0.0.0.0:2375",
-            ])
-            .stdin(Stdio::null())
-            .stdout(Stdio::null())
-            .stderr(Stdio::null())
-            .spawn()
-            .map_err(|e| FlokiError::FailedToLaunchDocker { error: e })?
-            .wait()
-            .map_err(|e| FlokiError::FailedToCompleteDockerCommand { error: e })?;
+    pub fn name(&self) -> &str {
+        self.command.name()
+    }
 
-        self.started = true;
-
+    pub fn launch(self) -> Result<DaemonHandle, Error> {
+        info!(
+            "Starting docker:dind container with name {}",
+            self.command.name()
+        );
+        let handle = self
+            .command
+            .start_as_daemon(&["dockerd", "--host=tcp://0.0.0.0:2375"])?;
         info!("docker:dind launched");
-
-        Ok(())
-    }
-}
-
-impl Drop for Dind {
-    fn drop(&mut self) {
-        if self.started {
-            info!("Stopping docker:dind container {}", &self.name);
-            Command::new("docker")
-                .args(&["kill", &self.name])
-                .stdin(Stdio::null())
-                .stdout(Stdio::null())
-                .stderr(Stdio::null())
-                .spawn()
-                .expect("Unable to kill docker container")
-                .wait()
-                .expect("Unable to wait for docker container to die");
-        }
+        Ok(handle)
     }
 }
 
