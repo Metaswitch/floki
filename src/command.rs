@@ -7,26 +7,24 @@ use std::process::{Command, Stdio};
 pub struct DockerCommandBuilder {
     volumes: Vec<(String, String)>,
     environment: Vec<(String, String)>,
-    shell: String,
     switches: Vec<String>,
     image: String,
 }
 
 impl DockerCommandBuilder {
-    pub fn run(&self, subshell_command: &str) -> Result<(), Error> {
+    pub fn run(&self, subshell_command: &[&str]) -> Result<(), Error> {
         debug!(
-            "Spawning docker command with configuration: {:?} args: {}",
+            "Spawning docker command with configuration: {:?} args: {:?}",
             self, &subshell_command
         );
+
         let mut command = Command::new("docker")
             .args(&["run", "--rm", "-it"])
             .args(&self.build_volume_switches())
             .args(&self.build_environment_switches())
             .args(&self.build_docker_switches())
             .arg(&self.image)
-            .arg(&self.shell)
-            .arg("-c")
-            .arg(subshell_command)
+            .args(subshell_command)
             .stdout(Stdio::inherit())
             .stderr(Stdio::inherit())
             .stdin(Stdio::inherit())
@@ -48,11 +46,10 @@ impl DockerCommandBuilder {
         }
     }
 
-    pub fn new(image: &str, shell: &str) -> Self {
+    pub fn new(image: &str) -> Self {
         DockerCommandBuilder {
             volumes: Vec::new(),
             environment: Vec::new(),
-            shell: shell.into(),
             switches: Vec::new(),
             image: image.into(),
         }
@@ -135,12 +132,4 @@ pub fn enable_docker_in_docker(
     Ok(command
         .add_docker_switch(&format!("--link {}:floki-docker", dind.name))
         .add_environment("DOCKER_HOST", "tcp://floki-docker:2375"))
-}
-
-/// Turn the init section of a floki.yaml file into a command
-/// that can be given to a shell
-pub(crate) fn subshell_command(init: &Vec<String>, command: String) -> String {
-    let mut args = init.clone();
-    args.push(command);
-    args.join(" && ")
 }

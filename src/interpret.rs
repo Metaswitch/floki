@@ -13,7 +13,7 @@ use std::path;
 pub(crate) fn run_container(
     environ: &Environment,
     config: &FlokiConfig,
-    command: &str,
+    inner_command: &str,
 ) -> Result<(), Error> {
     let volumes = resolve_volume_mounts(
         &environ.floki_root,
@@ -35,7 +35,9 @@ pub(crate) fn run_container(
 
     instantiate_volumes(&volumes)?;
 
-    cmd.run(command)
+    let subshell_command = subshell_command(&config.init, inner_command);
+
+    cmd.run(&[config.shell.outer_shell(), "-c", &subshell_command])
 }
 
 pub(crate) fn command_in_shell(shell: &str, command: &Vec<String>) -> String {
@@ -178,10 +180,18 @@ fn build_basic_command(
     let dind = Dind::new(mount);
 
     let image = &config.image.name()?;
-    let outer_shell = config.shell.outer_shell();
-    let cmd = command::DockerCommandBuilder::new(image, outer_shell).add_volume(mount);
+    let cmd = command::DockerCommandBuilder::new(image).add_volume(mount);
 
     Ok((cmd, dind))
+}
+
+/// Turn the init section of a floki.yaml file into a command
+/// that can be given to a shell
+fn subshell_command(init: &Vec<String>, command: &str) -> String {
+    let mut args: Vec<&str> = init.into_iter().map(|s| s as &str).collect::<Vec<&str>>();
+
+    args.push(command);
+    args.join(" && ")
 }
 
 #[cfg(test)]
