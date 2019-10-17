@@ -31,6 +31,7 @@ pub(crate) fn run_container(
     cmd = configure_forward_ssh_agent(cmd, &config, &environ)?;
     cmd = configure_docker_switches(cmd, &config);
     cmd = configure_working_directory(cmd, &environ, &config);
+    cmd = configure_volumes(cmd, &volumes);
 
     cmd.run(command)
 }
@@ -127,6 +128,17 @@ fn configure_working_directory(
         .to_str()
         .unwrap(),
     )
+}
+
+fn configure_volumes(
+    cmd: DockerCommandBuilder,
+    volumes: &Vec<(path::PathBuf, path::PathBuf)>,
+) -> DockerCommandBuilder {
+    let mut cmd = cmd; // Shadow as mutable
+    for (src, dst) in volumes.iter() {
+        cmd = cmd.add_volume((src.to_str().unwrap(), dst.to_str().unwrap()));
+    }
+    cmd
 }
 
 fn get_working_directory(
