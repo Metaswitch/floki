@@ -188,7 +188,7 @@ pub fn enable_forward_ssh_agent(
 
 pub fn enable_docker_in_docker(
     command: DockerCommandBuilder,
-    dind: &mut crate::dind::Dind,
+    dind: &crate::dind::Dind,
 ) -> Result<DockerCommandBuilder, Error> {
     Ok(command
         .add_docker_switch(&format!("--link {}:floki-docker", dind.name()))
