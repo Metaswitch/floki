@@ -11,19 +11,18 @@ use std::path;
 /// Build a spec for the docker container, and then run it
 pub(crate) fn run_container(
     environ: &Environment,
-    floki_root: &path::Path,
     config: &FlokiConfig,
     command: &str,
 ) -> Result<(), Error> {
-    let (mut cmd, mut dind) = build_basic_command(&floki_root, &config)?;
+    let (mut cmd, mut dind) = build_basic_command(&environ.floki_root, &config)?;
 
     cmd = configure_dind(cmd, &config, &mut dind)?;
     cmd = configure_floki_user_env(cmd, &environ);
-    cmd = configure_floki_host_mountdir_env(cmd, &floki_root);
+    cmd = configure_floki_host_mountdir_env(cmd, &environ.floki_root);
     cmd = configure_forward_user(cmd, &config, &environ);
     cmd = configure_forward_ssh_agent(cmd, &config, &environ)?;
     cmd = configure_docker_switches(cmd, &config);
-    cmd = configure_working_directory(cmd, &environ, &floki_root, &config);
+    cmd = configure_working_directory(cmd, &environ, &config);
 
     cmd.run(command)
 }
@@ -109,13 +108,12 @@ fn configure_docker_switches(
 fn configure_working_directory(
     cmd: DockerCommandBuilder,
     env: &Environment,
-    floki_root: &path::Path,
     config: &FlokiConfig,
 ) -> DockerCommandBuilder {
     cmd.set_working_directory(
         get_working_directory(
             &env.current_directory,
-            &floki_root,
+            &env.floki_root,
             &path::PathBuf::from(&config.mount),
         )
         .to_str()
