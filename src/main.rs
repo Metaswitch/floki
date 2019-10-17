@@ -79,7 +79,5 @@ fn run_floki_container(
     inner_command: String,
 ) -> Result<(), Error> {
     config.image.obtain_image()?;
-    let subshell_command = command::subshell_command(&config.init, inner_command);
-    debug!("Running container with command '{}'", &subshell_command);
-    interpret::run_container(&environ, &config, &subshell_command)
+    interpret::run_container(&environ, &config, &inner_command)
 }
