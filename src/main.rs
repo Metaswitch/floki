@@ -13,6 +13,7 @@ mod errors;
 mod image;
 mod interpret;
 mod verify;
+mod volumes;
 
 use cli::{Cli, Subcommand};
 use config::FlokiConfig;

@@ -12,6 +12,7 @@ pub struct Environment {
     pub floki_root: path::PathBuf,
     pub config_file: path::PathBuf,
     pub ssh_agent_socket: Option<String>,
+    pub floki_workspace: path::PathBuf,
 }
 
 impl Environment {
@@ -24,6 +25,7 @@ impl Environment {
             floki_root: floki_root,
             config_file: config_path,
             ssh_agent_socket: get_ssh_agent_socket_path(),
+            floki_workspace: get_floki_work_path()?,
         })
     }
 }
@@ -87,6 +89,14 @@ fn resolve_floki_root_and_config(
             &get_current_working_directory()?,
         )?)?),
     }
+}
+
+/// Resolve a directory for floki to use for user-global file (caches etc)
+fn get_floki_work_path() -> Result<path::PathBuf, Error> {
+    let root: path::PathBuf = env::var("HOME")
+        .unwrap_or(format!("/tmp/{}/", get_user_details()?.0))
+        .into();
+    Ok(root.join(".floki"))
 }
 
 #[cfg(test)]
