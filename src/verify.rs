@@ -16,6 +16,8 @@ mod test {
     use crate::config::Shell::Shell;
     use crate::image::Image::Name;
 
+    use std::collections::BTreeMap;
+
     fn get_test_config(docker_switches: Vec<String>) -> FlokiConfig {
         FlokiConfig {
             image: Name("foo".into()),
@@ -26,6 +28,7 @@ mod test {
             forward_ssh_agent: false,
             dind: false,
             forward_user: false,
+            volumes: BTreeMap::new(),
         }
     }
 
