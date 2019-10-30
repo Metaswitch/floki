@@ -1,7 +1,8 @@
 [package]
 name = "floki"
 version = "0.3.0"
-authors = ["Richard Lupton <richard.lupton@gmail.com>"]
+authors = ["Richard Lupton <richard.lupton@gmail.com>",
+           "Max Dymond <max.dymond@metaswitch.com>"]
 edition = '2018'
 
 [dependencies]
