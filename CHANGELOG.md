@@ -8,6 +8,8 @@ version number is tracked in the file `VERSION`.
 
 ## Unreleased
 ### Changed
+- Deploy tagged versions to crates.io - MINOR
+
 ### Added
 
 ## [0.3.0] - 2019-10-01
