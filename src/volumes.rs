@@ -9,7 +9,7 @@ use crate::config::Volume;
 static VOLUME_DIRECTORY: &str = "volumes/";
 
 pub(crate) fn resolve_volume_mounts(
-    floki_root: &path::PathBuf,
+    config_filepath: &path::PathBuf,
     work_path: &path::PathBuf,
     volumes: &BTreeMap<String, Volume>,
 ) -> Vec<(path::PathBuf, path::PathBuf)> {
@@ -17,7 +17,7 @@ pub(crate) fn resolve_volume_mounts(
         .iter()
         .map(|(name, volume)| {
             (
-                cache_path(work_path, floki_root, name, volume),
+                cache_path(work_path, config_filepath, name, volume),
                 volume.mount.clone(),
             )
         })
@@ -26,19 +26,19 @@ pub(crate) fn resolve_volume_mounts(
 
 fn cache_path(
     work_path: &path::PathBuf,
-    floki_root: &path::PathBuf,
+    config_filepath: &path::PathBuf,
     name: &str,
     config: &Volume,
 ) -> path::PathBuf {
-    let folder = prefix_cache(config.shared, floki_root) + name;
+    let folder = prefix_cache(config.shared, config_filepath) + name;
     work_path.join(VOLUME_DIRECTORY).join::<String>(folder)
 }
 
-fn prefix_cache(shared: bool, floki_root: &path::PathBuf) -> String {
+fn prefix_cache(shared: bool, config_filepath: &path::PathBuf) -> String {
     if shared {
         "".into()
     } else {
-        hash_path(floki_root) + "-"
+        hash_path(config_filepath) + "-"
     }
 }
 
@@ -56,7 +56,7 @@ mod test {
     fn test_shared_cache_path_is_shared_across_flokis() {
         let cache_1 = cache_path(
             &"work_path".into(),
-            &"/floki/root/1/".into(),
+            &"/floki/root/1/floki.yaml".into(),
             "cache",
             &Volume {
                 shared: true,
@@ -65,7 +65,7 @@ mod test {
         );
         let cache_2 = cache_path(
             &"work_path".into(),
-            &"/floki/root/2/".into(),
+            &"/floki/root/2/floki.yaml".into(),
             "cache",
             &Volume {
                 shared: true,
@@ -80,7 +80,7 @@ mod test {
     fn test_local_cache_path_is_not_shared_across_flokis() {
         let cache_1 = cache_path(
             &"work_path".into(),
-            &"/floki/root/1/".into(),
+            &"/floki/root/1/floki.yaml".into(),
             "cache",
             &Volume {
                 shared: false,
@@ -89,7 +89,7 @@ mod test {
         );
         let cache_2 = cache_path(
             &"work_path".into(),
-            &"/floki/root/2/".into(),
+            &"/floki/root/2/floki.yaml".into(),
             "cache",
             &Volume {
                 shared: false,
@@ -104,7 +104,7 @@ mod test {
     fn test_local_and_shared_caches_dont_collide() {
         let cache_shared = cache_path(
             &"work_path".into(),
-            &"/floki/root/1/".into(),
+            &"/floki/root/1/floki.yaml".into(),
             "cache",
             &Volume {
                 shared: true,
@@ -113,7 +113,31 @@ mod test {
         );
         let cache_local = cache_path(
             &"work_path".into(),
-            &"/floki/root/1/".into(),
+            &"/floki/root/1/floki.yaml".into(),
+            "cache",
+            &Volume {
+                shared: false,
+                mount: "/".into(),
+            },
+        );
+
+        assert_ne!(cache_shared, cache_local);
+    }
+
+    #[test]
+    fn test_local_volumes_from_different_configs_dont_collide() {
+        let cache_shared = cache_path(
+            &"work_path".into(),
+            &"/floki/root/1/floki-alternate.yaml".into(),
+            "cache",
+            &Volume {
+                shared: false,
+                mount: "/".into(),
+            },
+        );
+        let cache_local = cache_path(
+            &"work_path".into(),
+            &"/floki/root/1/floki.yaml".into(),
             "cache",
             &Volume {
                 shared: false,
