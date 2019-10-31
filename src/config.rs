@@ -32,9 +32,15 @@ impl Shell {
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
+/// The Volume structure captures configuration for floki volumes
 pub(crate) struct Volume {
     #[serde(default = "default_to_false")]
+    /// A shared volume is reused by containers which also use a
+    /// shared volume by the same name. Volumes which are not
+    /// shared are localised to a particular floki root directory.
     pub(crate) shared: bool,
+    /// The mount path is the path at which the volume is mounted
+    /// inside the floki container.
     pub(crate) mount: path::PathBuf,
 }
 
