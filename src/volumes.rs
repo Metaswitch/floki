@@ -6,6 +6,8 @@ use crypto::sha2::Sha256;
 
 use crate::config::Volume;
 
+static VOLUME_DIRECTORY: &str = "volumes/";
+
 pub(crate) fn resolve_volume_mounts(
     floki_root: &path::PathBuf,
     work_path: &path::PathBuf,
@@ -29,7 +31,7 @@ fn cache_path(
     config: &Volume,
 ) -> path::PathBuf {
     let folder = prefix_cache(config.shared, floki_root) + name;
-    work_path.join("cache/").join::<String>(folder)
+    work_path.join(VOLUME_DIRECTORY).join::<String>(folder)
 }
 
 fn prefix_cache(shared: bool, floki_root: &path::PathBuf) -> String {
