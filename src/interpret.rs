@@ -20,7 +20,7 @@ pub(crate) fn run_container(
     let mut cmd = command::DockerCommandBuilder::new(&config.image.name()?).add_volume(mount);
 
     let volumes = resolve_volume_mounts(
-        &environ.floki_root,
+        &environ.config_file,
         &environ.floki_workspace,
         &config.volumes,
     );

@@ -1,5 +1,5 @@
-use crate::errors;
 /// Query the current user environment
+use crate::errors;
 use failure::Error;
 use std::env;
 use std::path;
@@ -7,11 +7,19 @@ use std::process::Command;
 
 #[derive(Debug)]
 pub struct Environment {
+    /// User uid and gid
     pub user_details: (String, String),
+    /// The directory floki was launched in
     pub current_directory: path::PathBuf,
+    /// The root directory for floki (may be different from
+    /// the above if we had to search for floki.yaml
     pub floki_root: path::PathBuf,
+    /// Absolute path to the configuration file
     pub config_file: path::PathBuf,
+    /// Path to ssh socket if found
     pub ssh_agent_socket: Option<String>,
+    /// The host folder that floki uses to e.g. create directories
+    /// to back volumes
     pub floki_workspace: path::PathBuf,
 }
 
@@ -23,7 +31,7 @@ impl Environment {
             user_details: get_user_details()?,
             current_directory: get_current_working_directory()?,
             floki_root: floki_root,
-            config_file: config_path,
+            config_file: normalize_path(config_path)?,
             ssh_agent_socket: get_ssh_agent_socket_path(),
             floki_workspace: get_floki_work_path()?,
         })
@@ -99,6 +107,19 @@ fn get_floki_work_path() -> Result<path::PathBuf, Error> {
         .unwrap_or(format!("/tmp/{}/", get_user_details()?.0))
         .into();
     Ok(root.join(".floki"))
+}
+
+/// Normalize the filepath - this turns a relative path into an absolute one - to
+/// do this it must locate the file in the filesystem, and hence it may fail.
+fn normalize_path(path: path::PathBuf) -> Result<path::PathBuf, Error> {
+    let res = std::fs::canonicalize(&path).map_err(|e| {
+        errors::FlokiError::ProblemNormalizingFilePath {
+            name: path.display().to_string(),
+            error: e,
+        }
+    })?;
+
+    Ok(res)
 }
 
 #[cfg(test)]

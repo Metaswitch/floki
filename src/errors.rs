@@ -17,6 +17,9 @@ pub enum FlokiError {
     #[fail(display = "No floki.yaml found in tree")]
     ProblemFindingConfigYaml {},
 
+    #[fail(display = "Could not normalize the file path '{}': {}", name, error)]
+    ProblemNormalizingFilePath { name: String, error: io::Error },
+
     #[fail(
         display = "There was a problem opening the configuration file '{}': {}",
         name, error
