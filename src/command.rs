@@ -40,10 +40,10 @@ impl Drop for DaemonHandle {
 }
 
 impl DockerCommandBuilder {
-    pub fn run(&self, subshell_command: &[&str]) -> Result<(), Error> {
+    pub fn run(&self, command: &[&str]) -> Result<(), Error> {
         debug!(
             "Spawning docker command with configuration: {:?} args: {:?}",
-            self, &subshell_command
+            self, command
         );
 
         let mut command = Command::new("docker")
@@ -52,7 +52,7 @@ impl DockerCommandBuilder {
             .args(&self.build_environment_switches())
             .args(&self.build_docker_switches())
             .arg(&self.image)
-            .args(subshell_command)
+            .args(command)
             .stdout(Stdio::inherit())
             .stderr(Stdio::inherit())
             .stdin(Stdio::inherit())

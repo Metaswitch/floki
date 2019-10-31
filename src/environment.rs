@@ -68,7 +68,7 @@ fn find_floki_yaml(current_directory: &path::Path) -> Result<path::PathBuf, Erro
         .ok_or(errors::FlokiError::ProblemFindingConfigYaml {}.into())
 }
 
-/// Take a file path, and return a tuple consisting of it's parent directory and the file path
+/// Take a file path, and return a tuple consisting of its parent directory and the file path
 fn locate_file_in_parents(path: path::PathBuf) -> Result<(path::PathBuf, path::PathBuf), Error> {
     let dir = path
         .parent()
@@ -79,7 +79,9 @@ fn locate_file_in_parents(path: path::PathBuf) -> Result<(path::PathBuf, path::P
     Ok((dir, path))
 }
 
-/// Resolve floki root directory and path to configuration file
+/// Resolve floki root directory and path to configuration file. The floki root directory
+/// here is the folder in which the floki.yaml was found when no configuration file
+/// is specified, and we have to search for it.
 fn resolve_floki_root_and_config(
     config_file: &Option<path::PathBuf>,
 ) -> Result<(path::PathBuf, path::PathBuf), Error> {
