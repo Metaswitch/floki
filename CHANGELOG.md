@@ -9,8 +9,10 @@ version number is tracked in the file `VERSION`.
 ## Unreleased
 ### Changed
 - Deploy tagged versions to crates.io - MINOR
+- Generalize `DockerCommandBuilder` and refactor docker-in-docker function to use it - PATCH
 
 ### Added
+- Add support for `floki` volumes. These can be used for caching build artifacts - MINOR
 
 ## [0.3.0] - 2019-10-01
 ### Changed
