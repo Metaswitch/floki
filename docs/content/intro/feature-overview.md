@@ -106,6 +106,29 @@ dind: true
 
 Note that the docker CLI tools are still required in the container, and the docker host is a linked container, with the working directory mounted in the same place as the interactive container.
 
+# Floki volumes
+
+`floki` has the ability to use volumes for caching build artifacts between runs of the container (amongst other things). Volumes can be configured in `floki.yaml`:
+
+```
+volumes:
+  cargo-registry:
+    mount: /home/rust/.cargo/registry
+```
+
+The key names the volume (it can be any valid yaml name), while the `mount` key specifies where the volume will be mounted inside the `floki` container.
+
+It's also possible to share volumes across different `floki.yaml`s. For example, you may want to share a `cargo` registry across all Rust build containers. These shared volumes are identified by the name given to the volume.
+
+```
+volumes:
+  cargo-registry:
+    shared: true
+    mount: /home/rust/.cargo/registry
+```
+
+`floki` creates directories on the host to back these volumes in `~/.floki/volumes`.
+
 # Environment forwarding
 
 ## User details
