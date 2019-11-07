@@ -1,9 +1,20 @@
 [package]
 name = "floki"
+description = "floki aims to provide reproducible and shareable build tooling by helping you run docker containers interactively from a declarative yaml file."
+repository = "https://github.com/Metaswitch/floki"
+homepage = "https://metaswitch.github.io/floki/"
+readme = "README.md"
+keywords = ["docker"]
+categories = ["command-line-utilities"]
+license = "MIT"
+
 version = "0.4.0"
 authors = ["Richard Lupton <richard.lupton@gmail.com>",
            "Max Dymond <max.dymond@metaswitch.com>"]
 edition = '2018'
+
+[badges]
+travis-ci = { repository = "Metaswitch/floki", branch = "master" }
 
 [dependencies]
 failure = "0.1.5"
