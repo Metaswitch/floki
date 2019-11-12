@@ -11,13 +11,17 @@ Status: Available for use
 
 ## [Unreleased]
 ### Changed
+- Attempt to fix up jobs and deployment to Cargo
 
 ### Added
 
 ## [0.4.0] - 2019-11-07
 ### Changed
+- Deploy tagged versions to crates.io - MINOR
+- Generalize `DockerCommandBuilder` and refactor docker-in-docker function to use it - PATCH
 
 ### Added
+- Add support for `floki` volumes. These can be used for caching build artifacts - MINOR
 
 ## [0.3.0] - 2019-10-01
 ### Changed
