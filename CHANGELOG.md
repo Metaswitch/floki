@@ -11,6 +11,11 @@ Status: Available for use
 
 ## [Unreleased]
 ### Changed
+
+### Added
+
+## [0.4.1] - 2019-11-12
+### Changed
 - Attempt to fix up jobs and deployment to Cargo
 
 ### Added
@@ -166,7 +171,8 @@ Status: Available for use
 - Initial primitive version
 ### Changed
 
-[Unreleased]: https://github.com/Metaswitch/floki/compare/0.4.0...HEAD
+[Unreleased]: https://github.com/Metaswitch/floki/compare/0.4.1...HEAD
+[0.4.1]: https://github.com/Metaswitch/floki/compare/0.4.0...0.4.1
 [0.4.0]: https://github.com/Metaswitch/floki/compare/0.3.0...0.4.0
 [0.3.0]: https://github.com/Metaswitch/floki/compare/0.2.0...0.3.0
 [0.2.0]: https://github.com/Metaswitch/floki/compare/0.1.0...0.2.0
