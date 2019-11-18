@@ -38,6 +38,7 @@ image:
     name: foo                    # Will create an image called foo:floki
     dockerfile: Dockerfile.foo   # Defaults to Dockerfile
     context: .                   # Defaults to .
+    target: builder              # Target to use, for multi-stage dockerfiles (optional).
 ```
 
 ## Referencing a key in another yaml file

@@ -13,6 +13,7 @@ Status: Available for use
 ### Changed
 
 ### Added
+- Add support for specifying Dockerfile build target - MINOR
 
 ## [0.4.1] - 2019-11-12
 ### Changed

@@ -14,6 +14,7 @@ pub struct BuildSpec {
     dockerfile: String,
     #[serde(default = "default_context")]
     context: String,
+    target: Option<String>,
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
@@ -77,15 +78,19 @@ impl Image {
         match *self {
             // Deal with the case where want to build an image
             Image::Build { ref build } => {
-                let exit_status = Command::new("docker")
+                let mut command = Command::new("docker");
+                command
                     .arg("build")
                     .arg("-t")
                     .arg(self.name()?)
                     .arg("-f")
-                    .arg(&build.dockerfile)
-                    .arg(&build.context)
-                    .spawn()?
-                    .wait()?;
+                    .arg(&build.dockerfile);
+
+                if let Some(target) = &build.target {
+                    command.arg("--target").arg(target);
+                }
+
+                let exit_status = command.arg(&build.context).spawn()?.wait()?;
                 if exit_status.success() {
                     Ok(self.name()?)
                 } else {
@@ -165,13 +170,14 @@ mod test {
 
     #[test]
     fn test_image_spec_by_build_spec() {
-        let yaml = "image:\n  build:\n    name: foo\n    dockerfile: Dockerfile.test \n    context: ./context";
+        let yaml = "image:\n  build:\n    name: foo\n    dockerfile: Dockerfile.test \n    context: ./context\n    target: builder";
         let expected = TestImage {
             image: Image::Build {
                 build: BuildSpec {
                     name: "foo".into(),
                     dockerfile: "Dockerfile.test".into(),
                     context: "./context".into(),
+                    target: Some("builder".into()),
                 },
             },
         };
