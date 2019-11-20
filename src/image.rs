@@ -112,10 +112,10 @@ impl Image {
 // Now we have some functions which are useful in general
 
 /// Wrapper to pull an image by it's name
-pub fn pull_image(name: String) -> Result<(), Error> {
+pub fn pull_image(name: &str) -> Result<(), Error> {
     let exit_status = Command::new("docker")
         .arg("pull")
-        .arg(name.clone())
+        .arg(name)
         .spawn()?
         .wait()?;
 
@@ -123,7 +123,7 @@ pub fn pull_image(name: String) -> Result<(), Error> {
         Ok(())
     } else {
         Err(FlokiError::FailedToPullImage {
-            image: name.clone(),
+            image: name.into(),
             exit_status: FlokiSubprocessExitStatus {
                 process_description: "docker pull".into(),
                 exit_status: exit_status,

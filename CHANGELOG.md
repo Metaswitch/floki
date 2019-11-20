@@ -13,6 +13,7 @@ Status: Available for use
 ### Changed
 
 ### Added
+- Allow the docker-in-docker image to be specified in configuration - MINOR
 
 ## [0.4.3] - 2019-12-02
 ### Changed
