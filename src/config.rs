@@ -32,6 +32,33 @@ impl Shell {
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[serde(untagged)]
+pub(crate) enum DindConfig {
+    Toggle(bool),
+    Image { image: String },
+}
+
+impl DindConfig {
+    pub fn deactivated() -> Self {
+        DindConfig::Toggle(false)
+    }
+
+    pub fn enabled(&self) -> bool {
+        match self {
+            DindConfig::Toggle(v) => *v,
+            _ => true,
+        }
+    }
+
+    pub fn image(&self) -> &str {
+        match self {
+            DindConfig::Image { image } => image,
+            _ => "docker:stable-dind",
+        }
+    }
+}
+
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 /// The Volume structure captures configuration for floki volumes
 pub(crate) struct Volume {
     #[serde(default = "default_to_false")]
@@ -58,8 +85,8 @@ pub(crate) struct FlokiConfig {
     pub(crate) docker_switches: Vec<String>,
     #[serde(default = "default_to_false")]
     pub(crate) forward_ssh_agent: bool,
-    #[serde(default = "default_to_false")]
-    pub(crate) dind: bool,
+    #[serde(default = "DindConfig::deactivated")]
+    pub(crate) dind: DindConfig,
     #[serde(default = "default_to_false")]
     pub(crate) forward_user: bool,
     #[serde(default = "BTreeMap::new")]
@@ -153,5 +180,36 @@ mod test {
         };
         let actual: TestShellConfig = serde_yaml::from_str(yaml).unwrap();
         assert!(actual == expected);
+    }
+
+    #[derive(Debug, PartialEq, Serialize, Deserialize)]
+    struct TestDindConfig {
+        dind: DindConfig,
+    }
+
+    #[test]
+    fn test_dind_enabled_config() {
+        let yaml = "dind: true";
+        let expected = TestDindConfig {
+            dind: DindConfig::Toggle(true),
+        };
+        let actual: TestDindConfig = serde_yaml::from_str(yaml).unwrap();
+        assert_eq!(actual, expected);
+        assert_eq!(actual.dind.enabled(), true);
+        assert_eq!(actual.dind.image(), "docker:stable-dind");
+    }
+
+    #[test]
+    fn test_dind_image_config() {
+        let yaml = "dind:\n  image: dind:custom";
+        let expected = TestDindConfig {
+            dind: DindConfig::Image {
+                image: "dind:custom".into(),
+            },
+        };
+        let actual: TestDindConfig = serde_yaml::from_str(yaml).unwrap();
+        assert_eq!(actual, expected);
+        assert_eq!(actual.dind.enabled(), true);
+        assert_eq!(actual.dind.image(), "dind:custom");
     }
 }

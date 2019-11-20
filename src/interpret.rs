@@ -52,7 +52,7 @@ fn configure_dind(
     config: &FlokiConfig,
     dind: &Dind,
 ) -> Result<DockerCommandBuilder, Error> {
-    if config.dind {
+    if config.dind.enabled() {
         Ok(command::enable_docker_in_docker(cmd, dind)?)
     } else {
         Ok(cmd)
@@ -187,7 +187,7 @@ fn launch_dind_if_needed(
     config: &FlokiConfig,
     dind: Dind,
 ) -> Result<Option<command::DaemonHandle>, Error> {
-    if config.dind {
+    if config.dind.enabled() {
         crate::dind::dind_preflight()?;
         Ok(Some(dind.launch()?))
     } else {
