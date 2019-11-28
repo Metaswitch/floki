@@ -14,6 +14,7 @@ Status: Available for use
 
 ### Added
 - Add support for specifying Dockerfile build target - MINOR
+- Add `announce` support for notifying Slack of new changes - MINOR
 
 ## [0.4.1] - 2019-11-12
 ### Changed

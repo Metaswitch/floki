@@ -11,6 +11,13 @@ rust:
   - nightly
   - beta
 
+env:
+  global:
+  - secure: KdRENy+5Kw3Hw8DnPQGFCokLoE7ma3PSm/Prc+CV5IEnKCcz76jH8yWk6FKZjvrV46SVZfV+GCFt8/rVe5u5CBRwQqfqYz1kvGu+o9eouWNAHJ3LN9fZzsvF/pacBqEDQaTe5JUORDXeaH9VVPZjz4GTIbA0TpqvC1PpdnOaWEMApJe7vp9uA/hSLujo0v3ciZbP/NBiV7RrpXJmMAK6f9YGvJnREEiCvGfo8HysB2Q5m0iFQ+RxYqgePk7YkWabIm+nq72Ncou0VqUxDTWZLXcqgzhUkv9P3xq2TW99EG7ofN6U9h7D/LeTlKJBxqEtwKt5PYs3jb0acOTflRb0ZZE/X91UwtWJRcUt2UrLkJJY9tuauVWDki0TDHVCnJOBU4S0b9Jt7K4hmlHsRTG6tWGCm8WwlezmLBjjAgtHEri/uaLGkOJdlOSnATom+H14+c2sOBiMwE6WID6VJpc0f+fRXsnUjRd/4oCzF1B1CF3ZmJLH3WXa6hXsd02iR7wHRgZ2bQH2pdP1idPK6TvrcFSPpsqmgexkT3p1VfFRWlrSY5y1fIH6NlCtm5fr4cprujhwrufZ3Hm4BphubHmBdAeSJBBbTk5yt6Ct5ixhZfKdUobPEEy/lM9U1a0N1HyYbqlnE3odHuwGzaQLXduJ4PALnQoCYXEIAWXY/CRmZY4=
+
+install:
+- pip install --user -U tomlq
+
 jobs:
   include:
     # Extra deploy jobs.
@@ -52,3 +59,6 @@ deploy:
   on:
     tags: true
     condition: "$GITHUB_RELEASE = true"
+
+after_deploy:
+- bash after_deploy.sh
