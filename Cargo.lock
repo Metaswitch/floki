@@ -183,7 +183,7 @@ dependencies = [
 
 [[package]]
 name = "floki"
-version = "0.4.1"
+version = "0.4.3"
 dependencies = [
  "failure 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "failure_derive 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
