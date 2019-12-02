@@ -7,7 +7,7 @@ LABEL=${TRAVIS_TAG}-${TRAVIS_OS_NAME}
 rm -rf target
 echo "Starting release build for ${LABEL}"
 
-if [[ ${TRAVIS_OS_NAME} == "linux" ]]
+if [ ${TRAVIS_OS_NAME} = "linux" ]
 then
   echo "Building statically linked linux binary"
   docker run --rm -v $(pwd):/home/rust/src -w /home/rust/src ekidd/rust-musl-builder \

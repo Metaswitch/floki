@@ -15,6 +15,7 @@ Status: Available for use
 ### Added
 - Add support for specifying Dockerfile build target - MINOR
 - Add `announce` support for notifying Slack of new changes - MINOR
+- Fix up build.sh for Linux builds - PATCH
 
 ## [0.4.1] - 2019-11-12
 ### Changed
