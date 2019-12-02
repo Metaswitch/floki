@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Documentations on floki</title>
@@ -17,11 +17,11 @@
       <pubDate>Wed, 03 Apr 2019 23:01:31 +0100</pubDate>
       
       <guid>https://metaswitch.github.io/floki/documentation/getting-started/</guid>
-      <description>Installation Statically linked binaries are built as part of CI for tags, and can be copied directly onto your system.
-Getting started Write a basic configuration file, and name it floki.yaml.
-image: debian:latest init: - echo &amp;quot;Welcome to your first floki container!&amp;quot;  In the same directory, run
-floki  A container will launch with the working directory mounted, and the container shell located there.
-Using a different configuration file You can use a different configuration file with floki by telling it to use a different file from the command line.</description>
+      <description>Installation Precompiled binaries can be downloaded from the releases page (for linux (statically linked) and OSX).
+To obtain curl and extract the latest linux binary directly in your shell, run
+$ curl -L https://github.com/Metaswitch/floki/releases/download/0.1.0/floki-0.1.0-linux.tar.gz | tar xzvf -  You should be able to run floki from your working directory:
+$ ./floki --version floki 0.1.0  Move it onto your path to run it from anywhere. E.g.
+# mv floki /usr/local/bin/  Enjoy!</description>
     </item>
     
   </channel>

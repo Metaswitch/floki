@@ -7,7 +7,7 @@
 
     <meta name="description" content="">
 
-    <meta name="generator" content="Hugo 0.47.1" />
+    <meta name="generator" content="Hugo 0.59.0" />
     <meta name="twitter:card" content="summary">
     
     <meta name="twitter:title" content="floki &middot; floki">
@@ -94,7 +94,7 @@
 
 <h1 id="container-images">Container images</h1>
 
-<p><code>floki</code> offers a couple of ways t configure the container image to use.</p>
+<p><code>floki</code> offers a couple of ways to configure the container image to use.</p>
 
 <h2 id="prebuilt-images">Prebuilt images</h2>
 
@@ -114,6 +114,17 @@
     name: foo                    # Will create an image called foo:floki
     dockerfile: Dockerfile.foo   # Defaults to Dockerfile
     context: .                   # Defaults to .
+    target: builder              # Target to use, for multi-stage dockerfiles (optional).
+</code></pre>
+
+<h2 id="referencing-a-key-in-another-yaml-file">Referencing a key in another yaml file</h2>
+
+<p><code>floki</code> can use an image referenced in another yaml file. This can help keep local development environments sync&rsquo;d with a CI environment.</p>
+
+<pre><code>image:
+  yaml:
+    file: .gitlab-ci.yaml
+    key: variables.RUST-IMAGE
 </code></pre>
 
 <h2 id="updating-an-image">Updating an image</h2>
@@ -123,6 +134,8 @@
 <h1 id="setting-the-shell">Setting the shell</h1>
 
 <p>Different containers require different shells, so <code>floki</code> allows you to configure this. Sometimes you will want a different shell to run the <code>init</code> commands to the shell presented to the user, and so <code>floki</code> also allows you to set an outer (used for <code>init</code>) and inner (used by the user) shell.</p>
+
+<p>The default shell is <code>sh</code>.</p>
 
 <h2 id="single-shell">Single shell</h2>
 
@@ -166,6 +179,27 @@ dind: true
 
 <p>Note that the docker CLI tools are still required in the container, and the docker host is a linked container, with the working directory mounted in the same place as the interactive container.</p>
 
+<h1 id="floki-volumes">Floki volumes</h1>
+
+<p><code>floki</code> has the ability to use volumes for caching build artifacts between runs of the container (amongst other things). Volumes can be configured in <code>floki.yaml</code>:</p>
+
+<pre><code>volumes:
+  cargo-registry:
+    mount: /home/rust/.cargo/registry
+</code></pre>
+
+<p>The key names the volume (it can be any valid yaml name), while the <code>mount</code> key specifies where the volume will be mounted inside the <code>floki</code> container.</p>
+
+<p>It&rsquo;s also possible to share volumes across different <code>floki.yaml</code>s. For example, you may want to share a <code>cargo</code> registry across all Rust build containers. These shared volumes are identified by the name given to the volume.</p>
+
+<pre><code>volumes:
+  cargo-registry:
+    shared: true
+    mount: /home/rust/.cargo/registry
+</code></pre>
+
+<p><code>floki</code> creates directories on the host to back these volumes in <code>~/.floki/volumes</code>.</p>
+
 <h1 id="environment-forwarding">Environment forwarding</h1>
 
 <h2 id="user-details">User details</h2>
@@ -178,6 +212,12 @@ dind: true
 </ul>
 
 <p>These can be used to configure users in the container dynamically. This can be a little fiddly, especially if the container already uses a non-root user with the same id as the host user.</p>
+
+<h2 id="host-working-directory">Host working directory</h2>
+
+<p>The host path to the mounted directory is forwarded into the <code>floki</code> container as an environment variable, <code>FLOKI_HOST_MOUNTDIR</code>.</p>
+
+<p>You can set where this directory is mounted in the container using the <code>mount</code> key in <code>floki.yaml</code>.</p>
 
 <h2 id="ssh-agent">SSH agent</h2>
 
@@ -240,7 +280,25 @@ Welcome to your server container!
 
 <h2 id="installation">Installation</h2>
 
-<p>Statically linked binaries are built as part of CI for tags, and can be copied directly onto your system.</p>
+<p>Precompiled binaries can be downloaded from the releases page (for linux (statically linked) and OSX).</p>
+
+<p>To obtain <code>curl</code> and extract the latest linux binary directly in your shell, run</p>
+
+<pre><code>$ curl -L https://github.com/Metaswitch/floki/releases/download/0.1.0/floki-0.1.0-linux.tar.gz | tar xzvf -
+</code></pre>
+
+<p>You should be able to run <code>floki</code> from your working directory:</p>
+
+<pre><code>$ ./floki --version
+floki 0.1.0
+</code></pre>
+
+<p>Move it onto your path to run it from anywhere. E.g.</p>
+
+<pre><code># mv floki /usr/local/bin/
+</code></pre>
+
+<p>Enjoy!</p>
 
 <h2 id="getting-started">Getting started</h2>
 
@@ -258,12 +316,26 @@ init:
 
 <p>A container will launch with the working directory mounted, and the container shell located there.</p>
 
+<p>In general, invoking <code>floki</code> in any child of this directory will launch with:
+- The directory containing <code>floki.yaml</code> mounted;
+- The container shell located in the guest directory corresponding to the child.</p>
+
 <h2 id="using-a-different-configuration-file">Using a different configuration file</h2>
 
 <p>You can use a different configuration file with <code>floki</code> by telling it to use a different file from the command line. For example, if you have another configuration in <code>config.yaml</code>, you can run <code>floki</code> with</p>
 
 <pre><code>floki -c config.yaml
 </code></pre>
+
+<p>Note that, in contrast to invoking <code>floki</code> without the <code>-c</code> flag, this will always mount the current working directory.</p>
+
+<h3 id="features-you-may-want-to-look-at-next">Features you may want to look at next</h3>
+
+<ul>
+<li>Forwarding of <code>ssh-agent</code> (useful for authenticating with remote private git servers to pull private dependencies)</li>
+<li>Docker-in-docker support</li>
+<li>Forwarding of host user information (allows non-root users to be added and used).</li>
+</ul>
 
                     </div>
                 </section>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Intros on floki</title>
@@ -20,7 +20,7 @@
       <description>floki aims to provide reproducible and shareable build tooling. It does this by helping you run docker containers interactively from a declarative yaml file.
 The ideal workflow is
  clone the source repository run floki build  floki has a number of features to help achieve this. The following outlines the current list.
-Container images floki offers a couple of ways t configure the container image to use.
+Container images floki offers a couple of ways to configure the container image to use.
 Prebuilt images Using a prebuilt image (e.</description>
     </item>
     
