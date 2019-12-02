@@ -13,6 +13,11 @@ Status: Available for use
 ### Changed
 
 ### Added
+
+## [0.4.2] - 2019-12-02
+### Changed
+
+### Added
 - Add support for specifying Dockerfile build target - MINOR
 - Add `announce` support for notifying Slack of new changes - MINOR
 - Fix up build.sh for Linux builds - PATCH
@@ -174,7 +179,8 @@ Status: Available for use
 - Initial primitive version
 ### Changed
 
-[Unreleased]: https://github.com/Metaswitch/floki/compare/0.4.1...HEAD
+[Unreleased]: https://github.com/Metaswitch/floki/compare/0.4.2...HEAD
+[0.4.2]: https://github.com/Metaswitch/floki/compare/0.4.1...0.4.2
 [0.4.1]: https://github.com/Metaswitch/floki/compare/0.4.0...0.4.1
 [0.4.0]: https://github.com/Metaswitch/floki/compare/0.3.0...0.4.0
 [0.3.0]: https://github.com/Metaswitch/floki/compare/0.2.0...0.3.0
