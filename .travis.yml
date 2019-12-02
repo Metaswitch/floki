@@ -14,6 +14,7 @@ rust:
 env:
   global:
   - secure: KdRENy+5Kw3Hw8DnPQGFCokLoE7ma3PSm/Prc+CV5IEnKCcz76jH8yWk6FKZjvrV46SVZfV+GCFt8/rVe5u5CBRwQqfqYz1kvGu+o9eouWNAHJ3LN9fZzsvF/pacBqEDQaTe5JUORDXeaH9VVPZjz4GTIbA0TpqvC1PpdnOaWEMApJe7vp9uA/hSLujo0v3ciZbP/NBiV7RrpXJmMAK6f9YGvJnREEiCvGfo8HysB2Q5m0iFQ+RxYqgePk7YkWabIm+nq72Ncou0VqUxDTWZLXcqgzhUkv9P3xq2TW99EG7ofN6U9h7D/LeTlKJBxqEtwKt5PYs3jb0acOTflRb0ZZE/X91UwtWJRcUt2UrLkJJY9tuauVWDki0TDHVCnJOBU4S0b9Jt7K4hmlHsRTG6tWGCm8WwlezmLBjjAgtHEri/uaLGkOJdlOSnATom+H14+c2sOBiMwE6WID6VJpc0f+fRXsnUjRd/4oCzF1B1CF3ZmJLH3WXa6hXsd02iR7wHRgZ2bQH2pdP1idPK6TvrcFSPpsqmgexkT3p1VfFRWlrSY5y1fIH6NlCtm5fr4cprujhwrufZ3Hm4BphubHmBdAeSJBBbTk5yt6Ct5ixhZfKdUobPEEy/lM9U1a0N1HyYbqlnE3odHuwGzaQLXduJ4PALnQoCYXEIAWXY/CRmZY4=
+  - secure: OfxPuInshW1OJHCngJFsf6NJXcCFRgIpvISiwOWYptQpc119xdz4yO5kRhgNMdnjwBVsa4BwtfpyfP8lNadBNRUXPE478dcz+JmlABL2j1lei80yOUIBpIIF1giMSNMtCOpZ9PiduPr8kUX5CjqKXISVTR78oY9PftOjZuuwHLoWqaZzGCsjUvgjRNmz98awdwK10xHAGikeFZjHIpDsj+sAOLsHTsYgKAcIy7xIUvoPMT4Wo/k+3Ai9fjHS3yipsvSijvTsKMGiE2sJLqXqIC6P/GD+GR6tK54NnPe0hXfGmEA9newjMOX7dhbx9PdPJLmz2Ed/HNR0fo5xEiuUX9mrKqh1hamkN+s/mPfViPcKWmEyuVzOwb9rJ8i54OSfhRHPQFNFTCNLcGFY2ullvZ7De08/vW0UBSpm1LmLaUaBTQtVkCVXeVgh/QhMuo2AV/t4TZLeDnzwI+1GEai4vLkKpsmQgxn54kokws9I4UZOG6JXrOGpQaJfW3g822uDaS0k+Ci41Z5g/lH/bu/KiPB8OsjpGNwBXL44cVqVl7iLAMnaIl5s964IDREvxZnDe8m0PlFwBXuFJFqVcCaHHnQt8+eHOYURINMidI6IYIxYw0tdig3t0ZYF57a9rIir8ZgWKgrUqVd/GGs57aEcr3SPklGEFucAtGRkwQ5gCFA=
 
 install:
 - pip install --user -U tomlq
@@ -43,6 +44,29 @@ jobs:
           secure: S77Jo+z1OflPtz+j/0inlW79vVjiRy3oV4rLxwlc/e/oES5EYSqaptcHaizb+gMjhIxOkdPkwtqDe+/Kz3zKqtjtbi73OR47mS7OjUf3loYGjkMEoM3GQRbUB/Qn4y7c4AGxYLrMAK7Pl+6aktDMmKO7SGy+VmuWxNGBm5+tfQ1+dyrl6l/WajZ6fSk1SEef5T2najRu9Jn0m4zlRE2EG+iXDqiPNv7VJNDleIBWQpmnSCFWAhDn0cI+IU0qg17VzGq+nHm7sIFyM4c8TynHzOxghwnkJ+cjn7W3XCCA3vx+aWkUv5lsjqNkxmx27OBfcmAOyDIwABFSg/XdYLWiQJ+//+mmZ0y/ItNy2SxLCUA0smacZT5NOWm/hDh7mYkyGpKp/4LmhekKCRMTIDq5QPQw2zdKTomVQGxSXEHg7ilLIAfv7v/z4MV5HYtWqTN0UL768JDGJbzTjYcoaAIwgWehGWtVb+5nUAcyffVLqaulJ55DTAfzNYvk0otH6LdnEx2Bqs6btgpw2grOIhIJtHBSOJH8Xn15VGOLMw89uQlpqXXvKJ+FBvcIMjJ2KncvI9CMfC620rHga/s0752oL3YoQ/VdNwgKIlYJ575xW1najg0A7eSQ9nhAi+om3todbGuHKIcbsvPtT3CNR47/yBLC6pDuKPVeWSvyntMJZaY=
         on:
           os: linux
+          tags: true
+
+    - stage: Deploy
+      language: generic
+      env:
+        - HUGO_VERSION="0.59.0"
+      install:
+        - wget -q https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_${HUGO_VERSION}_Linux-64bit.tar.gz
+        - tar -xzvf hugo_${HUGO_VERSION}_Linux-64bit.tar.gz
+        - mv hugo ~/bin
+        - hugo version
+      script:
+        - pushd docs
+        - hugo
+        - popd
+        - ls -al public
+      deploy:
+        provider: pages
+        skip_cleanup: true
+        local_dir: public
+        github_token: $GITHUB_TOKEN
+        keep_history: true
+        on:
           tags: true
 
   allow_failures:
