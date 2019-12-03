@@ -69,6 +69,14 @@ jobs:
         on:
           tags: true
 
+    - stage: Announce
+      script: "echo Announcing on Slack"
+      deploy:
+        provider: script
+        script: bash slack_announce.sh
+        on:
+          tags: true
+
   allow_failures:
     - rust: nightly
   fast_finish: true
@@ -83,6 +91,3 @@ deploy:
   on:
     tags: true
     condition: "$GITHUB_RELEASE = true"
-
-after_deploy:
-- bash after_deploy.sh

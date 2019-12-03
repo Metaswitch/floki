@@ -11,6 +11,7 @@ Status: Available for use
 
 ## [Unreleased]
 ### Changed
+- Change `after_deploy.sh` into a separate stage as `after_deploy:` scripts run after each `deploy:` step.
 
 ### Added
 
