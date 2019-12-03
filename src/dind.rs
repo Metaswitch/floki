@@ -10,9 +10,9 @@ pub struct Dind {
 }
 
 impl Dind {
-    pub fn new(mount: (&str, &str)) -> Self {
+    pub fn new(image: &str, mount: (&str, &str)) -> Self {
         Dind {
-            command: DockerCommandBuilder::new("docker:stable-dind")
+            command: DockerCommandBuilder::new(image)
                 .add_docker_switch("--privileged")
                 .add_volume(mount),
         }
@@ -36,10 +36,10 @@ impl Dind {
 }
 
 /// Check the docker dind image is available
-pub fn dind_preflight() -> Result<(), Error> {
-    if image_exists_locally("docker:stable-dind".into())? {
+pub fn dind_preflight(image: &str) -> Result<(), Error> {
+    if image_exists_locally(image)? {
         Ok(())
     } else {
-        pull_image("docker:stable-dind".into())
+        pull_image(image)
     }
 }

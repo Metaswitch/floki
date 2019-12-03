@@ -13,6 +13,7 @@ pub(crate) fn verify_command(local: bool, config: &FlokiConfig) -> Result<(), Er
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::config::DindConfig;
     use crate::config::Shell::Shell;
     use crate::image::Image::Name;
 
@@ -26,7 +27,7 @@ mod test {
             mount: "/mnt".into(),
             docker_switches,
             forward_ssh_agent: false,
-            dind: false,
+            dind: DindConfig::deactivated(),
             forward_user: false,
             volumes: BTreeMap::new(),
         }

@@ -14,6 +14,7 @@ Status: Available for use
 - Change `after_deploy.sh` into a separate stage as `after_deploy:` scripts run after each `deploy:` step.
 
 ### Added
+- Allow the docker-in-docker image to be specified in configuration - MINOR
 
 ## [0.4.3] - 2019-12-02
 ### Changed

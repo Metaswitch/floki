@@ -16,7 +16,7 @@ pub(crate) fn run_container(
     inner_command: &str,
 ) -> Result<(), Error> {
     let mount = get_mount_specification(&environ.floki_root, &config);
-    let dind = Dind::new(mount);
+    let dind = Dind::new(config.dind.image(), mount);
     let mut cmd = command::DockerCommandBuilder::new(&config.image.name()?).add_volume(mount);
 
     let volumes = resolve_volume_mounts(
@@ -52,7 +52,7 @@ fn configure_dind(
     config: &FlokiConfig,
     dind: &Dind,
 ) -> Result<DockerCommandBuilder, Error> {
-    if config.dind {
+    if config.dind.enabled() {
         Ok(command::enable_docker_in_docker(cmd, dind)?)
     } else {
         Ok(cmd)
@@ -187,8 +187,8 @@ fn launch_dind_if_needed(
     config: &FlokiConfig,
     dind: Dind,
 ) -> Result<Option<command::DaemonHandle>, Error> {
-    if config.dind {
-        crate::dind::dind_preflight()?;
+    if config.dind.enabled() {
+        crate::dind::dind_preflight(config.dind.image())?;
         Ok(Some(dind.launch()?))
     } else {
         Ok(None)

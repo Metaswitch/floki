@@ -55,7 +55,7 @@ fn run_floki_from_args(args: &Cli) -> Result<(), Error> {
         Some(Subcommand::Pull {}) => {
             debug!("Trying to pull image {:?}", &config.image);
             debug!("Pulling image: {}", config.image.name()?);
-            image::pull_image(config.image.name()?)
+            image::pull_image(&config.image.name()?)
         }
 
         // Run a command in the floki container
