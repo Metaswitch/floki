@@ -78,6 +78,6 @@ fn run_floki_container(
     config: &FlokiConfig,
     inner_command: String,
 ) -> Result<(), Error> {
-    config.image.obtain_image()?;
+    config.image.obtain_image(&environ.floki_root)?;
     interpret::run_container(&environ, &config, &inner_command)
 }

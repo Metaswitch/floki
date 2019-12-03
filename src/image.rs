@@ -1,7 +1,7 @@
 use failure::Error;
 use quicli::prelude::*;
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use yaml_rust::YamlLoader;
 
@@ -11,9 +11,9 @@ use crate::errors::{FlokiError, FlokiSubprocessExitStatus};
 pub struct BuildSpec {
     name: String,
     #[serde(default = "default_dockerfile")]
-    dockerfile: String,
+    dockerfile: PathBuf,
     #[serde(default = "default_context")]
-    context: String,
+    context: PathBuf,
     target: Option<String>,
 }
 
@@ -23,11 +23,11 @@ pub struct YamlSpec {
     key: String,
 }
 
-fn default_dockerfile() -> String {
+fn default_dockerfile() -> PathBuf {
     "Dockerfile".into()
 }
 
-fn default_context() -> String {
+fn default_context() -> PathBuf {
     ".".into()
 }
 
@@ -74,7 +74,7 @@ impl Image {
 
     /// Do the required work to get the image, and then return
     /// it's name
-    pub fn obtain_image(&self) -> Result<String, Error> {
+    pub fn obtain_image(&self, floki_root: &Path) -> Result<String, Error> {
         match *self {
             // Deal with the case where want to build an image
             Image::Build { ref build } => {
@@ -84,13 +84,13 @@ impl Image {
                     .arg("-t")
                     .arg(self.name()?)
                     .arg("-f")
-                    .arg(&build.dockerfile);
+                    .arg(&floki_root.join(&build.dockerfile));
 
                 if let Some(target) = &build.target {
                     command.arg("--target").arg(target);
                 }
 
-                let exit_status = command.arg(&build.context).spawn()?.wait()?;
+                let exit_status = command.arg(&floki_root.join(&build.context)).spawn()?.wait()?;
                 if exit_status.success() {
                     Ok(self.name()?)
                 } else {
