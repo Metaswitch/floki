@@ -88,7 +88,7 @@ and run `floki` in that directory. You should be dropped into a shell with the i
 
 ## Contributing
 
-Contributors will need to sign there commits to acknowledge the [DCO](DCO) 
+Contributors will need to sign their commits to acknowledge the [DCO](DCO)
 
 ## TODO
 
