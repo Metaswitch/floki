@@ -1,6 +1,6 @@
 # floki
 
-Floki was a boatbuilder. Floki now helps you launch build containers.
+Floki was a boatbuilder. Floki now helps you launch containers to build your software.
 
 ## What is floki?
 
@@ -19,6 +19,8 @@ For installation, and basic usage, see [getting started](https://metaswitch.gith
 Full documentation can be found [here](https://metaswitch.github.io/floki/).
 
 ## Install
+
+### From pre-built binaries
 
 Precompiled binaries can be downloaded from the releases page (for linux and OSX).
 
@@ -42,6 +44,14 @@ Move it onto your path to run it from anywhere. E.g.
 ```
 
 Enjoy!
+
+### From cargo
+
+`floki` can also be installed directly from `cargo`.
+
+```
+$ cargo install floki
+```
 
 ## Prerequisites
 
