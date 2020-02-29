@@ -1,6 +1,6 @@
 use crate::errors::{FlokiError, FlokiSubprocessExitStatus};
 use failure::Error;
-use std::ffi::OsString;
+use std::ffi::{OsStr, OsString};
 use std::path;
 use std::process::{Command, Stdio};
 use uuid;
@@ -8,7 +8,7 @@ use uuid;
 #[derive(Debug, Clone)]
 pub struct DockerCommandBuilder {
     name: String,
-    volumes: Vec<(path::PathBuf, path::PathBuf)>,
+    volumes: Vec<OsString>,
     environment: Vec<(String, String)>,
     switches: Vec<OsString>,
     image: String,
@@ -122,7 +122,7 @@ impl DockerCommandBuilder {
 
     pub fn add_volume(mut self, spec: (&path::PathBuf, &path::PathBuf)) -> Self {
         let (src, dst) = spec;
-        self.volumes.push((src.clone(), dst.clone()));
+        self.volumes.push(Self::volume_mapping(src, dst));
         self
     }
 
@@ -145,11 +145,11 @@ impl DockerCommandBuilder {
         cmd
     }
 
-    fn build_volume_switches(&self) -> Vec<OsString> {
+    fn build_volume_switches(&self) -> Vec<&OsStr> {
         let mut switches = Vec::new();
-        for (s, d) in self.volumes.iter() {
-            switches.push("-v".into());
-            switches.push(Self::volume_mapping(s, d));
+        for mapping in self.volumes.iter() {
+            switches.push("-v".as_ref());
+            switches.push(mapping.as_os_str());
         }
         switches
     }
