@@ -8,7 +8,7 @@ use uuid;
 #[derive(Debug, Clone)]
 pub struct DockerCommandBuilder {
     name: String,
-    volumes: Vec<(String, String)>,
+    volumes: Vec<(path::PathBuf, path::PathBuf)>,
     environment: Vec<(String, String)>,
     switches: Vec<OsString>,
     image: String,
@@ -120,9 +120,9 @@ impl DockerCommandBuilder {
         &self.name
     }
 
-    pub fn add_volume(mut self, spec: (&str, &str)) -> Self {
+    pub fn add_volume(mut self, spec: (&path::PathBuf, &path::PathBuf)) -> Self {
         let (src, dst) = spec;
-        self.volumes.push((src.to_string(), dst.to_string()));
+        self.volumes.push((src.clone(), dst.clone()));
         self
     }
 
@@ -145,13 +145,20 @@ impl DockerCommandBuilder {
         cmd
     }
 
-    fn build_volume_switches(&self) -> Vec<String> {
+    fn build_volume_switches(&self) -> Vec<OsString> {
         let mut switches = Vec::new();
         for (s, d) in self.volumes.iter() {
             switches.push("-v".into());
-            switches.push(format!("{}:{}", s, d));
+            switches.push(Self::volume_mapping(s, d));
         }
         switches
+    }
+
+    fn volume_mapping(src: &path::PathBuf, dst: &path::PathBuf) -> OsString {
+        let mut mapping = src.clone().into_os_string();
+        mapping.push(":");
+        mapping.push(dst);
+        mapping
     }
 
     fn build_environment_switches(&self) -> Vec<String> {
@@ -173,13 +180,10 @@ pub fn enable_forward_ssh_agent(
     agent_socket: &str,
 ) -> Result<DockerCommandBuilder, Error> {
     debug!("Got SSH_AUTH_SOCK={}", agent_socket);
-    if let Some(dir) = path::Path::new(&agent_socket).to_str() {
-        Ok(command
-            .add_environment("SSH_AUTH_SOCK", agent_socket)
-            .add_volume((dir, dir)))
-    } else {
-        Err(FlokiError::NoSshAuthSock {})?
-    }
+    let dir = path::Path::new(&agent_socket).to_path_buf();
+    Ok(command
+        .add_environment("SSH_AUTH_SOCK", agent_socket)
+        .add_volume((&dir, &dir)))
 }
 
 pub fn enable_docker_in_docker(

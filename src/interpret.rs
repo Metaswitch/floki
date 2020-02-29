@@ -141,7 +141,7 @@ fn configure_volumes(
 ) -> DockerCommandBuilder {
     let mut cmd = cmd; // Shadow as mutable
     for (src, dst) in volumes.iter() {
-        cmd = cmd.add_volume((src.to_str().unwrap(), dst.to_str().unwrap()));
+        cmd = cmd.add_volume((src, dst));
     }
     cmd
 }
@@ -168,10 +168,10 @@ fn get_working_directory(
 
 /// Specify the primary mount for the floki container
 fn get_mount_specification<'a, 'b>(
-    floki_root: &'a path::Path,
+    floki_root: &'a path::PathBuf,
     config: &'b FlokiConfig,
-) -> (&'a str, &'b str) {
-    (&floki_root.to_str().unwrap(), &config.mount)
+) -> (&'a path::PathBuf, &'b path::PathBuf) {
+    (floki_root, &config.mount)
 }
 
 /// Turn the init section of a floki.yaml file into a command
