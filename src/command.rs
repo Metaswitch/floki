@@ -1,5 +1,6 @@
 use crate::errors::{FlokiError, FlokiSubprocessExitStatus};
 use failure::Error;
+use std::ffi::OsString;
 use std::path;
 use std::process::{Command, Stdio};
 use uuid;
@@ -9,7 +10,7 @@ pub struct DockerCommandBuilder {
     name: String,
     volumes: Vec<(String, String)>,
     environment: Vec<(String, String)>,
-    switches: Vec<String>,
+    switches: Vec<OsString>,
     image: String,
 }
 
@@ -50,7 +51,7 @@ impl DockerCommandBuilder {
             .args(&["run", "--rm", "-it"])
             .args(&self.build_volume_switches())
             .args(&self.build_environment_switches())
-            .args(&self.build_docker_switches())
+            .args(self.build_docker_switches())
             .arg(&self.image)
             .args(command)
             .stdout(Stdio::inherit())
@@ -81,7 +82,7 @@ impl DockerCommandBuilder {
             .args(&["--name", &self.name])
             .args(&self.build_volume_switches())
             .args(&self.build_environment_switches())
-            .args(&self.build_docker_switches())
+            .args(self.build_docker_switches())
             .arg("-d")
             .arg(&self.image)
             .args(command)
@@ -131,7 +132,9 @@ impl DockerCommandBuilder {
     }
 
     pub fn add_docker_switch(mut self, switch: &str) -> Self {
-        self.switches.push(switch.into());
+        for s in switch.split_whitespace() {
+            self.switches.push(s.into());
+        }
         self
     }
 
@@ -160,15 +163,8 @@ impl DockerCommandBuilder {
         switches
     }
 
-    fn build_docker_switches(&self) -> Vec<String> {
-        let mut switches = Vec::new();
-        for docker_switch in self.switches.iter() {
-            let pieces = docker_switch.split_whitespace();
-            for s in pieces {
-                switches.push(s.into());
-            }
-        }
-        switches
+    fn build_docker_switches(&self) -> &Vec<OsString> {
+        &self.switches
     }
 }
 
