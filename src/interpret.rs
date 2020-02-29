@@ -97,7 +97,7 @@ fn configure_forward_ssh_agent(
 ) -> Result<DockerCommandBuilder, Error> {
     if config.forward_ssh_agent {
         if let Some(ref path) = env.ssh_agent_socket {
-            Ok(command::enable_forward_ssh_agent(cmd, path)?)
+            Ok(command::enable_forward_ssh_agent(cmd, path))
         } else {
             Err(errors::FlokiError::NoSshAuthSock {})?
         }
