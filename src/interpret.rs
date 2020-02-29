@@ -137,7 +137,7 @@ fn configure_working_directory(
 /// Add mounts for each of the passed in volumes
 fn configure_volumes(
     cmd: DockerCommandBuilder,
-    volumes: &Vec<(path::PathBuf, path::PathBuf)>,
+    volumes: &Vec<(path::PathBuf, &path::PathBuf)>,
 ) -> DockerCommandBuilder {
     let mut cmd = cmd; // Shadow as mutable
     for (src, dst) in volumes.iter() {
@@ -147,7 +147,7 @@ fn configure_volumes(
 }
 
 /// Create the backing directories for floki volumes if needed
-fn instantiate_volumes(volumes: &Vec<(path::PathBuf, path::PathBuf)>) -> Result<(), Error> {
+fn instantiate_volumes(volumes: &Vec<(path::PathBuf, &path::PathBuf)>) -> Result<(), Error> {
     for (src, _) in volumes.iter() {
         std::fs::create_dir_all(src)?;
     }
