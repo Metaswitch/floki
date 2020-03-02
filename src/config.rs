@@ -1,5 +1,5 @@
-use crate::errors;
 /// Configuration file format for floki
+use crate::errors;
 use crate::image;
 use failure::Error;
 use quicli::prelude::*;
