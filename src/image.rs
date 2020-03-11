@@ -90,7 +90,10 @@ impl Image {
                     command.arg("--target").arg(target);
                 }
 
-                let exit_status = command.arg(&floki_root.join(&build.context)).spawn()?.wait()?;
+                let exit_status = command
+                    .arg(&floki_root.join(&build.context))
+                    .spawn()?
+                    .wait()?;
                 if exit_status.success() {
                     Ok(self.name()?)
                 } else {

@@ -1,5 +1,5 @@
-use crate::errors;
 /// Configuration file format for floki
+use crate::errors;
 use crate::image;
 use failure::Error;
 use quicli::prelude::*;
@@ -80,7 +80,7 @@ pub(crate) struct FlokiConfig {
     #[serde(default = "default_shell")]
     pub(crate) shell: Shell,
     #[serde(default = "default_mount")]
-    pub(crate) mount: String,
+    pub(crate) mount: path::PathBuf,
     #[serde(default = "Vec::new")]
     pub(crate) docker_switches: Vec<String>,
     #[serde(default = "default_to_false")]
@@ -140,8 +140,8 @@ fn default_shell() -> Shell {
     Shell::Shell("sh".into())
 }
 
-fn default_mount() -> String {
-    "/src".into()
+fn default_mount() -> path::PathBuf {
+    path::Path::new("/src").to_path_buf()
 }
 
 fn default_to_false() -> bool {

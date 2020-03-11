@@ -1,5 +1,6 @@
 /// Docker-in-docker structures
 use failure::Error;
+use std::path;
 
 use crate::command::{DaemonHandle, DockerCommandBuilder};
 use crate::image::{image_exists_locally, pull_image};
@@ -10,7 +11,7 @@ pub struct Dind {
 }
 
 impl Dind {
-    pub fn new(image: &str, mount: (&str, &str)) -> Self {
+    pub fn new(image: &str, mount: (&path::PathBuf, &path::PathBuf)) -> Self {
         Dind {
             command: DockerCommandBuilder::new(image)
                 .add_docker_switch("--privileged")

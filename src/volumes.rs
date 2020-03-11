@@ -8,17 +8,17 @@ use crate::config::Volume;
 
 static VOLUME_DIRECTORY: &str = "volumes/";
 
-pub(crate) fn resolve_volume_mounts(
+pub(crate) fn resolve_volume_mounts<'a>(
     config_filepath: &path::PathBuf,
     work_path: &path::PathBuf,
-    volumes: &BTreeMap<String, Volume>,
-) -> Vec<(path::PathBuf, path::PathBuf)> {
+    volumes: &'a BTreeMap<String, Volume>,
+) -> Vec<(path::PathBuf, &'a path::PathBuf)> {
     volumes
         .iter()
         .map(|(name, volume)| {
             (
                 cache_path(work_path, config_filepath, name, volume),
-                volume.mount.clone(),
+                &volume.mount,
             )
         })
         .collect()

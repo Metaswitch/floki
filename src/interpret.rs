@@ -97,7 +97,7 @@ fn configure_forward_ssh_agent(
 ) -> Result<DockerCommandBuilder, Error> {
     if config.forward_ssh_agent {
         if let Some(ref path) = env.ssh_agent_socket {
-            Ok(command::enable_forward_ssh_agent(cmd, path)?)
+            Ok(command::enable_forward_ssh_agent(cmd, path))
         } else {
             Err(errors::FlokiError::NoSshAuthSock {})?
         }
@@ -137,17 +137,17 @@ fn configure_working_directory(
 /// Add mounts for each of the passed in volumes
 fn configure_volumes(
     cmd: DockerCommandBuilder,
-    volumes: &Vec<(path::PathBuf, path::PathBuf)>,
+    volumes: &Vec<(path::PathBuf, &path::PathBuf)>,
 ) -> DockerCommandBuilder {
     let mut cmd = cmd; // Shadow as mutable
     for (src, dst) in volumes.iter() {
-        cmd = cmd.add_volume((src.to_str().unwrap(), dst.to_str().unwrap()));
+        cmd = cmd.add_volume((src, dst));
     }
     cmd
 }
 
 /// Create the backing directories for floki volumes if needed
-fn instantiate_volumes(volumes: &Vec<(path::PathBuf, path::PathBuf)>) -> Result<(), Error> {
+fn instantiate_volumes(volumes: &Vec<(path::PathBuf, &path::PathBuf)>) -> Result<(), Error> {
     for (src, _) in volumes.iter() {
         std::fs::create_dir_all(src)?;
     }
@@ -168,10 +168,10 @@ fn get_working_directory(
 
 /// Specify the primary mount for the floki container
 fn get_mount_specification<'a, 'b>(
-    floki_root: &'a path::Path,
+    floki_root: &'a path::PathBuf,
     config: &'b FlokiConfig,
-) -> (&'a str, &'b str) {
-    (&floki_root.to_str().unwrap(), &config.mount)
+) -> (&'a path::PathBuf, &'b path::PathBuf) {
+    (floki_root, &config.mount)
 }
 
 /// Turn the init section of a floki.yaml file into a command

@@ -1,5 +1,6 @@
 use crate::errors::{FlokiError, FlokiSubprocessExitStatus};
 use failure::Error;
+use std::ffi::{OsStr, OsString};
 use std::path;
 use std::process::{Command, Stdio};
 use uuid;
@@ -7,9 +8,9 @@ use uuid;
 #[derive(Debug, Clone)]
 pub struct DockerCommandBuilder {
     name: String,
-    volumes: Vec<(String, String)>,
+    volumes: Vec<OsString>,
     environment: Vec<(String, String)>,
-    switches: Vec<String>,
+    switches: Vec<OsString>,
     image: String,
 }
 
@@ -50,7 +51,7 @@ impl DockerCommandBuilder {
             .args(&["run", "--rm", "-it"])
             .args(&self.build_volume_switches())
             .args(&self.build_environment_switches())
-            .args(&self.build_docker_switches())
+            .args(self.build_docker_switches())
             .arg(&self.image)
             .args(command)
             .stdout(Stdio::inherit())
@@ -81,7 +82,7 @@ impl DockerCommandBuilder {
             .args(&["--name", &self.name])
             .args(&self.build_volume_switches())
             .args(&self.build_environment_switches())
-            .args(&self.build_docker_switches())
+            .args(self.build_docker_switches())
             .arg("-d")
             .arg(&self.image)
             .args(command)
@@ -119,9 +120,9 @@ impl DockerCommandBuilder {
         &self.name
     }
 
-    pub fn add_volume(mut self, spec: (&str, &str)) -> Self {
+    pub fn add_volume(mut self, spec: (&path::PathBuf, &path::PathBuf)) -> Self {
         let (src, dst) = spec;
-        self.volumes.push((src.to_string(), dst.to_string()));
+        self.volumes.push(Self::volume_mapping(src, dst));
         self
     }
 
@@ -131,7 +132,9 @@ impl DockerCommandBuilder {
     }
 
     pub fn add_docker_switch(mut self, switch: &str) -> Self {
-        self.switches.push(switch.into());
+        for s in switch.split_whitespace() {
+            self.switches.push(s.into());
+        }
         self
     }
 
@@ -142,13 +145,20 @@ impl DockerCommandBuilder {
         cmd
     }
 
-    fn build_volume_switches(&self) -> Vec<String> {
+    fn build_volume_switches(&self) -> Vec<&OsStr> {
         let mut switches = Vec::new();
-        for (s, d) in self.volumes.iter() {
-            switches.push("-v".into());
-            switches.push(format!("{}:{}", s, d));
+        for mapping in self.volumes.iter() {
+            switches.push("-v".as_ref());
+            switches.push(mapping.as_os_str());
         }
         switches
+    }
+
+    fn volume_mapping(src: &path::PathBuf, dst: &path::PathBuf) -> OsString {
+        let mut mapping = src.clone().into_os_string();
+        mapping.push(":");
+        mapping.push(dst);
+        mapping
     }
 
     fn build_environment_switches(&self) -> Vec<String> {
@@ -160,30 +170,20 @@ impl DockerCommandBuilder {
         switches
     }
 
-    fn build_docker_switches(&self) -> Vec<String> {
-        let mut switches = Vec::new();
-        for docker_switch in self.switches.iter() {
-            let pieces = docker_switch.split_whitespace();
-            for s in pieces {
-                switches.push(s.into());
-            }
-        }
-        switches
+    fn build_docker_switches(&self) -> &Vec<OsString> {
+        &self.switches
     }
 }
 
 pub fn enable_forward_ssh_agent(
     command: DockerCommandBuilder,
     agent_socket: &str,
-) -> Result<DockerCommandBuilder, Error> {
+) -> DockerCommandBuilder {
     debug!("Got SSH_AUTH_SOCK={}", agent_socket);
-    if let Some(dir) = path::Path::new(&agent_socket).to_str() {
-        Ok(command
-            .add_environment("SSH_AUTH_SOCK", agent_socket)
-            .add_volume((dir, dir)))
-    } else {
-        Err(FlokiError::NoSshAuthSock {})?
-    }
+    let dir = path::Path::new(&agent_socket).to_path_buf();
+    command
+        .add_environment("SSH_AUTH_SOCK", agent_socket)
+        .add_volume((&dir, &dir))
 }
 
 pub fn enable_docker_in_docker(
