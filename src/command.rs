@@ -9,7 +9,7 @@ use uuid;
 pub struct DockerCommandBuilder {
     name: String,
     volumes: Vec<OsString>,
-    environment: Vec<String>,
+    environment: Vec<OsString>,
     switches: Vec<OsString>,
     image: String,
 }
@@ -126,9 +126,9 @@ impl DockerCommandBuilder {
         self
     }
 
-    pub fn add_environment(mut self, var: &str, bind: &str) -> Self {
+    pub fn add_environment<V: AsRef<OsStr>, B: AsRef<OsStr>>(mut self, var: V, bind: B) -> Self {
         self.environment.push("-e".into());
-        self.environment.push(format!("{}={}", var, bind));
+        self.environment.push(Self::environment_mapping(var, bind));
         self
     }
 
@@ -162,7 +162,14 @@ impl DockerCommandBuilder {
         mapping
     }
 
-    fn build_environment_switches(&self) -> &Vec<String> {
+    fn environment_mapping<V: AsRef<OsStr>, B: AsRef<OsStr>>(var: V, bind: B) -> OsString {
+        let mut binding: OsString = var.as_ref().into();
+        binding.push("=");
+        binding.push(bind);
+        binding
+    }
+
+    fn build_environment_switches(&self) -> &Vec<OsString> {
         &self.environment
     }
 
