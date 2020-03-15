@@ -14,6 +14,7 @@ Status: Available for use
 - Change `after_deploy.sh` into a separate stage as `after_deploy:` scripts run after each `deploy:` step.
 - Resolve Dockerfile path and Docker context correctly when running `floki` from a subdirectory of the directory containing `floki.yaml` - PATCH
 - Correct and refine path handling - PATCH
+- Correct and refine environment variable handling - PATCH
 
 ### Added
 - Allow the docker-in-docker image to be specified in configuration - MINOR
