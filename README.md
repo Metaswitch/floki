@@ -22,6 +22,8 @@ Full documentation can be found [here](https://metaswitch.github.io/floki/).
 
 ### Quickstart
 
+This assumes you have already installed `floki` using the installation instructions below.
+
 Suppose we want a build environment based on `alpine:latest` with a C compiler, and `clang` tools. Suppose we want to also have SSH credentials available from the host, so we can, for example, authenticate with a private git server.
 
 First create your `Dockerfile`:
@@ -41,13 +43,27 @@ image:
     name: hello-floki
 
 forward_ssh_agent: true
+init:
+  - echo "Welcome to the hello-floki build container"
 ```
 
 Now run `floki`. You should see the docker container be built, and you will be dropped into a shell. If you had an `ssh-agent` running on the host before running `floki`, you can run `ssh-add -l` and you should see the same keys loaded as you had on the host.
 
 ## Install
 
-### From pre-built binaries
+### Prerequisites
+
+It's recommended you add your user to the `docker` group:
+
+```
+sudo usermod -a -G docker USERNAME
+```
+
+and logout and in again to pick up the changes.
+
+Alternatively you can run `floki` (after installation) with `sudo -E floki`.
+
+### Installation from pre-built binaries
 
 Precompiled binaries can be downloaded from the releases page (for linux and OSX).
 
@@ -72,7 +88,7 @@ Move it onto your path to run it from anywhere. E.g.
 
 Enjoy!
 
-### From cargo
+### Installation from cargo
 
 `floki` can also be installed directly from `cargo`.
 
@@ -80,48 +96,12 @@ Enjoy!
 $ cargo install floki
 ```
 
-## Prerequisites
-
-It's recommended you add your user to the `docker` group:
-
-```
-sudo usermod -a -G docker USERNAME
-```
-
-and logout and in again to pick up the changes.
-
-Alternatively you can run `floki` with `sudo -E floki`.
-
-## Basic usage
-
-`floki` allows you to launch interactive containers with your working directory mounted, and to configure those containers for interactive use.
-
-Provide a `floki.yaml` in the root directory of your source code, in the following form:
-
-```yaml
-image: $IMAGE_NAME
-init:
-  - echo "Hello, there"
-```
-
-or to use a local `Dockerfile`
-
-```yaml
-image:
-  build:
-    name: name_of_resultant_image
-    dockerfile: Dockerfile.build
-init:
-  - echo "Hello, there"
-```
-
-and run `floki` in that directory. You should be dropped into a shell with the init commands run, and inside a directory where your host working directory has been mounted.
-
 ## Handy features
 
 - Forwarding of `ssh-agent` (useful for authenticating with remote private git servers to pull private dependencies)
 - Docker-in-docker support
 - Forwarding of host user information (allows non-root users to be added and used).
+- volumes (shared, or per-project) for e.g. build caching.
 
 ## Contributing
 
