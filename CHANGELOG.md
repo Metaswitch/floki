@@ -15,6 +15,7 @@ Status: Available for use
 - Resolve Dockerfile path and Docker context correctly when running `floki` from a subdirectory of the directory containing `floki.yaml` - PATCH
 - Correct and refine path handling - PATCH
 - Correct and refine environment variable handling - PATCH
+- Update Rust dependencies (run `cargo update`) - PATCH
 
 ### Added
 - Allow the docker-in-docker image to be specified in configuration - MINOR
