@@ -69,12 +69,7 @@ fn configure_floki_host_mountdir_env(
     cmd: DockerCommandBuilder,
     floki_root: &path::Path,
 ) -> DockerCommandBuilder {
-    cmd.add_environment(
-        "FLOKI_HOST_MOUNTDIR",
-        &floki_root
-            .to_str()
-            .expect("failed to set FLOKI_HOST_MOUNTDIR - unable to convert floki_root to str"),
-    )
+    cmd.add_environment("FLOKI_HOST_MOUNTDIR", floki_root)
 }
 
 fn configure_forward_user(

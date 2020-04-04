@@ -9,7 +9,7 @@ use uuid;
 pub struct DockerCommandBuilder {
     name: String,
     volumes: Vec<OsString>,
-    environment: Vec<(String, String)>,
+    environment: Vec<OsString>,
     switches: Vec<OsString>,
     image: String,
 }
@@ -50,7 +50,7 @@ impl DockerCommandBuilder {
         let mut command = Command::new("docker")
             .args(&["run", "--rm", "-it"])
             .args(&self.build_volume_switches())
-            .args(&self.build_environment_switches())
+            .args(self.build_environment_switches())
             .args(self.build_docker_switches())
             .arg(&self.image)
             .args(command)
@@ -81,7 +81,7 @@ impl DockerCommandBuilder {
             .args(&["run", "--rm"])
             .args(&["--name", &self.name])
             .args(&self.build_volume_switches())
-            .args(&self.build_environment_switches())
+            .args(self.build_environment_switches())
             .args(self.build_docker_switches())
             .arg("-d")
             .arg(&self.image)
@@ -126,8 +126,9 @@ impl DockerCommandBuilder {
         self
     }
 
-    pub fn add_environment(mut self, var: &str, bind: &str) -> Self {
-        self.environment.push((var.to_string(), bind.to_string()));
+    pub fn add_environment<V: AsRef<OsStr>, B: AsRef<OsStr>>(mut self, var: V, bind: B) -> Self {
+        self.environment.push("-e".into());
+        self.environment.push(Self::environment_mapping(var, bind));
         self
     }
 
@@ -161,13 +162,15 @@ impl DockerCommandBuilder {
         mapping
     }
 
-    fn build_environment_switches(&self) -> Vec<String> {
-        let mut switches = Vec::new();
-        for (var, bind) in self.environment.iter() {
-            switches.push("-e".into());
-            switches.push(format!("{}={}", var, bind));
-        }
-        switches
+    fn environment_mapping<V: AsRef<OsStr>, B: AsRef<OsStr>>(var: V, bind: B) -> OsString {
+        let mut binding: OsString = var.as_ref().into();
+        binding.push("=");
+        binding.push(bind);
+        binding
+    }
+
+    fn build_environment_switches(&self) -> &Vec<OsString> {
+        &self.environment
     }
 
     fn build_docker_switches(&self) -> &Vec<OsString> {
@@ -177,10 +180,10 @@ impl DockerCommandBuilder {
 
 pub fn enable_forward_ssh_agent(
     command: DockerCommandBuilder,
-    agent_socket: &str,
+    agent_socket: &OsStr,
 ) -> DockerCommandBuilder {
-    debug!("Got SSH_AUTH_SOCK={}", agent_socket);
-    let dir = path::Path::new(&agent_socket).to_path_buf();
+    debug!("Got SSH_AUTH_SOCK={:?}", agent_socket);
+    let dir = path::Path::new(agent_socket).to_path_buf();
     command
         .add_environment("SSH_AUTH_SOCK", agent_socket)
         .add_volume((&dir, &dir))

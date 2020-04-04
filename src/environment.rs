@@ -2,6 +2,7 @@
 use crate::errors;
 use failure::Error;
 use std::env;
+use std::ffi::OsString;
 use std::path;
 use std::process::Command;
 
@@ -17,7 +18,7 @@ pub struct Environment {
     /// Absolute path to the configuration file
     pub config_file: path::PathBuf,
     /// Path to ssh socket if found
-    pub ssh_agent_socket: Option<String>,
+    pub ssh_agent_socket: Option<OsString>,
     /// The host folder that floki uses to e.g. create directories
     /// to back volumes
     pub floki_workspace: path::PathBuf,
@@ -60,11 +61,8 @@ fn get_current_working_directory() -> Result<path::PathBuf, Error> {
 
 /// Get the path of the ssh agent socket from the SSH_AUTH_SOCK
 /// environment variable
-fn get_ssh_agent_socket_path() -> Option<String> {
-    match env::var("SSH_AUTH_SOCK") {
-        Ok(path) => Some(path),
-        Err(_) => None,
-    }
+fn get_ssh_agent_socket_path() -> Option<OsString> {
+    env::var_os("SSH_AUTH_SOCK")
 }
 
 /// Search all ancestors of the current directory for a floki.yaml file name.
