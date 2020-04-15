@@ -25,7 +25,6 @@ use structopt::StructOpt;
 
 fn main() -> CliResult {
     let args = Cli::from_args();
-    args.verbosity.setup_env_logger("floki")?;
 
     match run_floki_from_args(&args) {
         Ok(()) => (),
