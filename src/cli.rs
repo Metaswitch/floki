@@ -1,4 +1,3 @@
-use quicli::prelude::*;
 /// Description of the CLI interface to floki
 use std::path;
 use structopt::StructOpt;
@@ -27,9 +26,6 @@ pub(crate) struct Cli {
     /// Run floki regardless of reproducibility
     #[structopt(long = "local", short = "l")]
     pub(crate) local: bool,
-
-    #[structopt(flatten)]
-    pub(crate) verbosity: Verbosity,
 
     #[structopt(subcommand)]
     pub(crate) subcommand: Option<Subcommand>,
