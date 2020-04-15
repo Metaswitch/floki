@@ -16,6 +16,9 @@ Status: Available for use
 - Correct and refine path handling - PATCH
 - Correct and refine environment variable handling - PATCH
 - Update Rust dependencies (run `cargo update`) - PATCH
+- Bump serde_yaml from 0.7.5 to 0.8.4 - PATCH
+- Bump structopt from 0.2.18 to 0.3.13 - PATCH
+- Bump uuid from 0.6.5 to 0.8.1 - PATCH
 
 ### Added
 - Allow the docker-in-docker image to be specified in configuration - MINOR
