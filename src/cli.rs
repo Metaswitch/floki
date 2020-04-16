@@ -27,6 +27,10 @@ pub(crate) struct Cli {
     #[structopt(long = "local", short = "l")]
     pub(crate) local: bool,
 
+    /// Logging verbosity level
+    #[structopt(short = "v", parse(from_occurrences))]
+    pub(crate) verbosity: u8,
+
     #[structopt(subcommand)]
     pub(crate) subcommand: Option<Subcommand>,
 }
