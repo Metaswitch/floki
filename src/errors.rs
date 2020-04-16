@@ -115,3 +115,13 @@ pub enum FlokiInternalError {
     )]
     InternalAssertionFailed { description: String },
 }
+
+/// Errors made by floki users.
+#[derive(Debug, Fail)]
+pub enum FlokiUserError {
+    #[fail(
+        display = "Invalid verbosity setting of {}. Use a setting between 0 and 3 (-vvv)",
+        setting
+    )]
+    InvalidVerbositySetting { setting: u8 },
+}
