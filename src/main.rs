@@ -25,6 +25,7 @@ use structopt::StructOpt;
 
 fn main() -> CliResult {
     let args = Cli::from_args();
+    configure_logging(args.verbosity)?;
 
     match run_floki_from_args(&args) {
         Ok(()) => (),
@@ -79,4 +80,21 @@ fn run_floki_container(
 ) -> Result<(), Error> {
     config.image.obtain_image(&environ.floki_root)?;
     interpret::run_container(&environ, &config, &inner_command)
+}
+
+/// Configure the logger
+fn configure_logging(verbosity: u8) -> Result<(), Error> {
+    let level = match verbosity {
+        0 => log::LevelFilter::Off,
+        1 => log::LevelFilter::Info,
+        2 => log::LevelFilter::Debug,
+        3 => log::LevelFilter::Trace,
+        _ => Err(errors::FlokiUserError::InvalidVerbositySetting { setting: verbosity })?,
+    };
+    simplelog::TermLogger::init(
+        level,
+        simplelog::Config::default(),
+        simplelog::TerminalMode::Stderr,
+    )?;
+    Ok(())
 }

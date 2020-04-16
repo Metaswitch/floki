@@ -28,6 +28,7 @@ structopt = "0.3"
 uuid = { version = "0.8", features = ["v4"] }
 yaml-rust = "0.4.3"
 rust-crypto = "^0.2"
+simplelog = "0.7"
 
 [dev-dependencies]
 tempdir = "0.3.7"
