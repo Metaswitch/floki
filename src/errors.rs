@@ -66,11 +66,6 @@ pub enum FlokiError {
 
     #[fail(display = "Unable to forward ssh socket - cannot find SSH_AUTH_SOCK in environment")]
     NoSshAuthSock {},
-
-    #[fail(
-        display = "Cannot guarantee reproducibility of docker_switches. Run 'floki --local' if docker_switches are needed."
-    )]
-    NonLocalDockerSwitches {},
 }
 
 /// Generate a summary string for a process exiting

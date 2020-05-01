@@ -20,6 +20,7 @@ Status: Available for use
 - Bump structopt from 0.2.18 to 0.3.13 - PATCH
 - Bump uuid from 0.6.5 to 0.8.1 - PATCH
 - Rework logging and verbosity setting to use simplelog (needed because of `structopt` upgrade) - PATCH
+- `--local` CLI flag is no longer required to use `docker_switches` - MINOR
 
 ### Added
 - Allow the docker-in-docker image to be specified in configuration - MINOR

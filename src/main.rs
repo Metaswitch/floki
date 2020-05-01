@@ -12,12 +12,10 @@ mod environment;
 mod errors;
 mod image;
 mod interpret;
-mod verify;
 mod volumes;
 
 use cli::{Cli, Subcommand};
 use config::FlokiConfig;
-use verify::verify_command;
 
 use failure::Error;
 use quicli::prelude::*;
@@ -47,7 +45,9 @@ fn run_floki_from_args(args: &Cli) -> Result<(), Error> {
     debug!("Selected configuration file: {:?}", &environ.config_file);
 
     let config = FlokiConfig::from_file(&environ.config_file)?;
-    verify_command(args.local, &config)?;
+    if args.local {
+        eprintln!("-l/--local is deprecated and may be removed in a future release");
+    }
 
     // Dispatch appropriate subcommand
     match &args.subcommand {

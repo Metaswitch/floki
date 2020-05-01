@@ -165,13 +165,9 @@ floki.yaml
 Note that if you have configured an inner shell, the command will run within the inner shell.
 
 
-# Escaping with floki local
+# Escaping with `docker_switches`
 
-`floki` also allows you to pass additional switches to the underlying docker command. These are not allowed by default because the aim of `floki` is to help provide reproducible and shareable interactive build shells - allowing arbitrary docker switches undermines this (for instance a volume with a specific host path that works on no other machines may be mounted).
-
-Nonetheless, it is useful to be able to add arbitrary switches in a pinch, just to be able to get something working. `floki` allows this with the `local` subcommands.
-
-If `floki.yaml` contains the following to forward port `8080` to the host
+`floki` also allows you to pass additional switches to the underlying docker command, for example to forward port `8080` to the host.
 
 ```
 image: debian:sid
@@ -182,12 +178,8 @@ init:
   - echo "Welcome to your server container!"
 ```
 
-then this can be run with
+Note that use of `docker_switches` may reduce the reproducibility and shareability of your `floki.yaml` (for instance it could be used to
+mount a volume with a specific host path that works on no other machines).
 
-```
-$ floki local
-Welcome to your server container!
-[root@blah]#
-```
-
-There are things you can add with `docker_switches` which are reprodicuble and shareable. If something is needed, raise a feature request.
+Nonetheless, it is useful to be able to add arbitrary switches in a pinch, just to be able to get something working.
+There are things you can add with `docker_switches` which are reproducible and shareable. If something is needed, raise a feature request.
