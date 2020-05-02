@@ -46,7 +46,7 @@ fn run_floki_from_args(args: &Cli) -> Result<(), Error> {
 
     let config = FlokiConfig::from_file(&environ.config_file)?;
     if args.local {
-        eprintln!("-l/--local is deprecated and may be removed in a future release");
+        warn!("-l/--local is deprecated and may be removed in a future release");
     }
 
     // Dispatch appropriate subcommand
@@ -85,7 +85,7 @@ fn run_floki_container(
 /// Configure the logger
 fn configure_logging(verbosity: u8) -> Result<(), Error> {
     let level = match verbosity {
-        0 => log::LevelFilter::Off,
+        0 => log::LevelFilter::Warn,
         1 => log::LevelFilter::Info,
         2 => log::LevelFilter::Debug,
         3 => log::LevelFilter::Trace,
