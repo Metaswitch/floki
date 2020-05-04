@@ -23,8 +23,8 @@ pub(crate) struct Cli {
     #[structopt(long = "config", short = "c")]
     pub(crate) config_file: Option<path::PathBuf>,
 
-    /// Run floki regardless of reproducibility
-    #[structopt(long = "local", short = "l")]
+    /// Deprecated, and no longer has any effect.
+    #[structopt(long = "local", short = "l", hidden = true)]
     pub(crate) local: bool,
 
     /// Logging verbosity level
