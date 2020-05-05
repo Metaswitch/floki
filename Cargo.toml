@@ -18,7 +18,7 @@ travis-ci = { repository = "Metaswitch/floki", branch = "master" }
 
 [dependencies]
 failure = "0.1.8"
-failure_derive = "0.1.5"
+failure_derive = "0.1.8"
 log = "0.4"
 quicli = "0.4"
 serde = "1.0"
