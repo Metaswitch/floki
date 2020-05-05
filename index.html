@@ -235,13 +235,9 @@ floki.yaml
 
 <p>Note that if you have configured an inner shell, the command will run within the inner shell.</p>
 
-<h1 id="escaping-with-floki-local">Escaping with floki local</h1>
+<h1 id="escaping-with-docker-switches">Escaping with <code>docker_switches</code></h1>
 
-<p><code>floki</code> also allows you to pass additional switches to the underlying docker command. These are not allowed by default because the aim of <code>floki</code> is to help provide reproducible and shareable interactive build shells - allowing arbitrary docker switches undermines this (for instance a volume with a specific host path that works on no other machines may be mounted).</p>
-
-<p>Nonetheless, it is useful to be able to add arbitrary switches in a pinch, just to be able to get something working. <code>floki</code> allows this with the <code>local</code> subcommands.</p>
-
-<p>If <code>floki.yaml</code> contains the following to forward port <code>8080</code> to the host</p>
+<p><code>floki</code> also allows you to pass additional switches to the underlying docker command, for example to forward port <code>8080</code> to the host.</p>
 
 <pre><code>image: debian:sid
 docker_switches:
@@ -251,14 +247,11 @@ init:
   - echo &quot;Welcome to your server container!&quot;
 </code></pre>
 
-<p>then this can be run with</p>
+<p>Note that use of <code>docker_switches</code> may reduce the reproducibility and shareability of your <code>floki.yaml</code> (for instance it could be used to
+mount a volume with a specific host path that works on no other machines).</p>
 
-<pre><code>$ floki local
-Welcome to your server container!
-[root@blah]#
-</code></pre>
-
-<p>There are things you can add with <code>docker_switches</code> which are reprodicuble and shareable. If something is needed, raise a feature request.</p>
+<p>Nonetheless, it is useful to be able to add arbitrary switches in a pinch, just to be able to get something working.
+There are things you can add with <code>docker_switches</code> which are reproducible and shareable. If something is needed, raise a feature request.</p>
 
                     </div>
                 </section>
@@ -284,7 +277,7 @@ Welcome to your server container!
 
 <p>To obtain <code>curl</code> and extract the latest linux binary directly in your shell, run</p>
 
-<pre><code>$ curl -L https://github.com/Metaswitch/floki/releases/download/0.4.3/floki-0.4.3-linux.tar.gz | tar xzvf -
+<pre><code>$ curl -L https://github.com/Metaswitch/floki/releases/download/0.5.0/floki-0.5.0-linux.tar.gz | tar xzvf -
 </code></pre>
 
 <p>You should be able to run <code>floki</code> from your working directory:</p>
