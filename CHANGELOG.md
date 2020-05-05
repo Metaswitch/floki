@@ -11,6 +11,11 @@ Status: Available for use
 
 ## [Unreleased]
 ### Changed
+
+### Added
+
+## [0.5.0] - 2020-05-05
+### Changed
 - Change `after_deploy.sh` into a separate stage as `after_deploy:` scripts run after each `deploy:` step.
 - Resolve Dockerfile path and Docker context correctly when running `floki` from a subdirectory of the directory containing `floki.yaml` - PATCH
 - Correct and refine path handling - PATCH
@@ -195,7 +200,8 @@ Status: Available for use
 - Initial primitive version
 ### Changed
 
-[Unreleased]: https://github.com/Metaswitch/floki/compare/0.4.3...HEAD
+[Unreleased]: https://github.com/Metaswitch/floki/compare/0.5.0...HEAD
+[0.5.0]: https://github.com/Metaswitch/floki/compare/0.4.3...0.5.0
 [0.4.3]: https://github.com/Metaswitch/floki/compare/0.4.2...0.4.3
 [0.4.2]: https://github.com/Metaswitch/floki/compare/0.4.1...0.4.2
 [0.4.1]: https://github.com/Metaswitch/floki/compare/0.4.0...0.4.1
