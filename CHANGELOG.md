@@ -14,6 +14,11 @@ Status: Available for use
 
 ### Added
 
+- **New Subcommand**: `completion` :tada:
+  + Generation of shell :shell: completion added for an assortment of shells:
+    bash, fish, zsh, powershell, elvish.
+  + See `floki completion --help`
+
 ## [0.5.0] - 2020-05-05
 ### Changed
 - Change `after_deploy.sh` into a separate stage as `after_deploy:` scripts run after each `deploy:` step.
