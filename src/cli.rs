@@ -18,7 +18,7 @@ pub(crate) enum Subcommand {
     Completion {
         /// The shell to generate completions for.  Choose from: bash, fish, zsh, powershell, elvish
         #[structopt(name = "SHELL", parse(try_from_str))]
-        shell: clap::Shell,
+        shell: structopt::clap::Shell,
     },
 }
 
