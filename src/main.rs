@@ -25,7 +25,7 @@ fn main() -> CliResult {
     let args = Cli::from_args();
     configure_logging(args.verbosity)?;
 
-    match run_floki_from_args(args) {
+    match run_floki_from_args(&args) {
         Ok(()) => (),
         Err(e) => {
             error!("A problem occured: {}", e);
@@ -36,7 +36,7 @@ fn main() -> CliResult {
 }
 
 /// Decide which commands to run given the input from the shell
-fn run_floki_from_args(args: Cli) -> Result<(), Error> {
+fn run_floki_from_args(args: &Cli) -> Result<(), Error> {
     debug!("Got command line arguments: {:?}", &args);
 
     let environ = environment::Environment::gather(&args.config_file)?;
@@ -50,7 +50,7 @@ fn run_floki_from_args(args: Cli) -> Result<(), Error> {
     }
 
     // Dispatch appropriate subcommand
-    match args.subcommand {
+    match &args.subcommand {
         // Pull the image in the configuration file
         Some(Subcommand::Pull {}) => {
             debug!("Trying to pull image {:?}", &config.image);
@@ -65,7 +65,7 @@ fn run_floki_from_args(args: Cli) -> Result<(), Error> {
         }
 
         Some(Subcommand::Completion { shell }) => {
-            Ok(Cli::clap().gen_completions_to("floki", shell, &mut std::io::stdout()))
+            Ok(Cli::clap().gen_completions_to("floki", *shell, &mut std::io::stdout()))
         }
 
         // Launch an interactive floki shell (the default)
