@@ -11,6 +11,7 @@ Status: Available for use
 
 ## [Unreleased]
 ### Changed
+- Cleanup of resolution of working directory to use proper path types - PATCH
 
 ### Added
 
