@@ -132,14 +132,12 @@ impl DockerCommandBuilder {
         self
     }
 
-    pub fn add_docker_switch(mut self, switch: &str) -> Self {
-        for s in switch.split_whitespace() {
-            self.switches.push(s.into());
-        }
+    pub fn add_docker_switch<S: AsRef<OsStr>>(mut self, switch: S) -> Self {
+        self.switches.push(switch.as_ref().into());
         self
     }
 
-    pub fn set_working_directory(self, directory: &str) -> Self {
+    pub fn set_working_directory<S: AsRef<OsStr>>(self, directory: S) -> Self {
         let mut cmd = self;
         cmd = cmd.add_docker_switch("-w");
         cmd = cmd.add_docker_switch(directory);

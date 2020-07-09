@@ -79,7 +79,8 @@ fn configure_forward_user(
 ) -> DockerCommandBuilder {
     if config.forward_user {
         let (ref user, ref group) = env.user_details;
-        cmd.add_docker_switch(&format!("--user {}:{}", user, group))
+        cmd.add_docker_switch("--user")
+            .add_docker_switch(&format!("{}:{}", user, group))
     } else {
         cmd
     }
@@ -107,7 +108,9 @@ fn configure_docker_switches(
 ) -> DockerCommandBuilder {
     let mut cmd = cmd;
     for switch in &config.docker_switches {
-        cmd = cmd.add_docker_switch(&switch);
+        for s in switch.split_whitespace() {
+            cmd = cmd.add_docker_switch(s);
+        }
     }
 
     cmd
@@ -118,15 +121,11 @@ fn configure_working_directory(
     env: &Environment,
     config: &FlokiConfig,
 ) -> DockerCommandBuilder {
-    cmd.set_working_directory(
-        get_working_directory(
-            &env.current_directory,
-            &env.floki_root,
-            &path::PathBuf::from(&config.mount),
-        )
-        .to_str()
-        .unwrap(),
-    )
+    cmd.set_working_directory(get_working_directory(
+        &env.current_directory,
+        &env.floki_root,
+        &path::PathBuf::from(&config.mount),
+    ))
 }
 
 /// Add mounts for each of the passed in volumes
