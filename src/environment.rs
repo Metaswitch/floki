@@ -27,13 +27,14 @@ impl Environment {
     /// Gather information on the environment floki is running in
     pub fn gather(config_file: &Option<path::PathBuf>) -> Result<Self, Error> {
         let (floki_root, config_path) = resolve_floki_root_and_config(config_file)?;
+        let (uid, gid) = get_user_details();
         Ok(Environment {
-            user_details: get_user_details(),
+            user_details: (uid, gid),
             current_directory: get_current_working_directory()?,
             floki_root: floki_root,
             config_file: normalize_path(config_path)?,
             ssh_agent_socket: get_ssh_agent_socket_path(),
-            floki_workspace: get_floki_work_path()?,
+            floki_workspace: get_floki_work_path(uid),
         })
     }
 }
@@ -93,11 +94,9 @@ fn resolve_floki_root_and_config(
 }
 
 /// Resolve a directory for floki to use for user-global file (caches etc)
-fn get_floki_work_path() -> Result<path::PathBuf, Error> {
-    let root: path::PathBuf = env::var("HOME")
-        .unwrap_or(format!("/tmp/{}/", get_user_details().0))
-        .into();
-    Ok(root.join(".floki"))
+fn get_floki_work_path(uid: libc::uid_t) -> path::PathBuf {
+    let root: path::PathBuf = env::var("HOME").unwrap_or(format!("/tmp/{}/", uid)).into();
+    root.join(".floki")
 }
 
 /// Normalize the filepath - this turns a relative path into an absolute one - to
