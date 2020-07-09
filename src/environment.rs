@@ -4,12 +4,11 @@ use failure::Error;
 use std::env;
 use std::ffi::OsString;
 use std::path;
-use std::process::Command;
 
 #[derive(Debug)]
 pub struct Environment {
     /// User uid and gid
-    pub user_details: (String, String),
+    pub user_details: (libc::uid_t, libc::gid_t),
     /// The directory floki was launched in
     pub current_directory: path::PathBuf,
     /// The root directory for floki (may be different from
@@ -29,7 +28,7 @@ impl Environment {
     pub fn gather(config_file: &Option<path::PathBuf>) -> Result<Self, Error> {
         let (floki_root, config_path) = resolve_floki_root_and_config(config_file)?;
         Ok(Environment {
-            user_details: get_user_details()?,
+            user_details: get_user_details(),
             current_directory: get_current_working_directory()?,
             floki_root: floki_root,
             config_file: normalize_path(config_path)?,
@@ -39,19 +38,13 @@ impl Environment {
     }
 }
 
-/// Run a command and extract stdout as a String
-fn run_and_get_raw_output(cmd: &mut Command) -> Result<String, Error> {
-    let output = String::from_utf8(cmd.output()?.stdout)?;
-    Ok(output.trim_end().into())
-}
-
 /// Get the user and group ids of the current user
-fn get_user_details() -> Result<(String, String), Error> {
-    let user = run_and_get_raw_output(Command::new("id").arg("-u"))?;
-    debug!("User's current id: {:?}", user);
-    let group = run_and_get_raw_output(Command::new("id").arg("-g"))?;
-    debug!("User's current group: {:?}", group);
-    Ok((user, group))
+fn get_user_details() -> (libc::uid_t, libc::gid_t) {
+    let user = getuid();
+    debug!("User's current id: {}", user);
+    let group = getgid();
+    debug!("User's current group: {}", group);
+    (user, group)
 }
 
 /// Get the current working directory as a String
@@ -102,7 +95,7 @@ fn resolve_floki_root_and_config(
 /// Resolve a directory for floki to use for user-global file (caches etc)
 fn get_floki_work_path() -> Result<path::PathBuf, Error> {
     let root: path::PathBuf = env::var("HOME")
-        .unwrap_or(format!("/tmp/{}/", get_user_details()?.0))
+        .unwrap_or(format!("/tmp/{}/", get_user_details().0))
         .into();
     Ok(root.join(".floki"))
 }
@@ -118,6 +111,16 @@ fn normalize_path(path: path::PathBuf) -> Result<path::PathBuf, Error> {
     })?;
 
     Ok(res)
+}
+
+/// Safe wrapper for the getuid function
+fn getuid() -> libc::uid_t {
+    unsafe { libc::getuid() }
+}
+
+/// Safe wrapper for the getgid function
+fn getgid() -> libc::gid_t {
+    unsafe { libc::getgid() }
 }
 
 #[cfg(test)]

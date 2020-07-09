@@ -60,9 +60,9 @@ fn configure_dind(
 }
 
 fn configure_floki_user_env(cmd: DockerCommandBuilder, env: &Environment) -> DockerCommandBuilder {
-    let (ref user, ref group) = env.user_details;
-    let new_cmd = cmd.add_environment("FLOKI_HOST_UID", &user);
-    new_cmd.add_environment("FLOKI_HOST_GID", &group)
+    let (user, group) = env.user_details;
+    let new_cmd = cmd.add_environment("FLOKI_HOST_UID", user.to_string());
+    new_cmd.add_environment("FLOKI_HOST_GID", group.to_string())
 }
 
 fn configure_floki_host_mountdir_env(
