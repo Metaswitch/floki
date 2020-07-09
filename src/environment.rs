@@ -5,10 +5,18 @@ use std::env;
 use std::ffi::OsString;
 use std::path;
 
+#[derive(Debug, Clone, Copy)]
+pub struct User {
+    /// The users uid
+    pub uid: libc::uid_t,
+    /// The users gid
+    pub gid: libc::gid_t,
+}
+
 #[derive(Debug)]
 pub struct Environment {
     /// User uid and gid
-    pub user_details: (libc::uid_t, libc::gid_t),
+    pub user_details: User,
     /// The directory floki was launched in
     pub current_directory: path::PathBuf,
     /// The root directory for floki (may be different from
@@ -27,25 +35,25 @@ impl Environment {
     /// Gather information on the environment floki is running in
     pub fn gather(config_file: &Option<path::PathBuf>) -> Result<Self, Error> {
         let (floki_root, config_path) = resolve_floki_root_and_config(config_file)?;
-        let (uid, gid) = get_user_details();
+        let user = get_user_details();
         Ok(Environment {
-            user_details: (uid, gid),
+            user_details: user,
             current_directory: get_current_working_directory()?,
             floki_root: floki_root,
             config_file: normalize_path(config_path)?,
             ssh_agent_socket: get_ssh_agent_socket_path(),
-            floki_workspace: get_floki_work_path(uid),
+            floki_workspace: get_floki_work_path(user.uid),
         })
     }
 }
 
 /// Get the user and group ids of the current user
-fn get_user_details() -> (libc::uid_t, libc::gid_t) {
-    let user = getuid();
-    debug!("User's current id: {}", user);
-    let group = getgid();
-    debug!("User's current group: {}", group);
-    (user, group)
+fn get_user_details() -> User {
+    let uid = getuid();
+    debug!("User's current id: {}", uid);
+    let gid = getgid();
+    debug!("User's current group: {}", gid);
+    User { uid, gid }
 }
 
 /// Get the current working directory as a String
