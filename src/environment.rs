@@ -8,9 +8,9 @@ use std::path;
 #[derive(Debug, Clone, Copy)]
 pub struct User {
     /// The users uid
-    pub uid: libc::uid_t,
+    pub uid: nix::unistd::Uid,
     /// The users gid
-    pub gid: libc::gid_t,
+    pub gid: nix::unistd::Gid,
 }
 
 #[derive(Debug)]
@@ -49,10 +49,9 @@ impl Environment {
 
 /// Get the user and group ids of the current user
 fn get_user_details() -> User {
-    let uid = getuid();
-    debug!("User's current id: {}", uid);
-    let gid = getgid();
-    debug!("User's current group: {}", gid);
+    let uid = nix::unistd::getuid();
+    let gid = nix::unistd::getgid();
+    debug!("Current user has uid {} and group {}", uid, gid);
     User { uid, gid }
 }
 
@@ -102,7 +101,7 @@ fn resolve_floki_root_and_config(
 }
 
 /// Resolve a directory for floki to use for user-global file (caches etc)
-fn get_floki_work_path(uid: libc::uid_t) -> path::PathBuf {
+fn get_floki_work_path(uid: nix::unistd::Uid) -> path::PathBuf {
     let root: path::PathBuf = env::var("HOME").unwrap_or(format!("/tmp/{}/", uid)).into();
     root.join(".floki")
 }
@@ -118,16 +117,6 @@ fn normalize_path(path: path::PathBuf) -> Result<path::PathBuf, Error> {
     })?;
 
     Ok(res)
-}
-
-/// Safe wrapper for the getuid function
-fn getuid() -> libc::uid_t {
-    unsafe { libc::getuid() }
-}
-
-/// Safe wrapper for the getgid function
-fn getgid() -> libc::gid_t {
-    unsafe { libc::getgid() }
 }
 
 #[cfg(test)]
