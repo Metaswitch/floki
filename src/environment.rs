@@ -13,6 +13,16 @@ pub struct User {
     pub gid: nix::unistd::Gid,
 }
 
+impl User {
+    /// Get the user and group ids of the current user
+    fn current() -> Self {
+        let uid = nix::unistd::getuid();
+        let gid = nix::unistd::getgid();
+        debug!("Current user has uid {} and group {}", uid, gid);
+        Self { uid, gid }
+    }
+}
+
 #[derive(Debug)]
 pub struct Environment {
     /// User uid and gid
@@ -35,7 +45,7 @@ impl Environment {
     /// Gather information on the environment floki is running in
     pub fn gather(config_file: &Option<path::PathBuf>) -> Result<Self, Error> {
         let (floki_root, config_path) = resolve_floki_root_and_config(config_file)?;
-        let user = get_user_details();
+        let user = User::current();
         Ok(Environment {
             user_details: user,
             current_directory: get_current_working_directory()?,
@@ -45,14 +55,6 @@ impl Environment {
             floki_workspace: get_floki_work_path(user.uid),
         })
     }
-}
-
-/// Get the user and group ids of the current user
-fn get_user_details() -> User {
-    let uid = nix::unistd::getuid();
-    let gid = nix::unistd::getgid();
-    debug!("Current user has uid {} and group {}", uid, gid);
-    User { uid, gid }
 }
 
 /// Get the current working directory as a String
