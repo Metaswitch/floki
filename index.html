@@ -277,7 +277,7 @@ There are things you can add with <code>docker_switches</code> which are reprodu
 
 <p>To obtain <code>curl</code> and extract the latest linux binary directly in your shell, run</p>
 
-<pre><code>$ curl -L https://github.com/Metaswitch/floki/releases/download/0.5.0/floki-0.5.0-linux.tar.gz | tar xzvf -
+<pre><code>$ curl -L https://github.com/Metaswitch/floki/releases/download/0.6.0/floki-0.6.0-linux.tar.gz | tar xzvf -
 </code></pre>
 
 <p>You should be able to run <code>floki</code> from your working directory:</p>
@@ -290,6 +290,13 @@ floki 0.1.0
 
 <pre><code># mv floki /usr/local/bin/
 </code></pre>
+
+<p>Generate shell completions with:</p>
+
+<pre><code>source &lt;(floki completion &lt;shell&gt;)
+</code></pre>
+
+<p>See <code>floki completion --help</code> for a list of available <code>&lt;shell&gt;</code>s.</p>
 
 <p>Enjoy!</p>
 
