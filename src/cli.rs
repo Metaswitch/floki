@@ -12,6 +12,14 @@ pub(crate) enum Subcommand {
     /// Pull the image in the configuration file
     #[structopt(name = "pull")]
     Pull {},
+
+    /// Generate shell completions to stdout.
+    #[structopt(name = "completion")]
+    Completion {
+        /// The shell to generate completions for.  Choose from: bash, fish, zsh, powershell, elvish
+        #[structopt(name = "SHELL", parse(try_from_str))]
+        shell: structopt::clap::Shell,
+    },
 }
 
 /// Main CLI interface

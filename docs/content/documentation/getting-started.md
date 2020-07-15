@@ -27,6 +27,14 @@ Move it onto your path to run it from anywhere. E.g.
 # mv floki /usr/local/bin/
 ```
 
+Generate shell completions with:
+
+```
+source <(floki completion <shell>)
+```
+
+See `floki completion --help` for a list of available `<shell>`s.
+
 Enjoy!
 
 ## Getting started

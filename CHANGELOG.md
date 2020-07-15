@@ -11,8 +11,15 @@ Status: Available for use
 
 ## [Unreleased]
 ### Changed
+- Cleanup of resolution of working directory to use proper path types - PATCH
+- Cleanup and improve handling of user uid and gid - PATCH
 
 ### Added
+
+- **New Subcommand**: `completion` :tada:
+  + Generation of shell :shell: completion added for an assortment of shells:
+    bash, fish, zsh, powershell, elvish.
+  + See `floki completion --help`
 
 ## [0.5.0] - 2020-05-05
 ### Changed

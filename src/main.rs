@@ -64,6 +64,10 @@ fn run_floki_from_args(args: &Cli) -> Result<(), Error> {
             run_floki_container(&environ, &config, inner_command)
         }
 
+        Some(Subcommand::Completion { shell }) => {
+            Ok(Cli::clap().gen_completions_to("floki", *shell, &mut std::io::stdout()))
+        }
+
         // Launch an interactive floki shell (the default)
         None => {
             let inner_command = config.shell.inner_shell().to_string();

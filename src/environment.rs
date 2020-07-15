@@ -4,12 +4,29 @@ use failure::Error;
 use std::env;
 use std::ffi::OsString;
 use std::path;
-use std::process::Command;
+
+#[derive(Debug, Clone, Copy)]
+pub struct User {
+    /// The users uid
+    pub uid: nix::unistd::Uid,
+    /// The users gid
+    pub gid: nix::unistd::Gid,
+}
+
+impl User {
+    /// Get the user and group ids of the current user
+    fn current() -> Self {
+        let uid = nix::unistd::getuid();
+        let gid = nix::unistd::getgid();
+        debug!("Current user has uid {} and group {}", uid, gid);
+        Self { uid, gid }
+    }
+}
 
 #[derive(Debug)]
 pub struct Environment {
     /// User uid and gid
-    pub user_details: (String, String),
+    pub user_details: User,
     /// The directory floki was launched in
     pub current_directory: path::PathBuf,
     /// The root directory for floki (may be different from
@@ -28,30 +45,16 @@ impl Environment {
     /// Gather information on the environment floki is running in
     pub fn gather(config_file: &Option<path::PathBuf>) -> Result<Self, Error> {
         let (floki_root, config_path) = resolve_floki_root_and_config(config_file)?;
+        let user = User::current();
         Ok(Environment {
-            user_details: get_user_details()?,
+            user_details: user,
             current_directory: get_current_working_directory()?,
             floki_root: floki_root,
             config_file: normalize_path(config_path)?,
             ssh_agent_socket: get_ssh_agent_socket_path(),
-            floki_workspace: get_floki_work_path()?,
+            floki_workspace: get_floki_work_path(user.uid),
         })
     }
-}
-
-/// Run a command and extract stdout as a String
-fn run_and_get_raw_output(cmd: &mut Command) -> Result<String, Error> {
-    let output = String::from_utf8(cmd.output()?.stdout)?;
-    Ok(output.trim_end().into())
-}
-
-/// Get the user and group ids of the current user
-fn get_user_details() -> Result<(String, String), Error> {
-    let user = run_and_get_raw_output(Command::new("id").arg("-u"))?;
-    debug!("User's current id: {:?}", user);
-    let group = run_and_get_raw_output(Command::new("id").arg("-g"))?;
-    debug!("User's current group: {:?}", group);
-    Ok((user, group))
 }
 
 /// Get the current working directory as a String
@@ -100,11 +103,9 @@ fn resolve_floki_root_and_config(
 }
 
 /// Resolve a directory for floki to use for user-global file (caches etc)
-fn get_floki_work_path() -> Result<path::PathBuf, Error> {
-    let root: path::PathBuf = env::var("HOME")
-        .unwrap_or(format!("/tmp/{}/", get_user_details()?.0))
-        .into();
-    Ok(root.join(".floki"))
+fn get_floki_work_path(uid: nix::unistd::Uid) -> path::PathBuf {
+    let root: path::PathBuf = env::var("HOME").unwrap_or(format!("/tmp/{}/", uid)).into();
+    root.join(".floki")
 }
 
 /// Normalize the filepath - this turns a relative path into an absolute one - to
