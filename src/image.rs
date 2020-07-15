@@ -7,9 +7,24 @@ use yaml_rust::YamlLoader;
 
 use crate::errors::{FlokiError, FlokiSubprocessExitStatus};
 
+/// Build Spec provides floki with the information needed to build
+/// a container image.
+///
+/// ---
+///
+/// Back to:
+/// - [Image Config](./enum.Image.html#variant.Build)
+///
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct BuildSpec {
+    /// The name to give the container.
+    ///
+    /// NOTE: floki will append ":floki" to provide a docker tag.  Do not
+    /// include a tag following a ":" in this name.
+    ///
     name: String,
+
+    /// TODO
     #[serde(default = "default_dockerfile")]
     dockerfile: PathBuf,
     #[serde(default = "default_context")]
@@ -31,11 +46,38 @@ fn default_context() -> PathBuf {
     ".".into()
 }
 
+/// Configure the container image to use.
+///
+/// ---
+///
+/// Back to:
+///
+/// - [Floki Config](../config/struct.FlokiConfig.html#structfield.image)
+///
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum Image {
+    /// Provide the name of a prebuilt image in a docker registry, e.g:
+    ///
+    /// ```yaml
+    /// debian:sid
+    /// ```
+    ///
     Name(String),
+
+    /// Instruct floki to build the image.
+    ///
+    /// Provide a [Build Spec](./struct.BuildSpec.html) under the `build`
+    /// key.
+    ///
+    /// ```yaml
+    /// build:
+    ///   <Build Spec>
+    /// ```
+    ///
     Build { build: BuildSpec },
+
+    /// TODO
     Yaml { yaml: YamlSpec },
 }
 

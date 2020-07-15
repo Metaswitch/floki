@@ -71,10 +71,32 @@ pub(crate) struct Volume {
     pub(crate) mount: path::PathBuf,
 }
 
+/// # Floki Configuration Reference
+///
+/// By default floki looks for its configuration file in `floki.yaml`
+/// (See `floki --help` for how to override this).
+///
+/// This document serves as a complete reference for all that can be
+/// included in this configuration file.  See the [user documentation][ud]
+/// for installation instructions, usage guidance, and recipes for
+/// a number of use cases.
+///
+/// [ud]: https://metaswitch.github.io/floki/
+///
+/// Floki config is defined as a [YAML][yaml] document with the structure
+/// detailed below.
+///
+/// [yaml]: https://yaml.org/spec/1.2/spec.html
+///
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(crate) struct FlokiConfig {
+    /// Specify how floki sources or builds the image to host your
+    /// environment.
+    ///
     pub(crate) image: image::Image,
+
+    /// TODO
     #[serde(default = "Vec::new")]
     pub(crate) init: Vec<String>,
     #[serde(default = "default_shell")]
