@@ -16,6 +16,7 @@ Status: Available for use
 ### Added
 
 ### Fixed
+- Fixed bug in new `add_docker_switch` behaviour.
 
 ## [0.6.0] - 2020-07-15
 
