@@ -16,6 +16,10 @@ Status: Available for use
 ### Added
 
 ### Fixed
+
+## [0.6.1] - 2020-07-16
+
+### Fixed
 - Fixed bug in new `add_docker_switch` behaviour.
 
 ## [0.6.0] - 2020-07-15
@@ -245,7 +249,8 @@ Status: Available for use
 - Initial primitive version
 ### Changed
 
-[unreleased]: https://github.com/Metaswitch/floki/compare/0.6.0...HEAD
+[unreleased]: https://github.com/Metaswitch/floki/compare/0.6.1...HEAD
+[0.6.1]: https://github.com/Metaswitch/floki/compare/0.6.0...0.6.1
 [0.6.0]: https://github.com/Metaswitch/floki/compare/0.5.0...0.6.0
 [0.5.0]: https://github.com/Metaswitch/floki/compare/0.4.3...0.5.0
 [0.4.3]: https://github.com/Metaswitch/floki/compare/0.4.2...0.4.3
