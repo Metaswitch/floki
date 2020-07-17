@@ -14,6 +14,7 @@ Status: Available for use
 ### Changed
 
 ### Added
+- Added Bors support
 
 ### Fixed
 

@@ -4,6 +4,17 @@ os:
   - linux
   - osx
 
+branches:
+  only:
+    # bors
+    - staging
+    - trying
+    # dependabot, which creates all MRs in dependabot/
+    - /^dependabot\/.*$/
+    # release branching and tagging
+    - /^release-\d+\.\d+\.\d+$/
+    - /^\d+\.\d+\.\d+$/
+
 # Build and test
 language: rust
 rust:
