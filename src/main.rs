@@ -68,6 +68,11 @@ fn run_floki_from_args(args: &Cli) -> Result<(), Error> {
             Ok(Cli::clap().gen_completions_to("floki", *shell, &mut std::io::stdout()))
         }
 
+        Some(Subcommand::Volume {}) => {
+            list_volumes(&environ, &config);
+            Ok(())
+        }
+
         // Launch an interactive floki shell (the default)
         None => {
             let inner_command = config.shell.inner_shell().to_string();
@@ -84,6 +89,22 @@ fn run_floki_container(
 ) -> Result<(), Error> {
     config.image.obtain_image(&environ.floki_root)?;
     interpret::run_container(&environ, &config, &inner_command)
+}
+
+/// Print the volumes used in the current configuration
+fn list_volumes(environ: &environment::Environment, config: &FlokiConfig) {
+    println!("{:20} {:20} {}", "NAME", "MOUNT", "HOSTPATH");
+    for (name, volume) in config.volumes.iter() {
+        let hostpath =
+            volumes::cache_path(&environ.floki_workspace, &environ.config_file, name, volume);
+        let mount = &volume.mount;
+        println!(
+            "{:20} {:20} {}",
+            name,
+            mount.to_string_lossy(),
+            hostpath.to_string_lossy()
+        );
+    }
 }
 
 /// Configure the logger

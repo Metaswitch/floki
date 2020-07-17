@@ -24,7 +24,7 @@ pub(crate) fn resolve_volume_mounts<'a>(
         .collect()
 }
 
-fn cache_path(
+pub(crate) fn cache_path(
     work_path: &path::PathBuf,
     config_filepath: &path::PathBuf,
     name: &str,
