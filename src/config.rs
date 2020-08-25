@@ -8,10 +8,42 @@ use std::collections::BTreeMap;
 use std::fs::File;
 use std::path;
 
+/// Specify the shell(s) for floki to run.
+///
+/// Floki runs the commands under [`init`][init] in an
+/// "outer" shell, and then drops the user into an "inner"
+/// shell.
+///
+/// [init]: ./struct.FlokiConfig.html#structfield.init
+///
+/// ---
+///
+/// Back to:
+/// - [Floki Config](./struct.FlokiConfig.html#structfield.shell)
+///
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 pub(crate) enum Shell {
+    /// Provide a string to specify both shells as the
+    /// same.
+    ///
+    /// e.g.
+    ///
+    /// ```yaml
+    /// bash
+    /// ```
+    ///
     Shell(String),
+
+    /// Specify both shells separately.
+    ///
+    /// e.g.
+    ///
+    /// ```yaml
+    /// inner: bash
+    /// outer: sh
+    /// ```
+    ///
     TwoShell { inner: String, outer: String },
 }
 
@@ -31,10 +63,32 @@ impl Shell {
     }
 }
 
+/// Enable Docker-in-Docker inside the container that
+/// floki runs.
+///
+/// ---
+///
+/// Back to:
+/// - [Floki Config](./struct.FlokiConfig.html#structfield.dind)
+///
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 pub(crate) enum DindConfig {
+    /// Provide a boolean.
+    ///
+    /// If `true` is given, floki will enable Docker-in-Docker
+    /// using dind image: `docker:stable-dind`.
+    ///
     Toggle(bool),
+
+    /// Enable Docker-in-Docker and specify the dind image to use.
+    ///
+    /// e.g.
+    ///
+    /// ```yaml
+    /// image: docker:19.03-dind
+    /// ```
+    ///
     Image { image: String },
 }
 
@@ -59,15 +113,35 @@ impl DindConfig {
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
-/// The Volume structure captures configuration for floki volumes
+/// # Floki Volumes
+///
+/// Floki has the ability to use volumes for caching build artifacts between
+/// runs of the container (amongst other things).
+///
+/// Floki creates directories on the host to back these volumes
+/// in `~/.floki/volumes`.
+///
+/// ---
+///
+/// Back to:
+/// - [Floki Config](./struct.FlokiConfig.html#structfield.volumes)
+///
 pub(crate) struct Volume {
     #[serde(default = "default_to_false")]
-    /// A shared volume is reused by containers which also use a
-    /// shared volume by the same name. Volumes which are not
-    /// shared are localised to a particular floki configuration file.
+    /// _Optional_
+    ///
+    /// _Default:_ `false`
+    ///
+    /// Share this volume with other containers instantiated from
+    /// different floki config files.
+    ///
+    /// If `false`, this volume is only accessible to containers
+    /// instantiated using this config file.
+    ///
     pub(crate) shared: bool,
-    /// The mount path is the path at which the volume is mounted
-    /// inside the floki container.
+
+    /// The path to which the volume is mounted inside the container.
+    ///
     pub(crate) mount: path::PathBuf,
 }
 
@@ -96,21 +170,85 @@ pub(crate) struct FlokiConfig {
     ///
     pub(crate) image: image::Image,
 
-    /// TODO
+    /// _Optional_
+    ///
+    /// Commands to be run before dropping the user into an interactive
+    /// shell.
+    ///
+    /// If "inner" and "outer" shells are defined under [`shell`](#structfield.shell),
+    /// these commands run in the outer shell.
+    ///
     #[serde(default = "Vec::new")]
     pub(crate) init: Vec<String>,
+
+    /// _Optional_
+    ///
+    /// _Default:_ `sh`
+    ///
+    /// Specify the shell for floki to run.
+    ///
     #[serde(default = "default_shell")]
     pub(crate) shell: Shell,
+
+    /// _Optional_
+    ///
+    /// _Default:_ `/src`
+    ///
+    /// Path inside the container that floki will mount the
+    /// current working directory to.
+    ///
     #[serde(default = "default_mount")]
     pub(crate) mount: path::PathBuf,
+
+    /// _Optional_
+    ///
+    /// Extra command line arguments to pass to docker.
+    ///
+    /// NOTE: This is a back door and if you find you have repeated use
+    /// of the same invocation using `docker_switches`, consider raising
+    /// an issue to request the use case be covered with mainline
+    /// floki features.
+    ///
     #[serde(default = "Vec::new")]
     pub(crate) docker_switches: Vec<String>,
+
+    /// _Optional_
+    ///
+    /// _Default:_ `false`
+    ///
+    /// Forward your ssh-agent into the container.
+    ///
+    /// NOTE: You will need to have an ssh-agent running on the host
+    /// before launching floki.
+    ///
     #[serde(default = "default_to_false")]
     pub(crate) forward_ssh_agent: bool,
+
+    /// _Optional_
+    ///
+    /// _Default:_ `false`
+    ///
+    /// Enable Docker-in-Docker inside the container.
+    ///
     #[serde(default = "DindConfig::deactivated")]
     pub(crate) dind: DindConfig,
+
+    /// _Optional_
+    ///
+    /// _Default:_ `false`
+    ///
+    /// Run interactive shell in the container as the host user.
+    ///
     #[serde(default = "default_to_false")]
     pub(crate) forward_user: bool,
+
+    /// _Optional_
+    ///
+    /// Specify the volumes to mount in the container as a mapping
+    /// of a name to [volume config][vol].
+    ///
+    /// [vol]: ./struct.Volume.html
+    ///
     #[serde(default = "BTreeMap::new")]
     pub(crate) volumes: BTreeMap<String, Volume>,
 }

@@ -14,6 +14,7 @@ use crate::errors::{FlokiError, FlokiSubprocessExitStatus};
 ///
 /// Back to:
 /// - [Image Config](./enum.Image.html#variant.Build)
+/// - [Floki Config](../config/struct.FlokiConfig.html#structfield.image)
 ///
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct BuildSpec {
@@ -24,17 +25,55 @@ pub struct BuildSpec {
     ///
     name: String,
 
-    /// TODO
+    /// _Optional_
+    ///
+    /// _Default:_ `Dockerfile`
+    ///
+    /// Path to the dockerfile to build the image from.
+    ///
     #[serde(default = "default_dockerfile")]
     dockerfile: PathBuf,
+
+    /// _Optional_
+    ///
+    /// _Default:_ `"."`
+    ///
+    /// Path to the root of the build context for the dockerfile.
+    ///
     #[serde(default = "default_context")]
     context: PathBuf,
+
+    /// _Optional_
+    ///
+    /// Target to use, for multi-stage dockerfiles.
+    ///
     target: Option<String>,
 }
 
+/// Data to reference an image name from the key of another YAML file.
+///
+/// ---
+///
+/// Back to:
+/// - [Image Config](./enum.Image.html#variant.Yaml)
+/// - [Floki Config](../config/struct.FlokiConfig.html#structfield.image)
+///
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct YamlSpec {
+    /// Path to foreign YAML file.
+    ///
     pub file: PathBuf,
+
+    /// Key path to image name data.
+    ///
+    /// - Key path looks like: `path.to.key`
+    ///   + A period separated list of YAML keys to lookup.
+    ///   + Keys may only be strings of integers.
+    ///   + `jq` style referencing of arrays (`key.[0].other_key` or
+    ///     `key.[].other_key`) is _not supported_.
+    ///   + Preceding period will be read as the top level key
+    ///     being the empty string, e.g: `.path.to.key => "".path.to.key`.
+    ///
     key: String,
 }
 
@@ -77,7 +116,16 @@ pub enum Image {
     ///
     Build { build: BuildSpec },
 
-    /// TODO
+    /// Get the image name by referencing a field in another YAML file.
+    ///
+    /// Provide a [Yaml Image Reference](./struct.YamlSpec.html) under the
+    /// `yaml` key.
+    ///
+    /// ```yaml
+    /// yaml:
+    ///   <Yaml Image Reference>
+    /// ```
+    ///
     Yaml { yaml: YamlSpec },
 }
 
