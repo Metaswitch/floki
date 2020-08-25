@@ -39,12 +39,15 @@ fn main() -> CliResult {
 fn run_floki_from_args(args: &Cli) -> Result<(), Error> {
     debug!("Got command line arguments: {:?}", &args);
 
-    let environ = environment::Environment::gather(&args.config_file)?;
-    debug!("Got environment {:?}", &environ);
+    let environ = || -> Result<environment::Environment, Error> {
+        let en = environment::Environment::gather(&args.config_file)?;
+        debug!("Got environment {:?}", &en);
+        debug!("Selected configuration file: {:?}", &en.config_file);
+        Ok(en)
+    };
 
-    debug!("Selected configuration file: {:?}", &environ.config_file);
+    let config = |env: &environment::Environment| FlokiConfig::from_file(&env.config_file);
 
-    let config = FlokiConfig::from_file(&environ.config_file)?;
     if args.local {
         warn!("-l/--local is deprecated and may be removed in a future release");
     }
@@ -53,6 +56,7 @@ fn run_floki_from_args(args: &Cli) -> Result<(), Error> {
     match &args.subcommand {
         // Pull the image in the configuration file
         Some(Subcommand::Pull {}) => {
+            let config = config(&environ()?)?;
             debug!("Trying to pull image {:?}", &config.image);
             debug!("Pulling image: {}", config.image.name()?);
             image::pull_image(&config.image.name()?)
@@ -60,6 +64,8 @@ fn run_floki_from_args(args: &Cli) -> Result<(), Error> {
 
         // Run a command in the floki container
         Some(Subcommand::Run { command }) => {
+            let environ = environ()?;
+            let config = config(&environ)?;
             let inner_command = interpret::command_in_shell(config.shell.inner_shell(), &command);
             run_floki_container(&environ, &config, inner_command)
         }
@@ -70,6 +76,8 @@ fn run_floki_from_args(args: &Cli) -> Result<(), Error> {
 
         // Launch an interactive floki shell (the default)
         None => {
+            let environ = environ()?;
+            let config = config(&environ)?;
             let inner_command = config.shell.inner_shell().to_string();
             run_floki_container(&environ, &config, inner_command)
         }
