@@ -40,11 +40,10 @@ pub(crate) fn run_container(
     cmd.run(&[config.shell.outer_shell(), "-c", &subshell_command])
 }
 
-pub(crate) fn command_in_shell(shell: &str, command: &Vec<String>) -> String {
+pub(crate) fn command_in_shell(shell: &str, command: &[String]) -> String {
     // Make sure our command runs in a subshell (we might switch user)
     let inner_shell: String = shell.to_string();
-    let command_string = inner_shell + " -c \"" + &command.join(" ") + "\"";
-    command_string
+    inner_shell + " -c \"" + &command.join(" ") + "\""
 }
 
 fn configure_dind(
@@ -95,7 +94,7 @@ fn configure_forward_ssh_agent(
         if let Some(ref path) = env.ssh_agent_socket {
             Ok(command::enable_forward_ssh_agent(cmd, path))
         } else {
-            Err(errors::FlokiError::NoSshAuthSock {})?
+            Err(errors::FlokiError::NoSshAuthSock {}.into())
         }
     } else {
         Ok(cmd)
@@ -131,7 +130,7 @@ fn configure_working_directory(
 /// Add mounts for each of the passed in volumes
 fn configure_volumes(
     cmd: DockerCommandBuilder,
-    volumes: &Vec<(path::PathBuf, &path::PathBuf)>,
+    volumes: &[(path::PathBuf, &path::PathBuf)],
 ) -> DockerCommandBuilder {
     let mut cmd = cmd; // Shadow as mutable
     for (src, dst) in volumes.iter() {
@@ -141,7 +140,7 @@ fn configure_volumes(
 }
 
 /// Create the backing directories for floki volumes if needed
-fn instantiate_volumes(volumes: &Vec<(path::PathBuf, &path::PathBuf)>) -> Result<(), Error> {
+fn instantiate_volumes(volumes: &[(path::PathBuf, &path::PathBuf)]) -> Result<(), Error> {
     for (src, _) in volumes.iter() {
         std::fs::create_dir_all(src)?;
     }
@@ -170,8 +169,8 @@ fn get_mount_specification<'a, 'b>(
 
 /// Turn the init section of a floki.yaml file into a command
 /// that can be given to a shell
-fn subshell_command(init: &Vec<String>, command: &str) -> String {
-    let mut args: Vec<&str> = init.into_iter().map(|s| s as &str).collect::<Vec<&str>>();
+fn subshell_command(init: &[String], command: &str) -> String {
+    let mut args: Vec<&str> = init.iter().map(|s| s as &str).collect::<Vec<&str>>();
     args.push(command);
     args.join(" && ")
 }

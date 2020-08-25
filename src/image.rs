@@ -101,9 +101,10 @@ impl Image {
                         image: self.name()?,
                         exit_status: FlokiSubprocessExitStatus {
                             process_description: "docker build".into(),
-                            exit_status: exit_status,
+                            exit_status,
                         },
-                    })?
+                    }
+                    .into())
                 }
             }
             // All other cases we just return the name
@@ -129,9 +130,10 @@ pub fn pull_image(name: &str) -> Result<(), Error> {
             image: name.into(),
             exit_status: FlokiSubprocessExitStatus {
                 process_description: "docker pull".into(),
-                exit_status: exit_status,
+                exit_status,
             },
-        })?
+        }
+        .into())
     }
 }
 

@@ -1,5 +1,4 @@
 /// Error type for floki
-use serde_yaml;
 use std::fmt;
 use std::io;
 use std::process::ExitStatus;
@@ -72,7 +71,7 @@ pub enum FlokiError {
 fn exit_code_diagnosis(exit_status: &ExitStatus) -> String {
     match exit_status.code() {
         Some(rc) => format!("exited with return code {}", rc),
-        None => format!("terminated by a signal"),
+        None => "terminated by a signal".to_string(),
     }
 }
 

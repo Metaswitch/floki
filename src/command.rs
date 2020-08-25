@@ -3,7 +3,6 @@ use failure::Error;
 use std::ffi::{OsStr, OsString};
 use std::path;
 use std::process::{Command, Stdio};
-use uuid;
 
 #[derive(Debug, Clone)]
 pub struct DockerCommandBuilder {
@@ -69,9 +68,10 @@ impl DockerCommandBuilder {
             Err(FlokiError::RunContainerFailed {
                 exit_status: FlokiSubprocessExitStatus {
                     process_description: "docker run".into(),
-                    exit_status: exit_status,
+                    exit_status,
                 },
-            })?
+            }
+            .into())
         }
     }
 
@@ -100,9 +100,10 @@ impl DockerCommandBuilder {
             Err(FlokiError::RunContainerFailed {
                 exit_status: FlokiSubprocessExitStatus {
                     process_description: "docker run".into(),
-                    exit_status: exit_status,
+                    exit_status,
                 },
-            })?
+            }
+            .into())
         }
     }
 

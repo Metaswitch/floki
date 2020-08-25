@@ -49,7 +49,7 @@ impl Environment {
         Ok(Environment {
             user_details: user,
             current_directory: get_current_working_directory()?,
-            floki_root: floki_root,
+            floki_root,
             config_file: normalize_path(config_path)?,
             ssh_agent_socket: get_ssh_agent_socket_path(),
             floki_workspace: get_floki_work_path(user.uid),
@@ -74,7 +74,7 @@ fn find_floki_yaml(current_directory: &path::Path) -> Result<path::PathBuf, Erro
         .ancestors()
         .map(|a| a.join("floki.yaml"))
         .find(|f| f.is_file())
-        .ok_or(errors::FlokiError::ProblemFindingConfigYaml {}.into())
+        .ok_or_else(|| errors::FlokiError::ProblemFindingConfigYaml {}.into())
 }
 
 /// Take a file path, and return a tuple consisting of its parent directory and the file path

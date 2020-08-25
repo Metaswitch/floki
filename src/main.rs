@@ -65,7 +65,8 @@ fn run_floki_from_args(args: &Cli) -> Result<(), Error> {
         }
 
         Some(Subcommand::Completion { shell }) => {
-            Ok(Cli::clap().gen_completions_to("floki", *shell, &mut std::io::stdout()))
+            Cli::clap().gen_completions_to("floki", *shell, &mut std::io::stdout());
+            Ok(())
         }
 
         // Launch an interactive floki shell (the default)
@@ -93,7 +94,11 @@ fn configure_logging(verbosity: u8) -> Result<(), Error> {
         1 => log::LevelFilter::Info,
         2 => log::LevelFilter::Debug,
         3 => log::LevelFilter::Trace,
-        _ => Err(errors::FlokiUserError::InvalidVerbositySetting { setting: verbosity })?,
+        _ => {
+            return Err(
+                errors::FlokiUserError::InvalidVerbositySetting { setting: verbosity }.into(),
+            )
+        }
     };
     simplelog::TermLogger::init(
         level,
