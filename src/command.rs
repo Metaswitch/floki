@@ -192,6 +192,7 @@ pub fn enable_docker_in_docker(
     dind: &crate::dind::Dind,
 ) -> Result<DockerCommandBuilder, Error> {
     Ok(command
-        .add_docker_switch(&format!("--link {}:floki-docker", dind.name()))
+        .add_docker_switch("--link")
+        .add_docker_switch(&format!("{}:floki-docker", dind.name()))
         .add_environment("DOCKER_HOST", "tcp://floki-docker:2375"))
 }
