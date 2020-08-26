@@ -116,6 +116,7 @@ impl Image {
 
 /// Wrapper to pull an image by it's name
 pub fn pull_image(name: &str) -> Result<(), Error> {
+    debug!("Pulling image: {}", name);
     let exit_status = Command::new("docker")
         .arg("pull")
         .arg(name)
