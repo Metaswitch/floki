@@ -17,6 +17,7 @@ Status: Available for use
 - Added Bors support
 
 ### Fixed
+- Don't require a floki config file to be present to run `floki completion`
 
 ## [0.6.1] - 2020-07-16
 

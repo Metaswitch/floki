@@ -46,14 +46,19 @@ impl Environment {
     pub fn gather(config_file: &Option<path::PathBuf>) -> Result<Self, Error> {
         let (floki_root, config_path) = resolve_floki_root_and_config(config_file)?;
         let user = User::current();
-        Ok(Environment {
+
+        let env = Environment {
             user_details: user,
             current_directory: get_current_working_directory()?,
             floki_root,
             config_file: normalize_path(config_path)?,
             ssh_agent_socket: get_ssh_agent_socket_path(),
             floki_workspace: get_floki_work_path(user.uid),
-        })
+        };
+
+        debug!("Got environment {:?}", &env);
+
+        Ok(env)
     }
 }
 

@@ -16,6 +16,7 @@ mod volumes;
 
 use cli::{Cli, Subcommand};
 use config::FlokiConfig;
+use environment::Environment;
 
 use failure::Error;
 use quicli::prelude::*;
@@ -28,7 +29,7 @@ fn main() -> CliResult {
     match run_floki_from_args(&args) {
         Ok(()) => (),
         Err(e) => {
-            error!("A problem occured: {}", e);
+            error!("A problem occurred: {}", e);
             std::process::exit(1);
         }
     }
@@ -39,12 +40,6 @@ fn main() -> CliResult {
 fn run_floki_from_args(args: &Cli) -> Result<(), Error> {
     debug!("Got command line arguments: {:?}", &args);
 
-    let environ = environment::Environment::gather(&args.config_file)?;
-    debug!("Got environment {:?}", &environ);
-
-    debug!("Selected configuration file: {:?}", &environ.config_file);
-
-    let config = FlokiConfig::from_file(&environ.config_file)?;
     if args.local {
         warn!("-l/--local is deprecated and may be removed in a future release");
     }
@@ -53,15 +48,17 @@ fn run_floki_from_args(args: &Cli) -> Result<(), Error> {
     match &args.subcommand {
         // Pull the image in the configuration file
         Some(Subcommand::Pull {}) => {
-            debug!("Trying to pull image {:?}", &config.image);
-            debug!("Pulling image: {}", config.image.name()?);
+            let env = Environment::gather(&args.config_file)?;
+            let config = FlokiConfig::from_file(&env.config_file)?;
             image::pull_image(&config.image.name()?)
         }
 
         // Run a command in the floki container
         Some(Subcommand::Run { command }) => {
+            let env = Environment::gather(&args.config_file)?;
+            let config = FlokiConfig::from_file(&env.config_file)?;
             let inner_command = interpret::command_in_shell(config.shell.inner_shell(), &command);
-            run_floki_container(&environ, &config, inner_command)
+            run_floki_container(&env, &config, inner_command)
         }
 
         Some(Subcommand::Completion { shell }) => {
@@ -71,8 +68,10 @@ fn run_floki_from_args(args: &Cli) -> Result<(), Error> {
 
         // Launch an interactive floki shell (the default)
         None => {
+            let env = Environment::gather(&args.config_file)?;
+            let config = FlokiConfig::from_file(&env.config_file)?;
             let inner_command = config.shell.inner_shell().to_string();
-            run_floki_container(&environ, &config, inner_command)
+            run_floki_container(&env, &config, inner_command)
         }
     }
 }
