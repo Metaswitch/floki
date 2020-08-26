@@ -95,6 +95,8 @@ pub(crate) struct FlokiConfig {
 
 impl FlokiConfig {
     pub fn from_file(file: &path::Path) -> Result<FlokiConfig, Error> {
+        debug!("Reading configuration file: {:?}", file);
+
         let f = File::open(file).map_err(|e| errors::FlokiError::ProblemOpeningConfigYaml {
             name: file.display().to_string(),
             error: e,
