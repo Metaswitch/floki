@@ -12,6 +12,7 @@ Status: Available for use
 ## [Unreleased]
 
 ### Changed
+- Some improvements to the getting started guide
 
 ### Added
 - Added Bors support
