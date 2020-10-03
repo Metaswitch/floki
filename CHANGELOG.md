@@ -12,6 +12,8 @@ Status: Available for use
 ## [Unreleased]
 
 ### Changed
+- Some improvements to the getting started guide
+- Some improvements to the feature documentation (including adding how to specify the `dind` image).
 
 ### Added
 - Added Bors support

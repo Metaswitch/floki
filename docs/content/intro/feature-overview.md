@@ -10,9 +10,9 @@ The ideal workflow is
 
 - clone the source repository
 - run `floki`
-- build
+- get to work
 
-`floki` has a number of features to help achieve this. The following outlines the current list.
+`floki` has a number of features to help achieve this. The following outlines these features.
 
 # Container images
 
@@ -28,21 +28,23 @@ image: debian:sid
 
 `floki` will use docker to pull this image if you need it.
 
+Custom registries can be used by configuring `docker` to use these registries. `floki` defers to `docker` to locate and pull images.
+
 ## Build an image
 
-`floki` can use an image built from a `Dockerfile` in your working directory. It's easiest to see an example of `floki.yaml` to see how to configure this.
+`floki` can use an image built from a `Dockerfile` in source tree. It's easiest to see an example of `floki.yaml` to see how to configure this.
 
 ```
 image:
   build:
-    name: foo                    # Will create an image called foo:floki
-    dockerfile: Dockerfile.foo   # Defaults to Dockerfile
+    name: foo                    # Will build the image with name foo:floki
+    dockerfile: Dockerfile.foo   # Relative location in source tree; defaults to Dockerfile
     context: .                   # Defaults to .
-    target: builder              # Target to use, for multi-stage dockerfiles (optional).
+    target: builder              # Target to use, for multi-stage dockerfiles (optional)
 ```
 
 ## Referencing a key in another yaml file
-`floki` can use an image referenced in another yaml file. This can help keep local development environments sync'd with a CI environment.
+`floki` can use an image by reference to another yaml file. This can help keep local development environments sync'd with a CI environment.
 
 ```
 image:
@@ -53,7 +55,7 @@ image:
 
 ## Updating an image
 
-`floki pull` pulls the container under the `image` key again. While it is better to version images, this can be used when working against e.g. a `latest` tag.
+`floki pull` forces a pull of the container specified in `image`. While it is better to version images properly, this can be used when tracking a `latest` tag, or similar.
 
 # Setting the shell
 
@@ -83,7 +85,7 @@ init:
   - apk update && apk install bash
 ```
 
-A useful use case here is if you want to run the container with the same user as on the host. `floki` exposes the user id and user group id in environment variables, so you can add a user to the container and switch to it as an inner shell:
+A useful use case here is if you want to run the container with the same user as on the host. `floki` exposes the user id and user group id in environment variables, so you can add a user to the running container and switch to the new user in the inner shell:
 
 ```
 image: foo:latest
@@ -94,7 +96,7 @@ init:
   - add_new_user $FLOKI_HOST_UID $FLOKI_HOST_GID
 ```
 
-The commands to make the above work depend on the container you are running. `floki` aims to provide the tools to make it happen.
+The commands to make the above work depend on the container you are running. `floki` just provides the tools to allow you to make it happen.
 
 # Docker-in-docker
 
@@ -106,6 +108,15 @@ dind: true
 ```
 
 Note that the docker CLI tools are still required in the container, and the docker host is a linked container, with the working directory mounted in the same place as the interactive container.
+
+The precise `dind` image can also be set
+
+```
+dind:
+  image: docker:stable-dind
+```
+
+This helps properly pin and version the docker-in-docker container.
 
 # Floki volumes
 
@@ -128,7 +139,7 @@ volumes:
     mount: /home/rust/.cargo/registry
 ```
 
-`floki` creates directories on the host to back these volumes in `~/.floki/volumes`.
+`floki` creates directories on the host to back these volumes in `~/.floki/volumes`. Non-shared volumes are given names unique to the source directory.
 
 # Environment forwarding
 
@@ -149,7 +160,11 @@ You can set where this directory is mounted in the container using the `mount` k
 
 ## SSH agent
 
-Sometimes it is useful to be able to pull dependencies for source code management servers for builds. To make this easier to do in an automated fashion, `floki` can forward and `ssh-agent` socket into the container, and expose its path through `SSH_AUTH_SOCK`.
+Sometimes it is useful to be able to pull dependencies from source code management servers for builds. To make this easier to do in an automated fashion, `floki` can forward and `ssh-agent` socket into the container, and expose its path through `SSH_AUTH_SOCK`.
+
+```
+forward_ssh_agent: true
+```
 
 You will need to have an `ssh-agent` running on the host before launching `floki`.
 
@@ -178,8 +193,7 @@ init:
   - echo "Welcome to your server container!"
 ```
 
-Note that use of `docker_switches` may reduce the reproducibility and shareability of your `floki.yaml` (for instance it could be used to
-mount a volume with a specific host path that works on no other machines).
+Note that use of `docker_switches` may reduce the reproducibility and shareability of your `floki.yaml` (for instance it could be used to mount a volume with a specific host path that works on no other machines).
 
 Nonetheless, it is useful to be able to add arbitrary switches in a pinch, just to be able to get something working.
-There are things you can add with `docker_switches` which are reproducible and shareable. If something is needed, raise a feature request.
+If there are things you can add with `docker_switches` which are reproducible and shareable, please raise a feature request, or go ahead and implement it yourself!
