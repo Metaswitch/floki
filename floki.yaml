@@ -2,10 +2,3 @@ image: ekidd/rust-musl-builder
 mount: /home/rust/src
 forward_ssh_agent: true
 shell: bash
-init:
-  - echo "-----"
-  - echo WELCOME TO FLOKI DEVELOPMENT
-  - echo "-----"
-  - echo ""
-  - echo "Run ./presubmit.sh before pushing to CI to run CI checks"
-  - echo ""
