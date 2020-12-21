@@ -1,0 +1,14 @@
+# For shell to work, need Alpine, Debian or Ubuntu versions of this container.
+# See https://hub.docker.com/r/klakegg/hugo/.
+image: klakegg/hugo:alpine
+mount: /src
+docker_switches:
+  # Expose port 1313, as this is the port the server exposes for locally built
+  # documentation.
+  - -p
+  - 1313:1313
+# The entrypoint for this container is a direct call to the "hugo" script. To
+# get a shell, we need to pass "shell" to this script, hence the "hack" of
+# setting "shell" to "shell".
+shell: shell
+# To run a hugo server, run "hugo server -D" from the /src/docs directory.
