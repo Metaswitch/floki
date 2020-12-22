@@ -52,7 +52,7 @@ pub enum FlokiError {
         exit_status: FlokiSubprocessExitStatus,
     },
 
-    #[fail(display = "Failed to check existance of image '{}': {}", image, error)]
+    #[fail(display = "Failed to check existence of image '{}': {}", image, error)]
     FailedToCheckForImage { image: String, error: io::Error },
 
     #[fail(display = "Failed to find the key '{}' in file '{}'", key, file)]

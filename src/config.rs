@@ -120,7 +120,7 @@ impl FlokiConfig {
                     .parent()
                     .ok_or_else(|| errors::FlokiInternalError::InternalAssertionFailed {
                         description: format!(
-                            "could not constuct path to external yaml file '{:?}'",
+                            "could not construct path to external yaml file '{:?}'",
                             &yaml.file
                         ),
                     })?
