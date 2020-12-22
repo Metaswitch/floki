@@ -28,7 +28,7 @@ Suppose we want a build environment based on `alpine:latest` with a C compiler, 
 
 First create your `Dockerfile`:
 
-```
+```dockerfile
 FROM alpine:latest
 
 RUN apk update && apk add alpine-sdk clang openssh
@@ -37,7 +37,7 @@ RUN apk update && apk add alpine-sdk clang openssh
 and then add a file called `floki.yaml` to the root of your codebase:
 
 
-```
+```yaml
 image:
   build:
     name: hello-floki
@@ -55,8 +55,8 @@ Now run `floki`. You should see the docker container be built, and you will be d
 
 It's recommended you add your user to the `docker` group:
 
-```
-sudo usermod -a -G docker USERNAME
+```shell
+$ sudo usermod -a -G docker USERNAME
 ```
 
 and logout and in again to pick up the changes.

@@ -11,7 +11,7 @@ draft: false
 It's recommended you add your user to the `docker` group:
 
 ```shell
-sudo usermod -a -G docker USERNAME
+$ sudo usermod -a -G docker USERNAME
 ```
 
 and logout and in again to pick up the changes.
