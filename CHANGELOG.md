@@ -20,6 +20,7 @@ Status: Available for use
 
 ### Fixed
 - Don't require a floki config file to be present to run `floki completion`
+- Properly parse `docker_switches` in accordance with shell quoting rules
 
 ## [0.6.1] - 2020-07-16
 

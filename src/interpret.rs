@@ -30,7 +30,7 @@ pub(crate) fn run_container(
     cmd = configure_floki_host_mountdir_env(cmd, &environ.floki_root);
     cmd = configure_forward_user(cmd, &config, &environ);
     cmd = configure_forward_ssh_agent(cmd, &config, &environ)?;
-    cmd = configure_docker_switches(cmd, &config);
+    cmd = configure_docker_switches(cmd, &config)?;
     cmd = configure_working_directory(cmd, &environ, &config);
     cmd = configure_volumes(cmd, &volumes);
 
@@ -104,15 +104,30 @@ fn configure_forward_ssh_agent(
 fn configure_docker_switches(
     cmd: DockerCommandBuilder,
     config: &FlokiConfig,
-) -> DockerCommandBuilder {
+) -> Result<DockerCommandBuilder, Error> {
     let mut cmd = cmd;
-    for switch in &config.docker_switches {
-        for s in switch.split_whitespace() {
-            cmd = cmd.add_docker_switch(s);
+    for switch in decompose_switches(&config.docker_switches)? {
+        cmd = cmd.add_docker_switch(switch);
+    }
+    Ok(cmd)
+}
+
+fn decompose_switches(
+    specs: &Vec<String>,
+) -> Result<Vec<String>, Error> {
+    let mut flattened = Vec::new();
+
+    for spec in specs {
+        if let Some(switches) = shlex::split(spec) {
+            for s in switches {
+                flattened.push(s);
+            }
+        } else {
+            Err(errors::FlokiError::MalformedDockerSwitch { item: spec.into() })?
         }
     }
 
-    cmd
+    Ok(flattened)
 }
 
 fn configure_working_directory(
@@ -212,5 +227,28 @@ mod test {
             get_working_directory(&current_directory, &floki_root, &mount)
                 == path::PathBuf::from("/guest/workingdir/")
         )
+    }
+
+    #[test]
+    fn test_decompose_switches() -> Result<(), Error> {
+        let switches = vec!["-e FOO='bar baz'".to_string()];
+
+        let want: Vec<String> = vec![
+            "-e".to_string(),
+	    "FOO=bar baz".to_string(),
+        ];
+
+	let got = decompose_switches(&switches)?;
+
+        assert_eq!(want, got);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_decompose_switches_error() {
+        let switches = vec!["-e FOO='bar baz".to_string()];
+	let got = decompose_switches(&switches);
+	assert!(got.is_err());
     }
 }

@@ -65,6 +65,9 @@ pub enum FlokiError {
 
     #[fail(display = "Unable to forward ssh socket - cannot find SSH_AUTH_SOCK in environment")]
     NoSshAuthSock {},
+
+    #[fail(display = "Malformed item in docker_switches: {}", item)]
+    MalformedDockerSwitch { item: String },
 }
 
 /// Generate a summary string for a process exiting
