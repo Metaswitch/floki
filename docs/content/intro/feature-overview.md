@@ -22,7 +22,7 @@ The ideal workflow is
 
 Using a prebuilt image (e.g. one from dockerhub or a docker registry) is as simple as providing its name as a top-level key in `floki.yaml`:
 
-```
+```yaml
 image: debian:sid
 ```
 
@@ -34,7 +34,7 @@ Custom registries can be used by configuring `docker` to use these registries. `
 
 `floki` can use an image built from a `Dockerfile` in source tree. It's easiest to see an example of `floki.yaml` to see how to configure this.
 
-```
+```yaml
 image:
   build:
     name: foo                    # Will build the image with name foo:floki
@@ -44,9 +44,9 @@ image:
 ```
 
 ## Referencing a key in another yaml file
-`floki` can use an image by reference to another yaml file. This can help keep local development environments sync'd with a CI environment.
+`floki` can use an image by reference to another yaml file. This can help keep local development environments synced with a CI environment.
 
-```
+```yaml
 image:
   yaml:
     file: .gitlab-ci.yaml
@@ -67,7 +67,7 @@ The default shell is `sh`.
 
 A shell can be set for a container using the top-level `shell` key:
 
-```
+```yaml
 image: alpine:latest
 shell: sh
 ```
@@ -76,7 +76,7 @@ shell: sh
 
 A different shell can be used for initialization and the interactive shell provided to the user.
 
-```
+```yaml
 image: alpine:latest
 shell:
   inner: bash
@@ -87,7 +87,7 @@ init:
 
 A useful use case here is if you want to run the container with the same user as on the host. `floki` exposes the user id and user group id in environment variables, so you can add a user to the running container and switch to the new user in the inner shell:
 
-```
+```yaml
 image: foo:latest
 shell:
   inner: bash
@@ -102,7 +102,7 @@ The commands to make the above work depend on the container you are running. `fl
 
 Docker-in-docker (`dind`) can be enabled by setting the top-level `dind` key to `true`.
 
-```
+```yaml
 image: foo:bar
 dind: true
 ```
@@ -111,7 +111,7 @@ Note that the docker CLI tools are still required in the container, and the dock
 
 The precise `dind` image can also be set
 
-```
+```yaml
 dind:
   image: docker:stable-dind
 ```
@@ -122,7 +122,7 @@ This helps properly pin and version the docker-in-docker container.
 
 `floki` has the ability to use volumes for caching build artifacts between runs of the container (amongst other things). Volumes can be configured in `floki.yaml`:
 
-```
+```yaml
 volumes:
   cargo-registry:
     mount: /home/rust/.cargo/registry
@@ -132,7 +132,7 @@ The key names the volume (it can be any valid yaml name), while the `mount` key 
 
 It's also possible to share volumes across different `floki.yaml`s. For example, you may want to share a `cargo` registry across all Rust build containers. These shared volumes are identified by the name given to the volume.
 
-```
+```yaml
 volumes:
   cargo-registry:
     shared: true
@@ -162,7 +162,7 @@ You can set where this directory is mounted in the container using the `mount` k
 
 Sometimes it is useful to be able to pull dependencies from source code management servers for builds. To make this easier to do in an automated fashion, `floki` can forward and `ssh-agent` socket into the container, and expose its path through `SSH_AUTH_SOCK`.
 
-```
+```yaml
 forward_ssh_agent: true
 ```
 
@@ -172,7 +172,7 @@ You will need to have an `ssh-agent` running on the host before launching `floki
 
 `floki` also allows single commands to be run, rather than dropping into an interactive shell.
 
-```
+```shell
 $ floki run ls
 floki.yaml
 ```
@@ -184,7 +184,7 @@ Note that if you have configured an inner shell, the command will run within the
 
 `floki` also allows you to pass additional switches to the underlying docker command, for example to forward port `8080` to the host.
 
-```
+```yaml
 image: debian:sid
 docker_switches:
   - -p

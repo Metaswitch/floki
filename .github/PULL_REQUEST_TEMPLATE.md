@@ -15,4 +15,6 @@ Anything you think will be useful for reviewers.
 These aren't hard requirements, just guidelines
 
 - [ ] New/modified Rust code formatted with `cargo fmt`
+- [ ] Documentation and `README.md` updated for this change, if necessary
+- [ ] `CHANGELOG.md` updated for this change
 

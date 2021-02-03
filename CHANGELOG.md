@@ -17,6 +17,8 @@ Status: Available for use
 
 ### Added
 - Added Bors support
+- Added a navigation section to the documentation (temporary until documentation format is redesigned)
+- Added a floki config file for quickly running `hugo` for building and testing documentation
 
 ### Fixed
 - Don't require a floki config file to be present to run `floki completion`
