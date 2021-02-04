@@ -30,6 +30,7 @@ yaml-rust = "0.4.4"
 rust-crypto = "^0.2"
 simplelog = "0.9"
 nix = "0.19"
+shlex = "0.1"
 
 [dev-dependencies]
 tempdir = "0.3.7"
