@@ -12,6 +12,14 @@ Status: Available for use
 ## [Unreleased]
 
 ### Changed
+
+### Added
+
+### Fixed
+
+## [0.6.2] - 2021-03-03
+
+### Changed
 - Some improvements to the getting started guide
 - Some improvements to the feature documentation (including adding how to specify the `dind` image).
 
@@ -256,7 +264,8 @@ Status: Available for use
 - Initial primitive version
 ### Changed
 
-[unreleased]: https://github.com/Metaswitch/floki/compare/0.6.1...HEAD
+[unreleased]: https://github.com/Metaswitch/floki/compare/0.6.2...HEAD
+[0.6.2]: https://github.com/Metaswitch/floki/compare/0.6.1...0.6.2
 [0.6.1]: https://github.com/Metaswitch/floki/compare/0.6.0...0.6.1
 [0.6.0]: https://github.com/Metaswitch/floki/compare/0.5.0...0.6.0
 [0.5.0]: https://github.com/Metaswitch/floki/compare/0.4.3...0.5.0

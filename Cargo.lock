@@ -241,7 +241,7 @@ dependencies = [
 
 [[package]]
 name = "floki"
-version = "0.6.1"
+version = "0.6.2"
 dependencies = [
  "failure",
  "failure_derive",
