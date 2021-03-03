@@ -82,50 +82,76 @@
 
 <h2 id="installation">Installation</h2>
 
-<p>Precompiled binaries can be downloaded from the releases page (for linux (statically linked) and OSX).</p>
+<h3 id="prerequisites">Prerequisites</h3>
 
-<p>To obtain <code>curl</code> and extract the latest linux binary directly in your shell, run</p>
+<p>It&rsquo;s recommended you add your user to the <code>docker</code> group:</p>
 
-<pre><code>$ curl -L https://github.com/Metaswitch/floki/releases/download/0.6.1/floki-0.6.1-linux.tar.gz | tar xzvf -
+<pre><code class="language-shell">$ sudo usermod -a -G docker USERNAME
 </code></pre>
 
-<p>You should be able to run <code>floki</code> from your working directory:</p>
+<p>and logout and in again to pick up the changes.</p>
 
-<pre><code>$ ./floki --version
-floki 0.1.0
+<p>Alternatively you can run <code>floki</code> (after installation) with <code>sudo -E floki</code>.</p>
+
+<h3 id="installation-from-pre-built-binaries">Installation from pre-built binaries</h3>
+
+<p>Precompiled binaries for linux and OSX can be downloaded from the <a href="https://github.com/Metaswitch/floki/releases">releases</a> page.</p>
+
+<p>For example, to obtain the latest binary with <code>curl</code> and extract it, run</p>
+
+<pre><code class="language-shell">$ curl -L https://github.com/Metaswitch/floki/releases/download/0.6.2/floki-0.6.2-linux.tar.gz | tar xzvf -
 </code></pre>
 
-<p>Move it onto your path to run it from anywhere. E.g.</p>
+<p>in a shell. You should now be able to run <code>floki</code> from your working directory:</p>
 
-<pre><code># mv floki /usr/local/bin/
+<pre><code class="language-shell">$ ./floki --version
+floki 0.6.1
 </code></pre>
 
-<p>Generate shell completions with:</p>
+<p>Copy this into your path to run it without needing to specify the path absolutely. E.g.</p>
 
-<pre><code>source &lt;(floki completion &lt;shell&gt;)
+<pre><code class="language-shell">$ mv floki /usr/local/bin/
 </code></pre>
 
-<p>See <code>floki completion --help</code> for a list of available <code>&lt;shell&gt;</code>s.</p>
+<h3 id="installation-from-cargo">Installation from cargo</h3>
+
+<p><code>floki</code> can also be installed directly from <code>cargo</code>.</p>
+
+<pre><code class="language-shell">$ cargo install floki
+</code></pre>
+
+<h3 id="shell-completions">Shell completions</h3>
+
+<p>Shell completions can be added to your existing shell session with</p>
+
+<pre><code class="language-shell">source &lt;(floki completion &lt;shell&gt;)
+</code></pre>
+
+<p>See <code>floki completion --help</code> for a list of available <code>&lt;shell&gt;</code>s. Add this command to your shell&rsquo;s rc file to get completions in all new shell sessions.</p>
 
 <p>Enjoy!</p>
 
 <h2 id="getting-started">Getting started</h2>
 
-<p>Write a basic configuration file, and name it <code>floki.yaml</code>.</p>
+<p><code>floki</code> is configured using a configuration file typically placed in the root of your codebase. As a basic example, write a basic configuration file, and name it <code>floki.yaml</code>.</p>
 
-<pre><code>image: debian:latest
+<pre><code class="language-yaml">image: debian:latest
 init:
   - echo &quot;Welcome to your first floki container!&quot;
 </code></pre>
 
-<p>In the same directory, run</p>
+<p>Now, in the same directory, run</p>
 
-<pre><code>floki
+<pre><code class="language-shell">floki
 </code></pre>
 
-<p>A container will launch with the working directory mounted, and the container shell located there.</p>
+<p>A container will launch with the working directory mounted as your working directory. Verify this by running <code>ls</code>:</p>
 
-<p>In general, invoking <code>floki</code> in any child of this directory will launch with:
+<pre><code class="language-shell">$ ls
+...  floki.yaml  ...
+</code></pre>
+
+<p>In general, invoking <code>floki</code> in any child directory of this root directory will launch a container with:
 - The directory containing <code>floki.yaml</code> mounted;
 - The container shell located in the guest directory corresponding to the child.</p>
 
@@ -133,7 +159,7 @@ init:
 
 <p>You can use a different configuration file with <code>floki</code> by telling it to use a different file from the command line. For example, if you have another configuration in <code>config.yaml</code>, you can run <code>floki</code> with</p>
 
-<pre><code>floki -c config.yaml
+<pre><code class="language-shell">floki -c config.yaml
 </code></pre>
 
 <p>Note that, in contrast to invoking <code>floki</code> without the <code>-c</code> flag, this will always mount the current working directory.</p>
@@ -144,6 +170,7 @@ init:
 <li>Forwarding of <code>ssh-agent</code> (useful for authenticating with remote private git servers to pull private dependencies)</li>
 <li>Docker-in-docker support</li>
 <li>Forwarding of host user information (allows non-root users to be added and used).</li>
+<li><code>floki</code> volumes for setting up cross-session build caches.</li>
 </ul>
 
                     </div>

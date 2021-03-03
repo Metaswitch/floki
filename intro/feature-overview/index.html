@@ -96,10 +96,10 @@
 <ul>
 <li>clone the source repository</li>
 <li>run <code>floki</code></li>
-<li>build</li>
+<li>get to work</li>
 </ul>
 
-<p><code>floki</code> has a number of features to help achieve this. The following outlines the current list.</p>
+<p><code>floki</code> has a number of features to help achieve this. The following outlines these features.</p>
 
 <h1 id="container-images">Container images</h1>
 
@@ -109,28 +109,30 @@
 
 <p>Using a prebuilt image (e.g. one from dockerhub or a docker registry) is as simple as providing its name as a top-level key in <code>floki.yaml</code>:</p>
 
-<pre><code>image: debian:sid
+<pre><code class="language-yaml">image: debian:sid
 </code></pre>
 
 <p><code>floki</code> will use docker to pull this image if you need it.</p>
 
+<p>Custom registries can be used by configuring <code>docker</code> to use these registries. <code>floki</code> defers to <code>docker</code> to locate and pull images.</p>
+
 <h2 id="build-an-image">Build an image</h2>
 
-<p><code>floki</code> can use an image built from a <code>Dockerfile</code> in your working directory. It&rsquo;s easiest to see an example of <code>floki.yaml</code> to see how to configure this.</p>
+<p><code>floki</code> can use an image built from a <code>Dockerfile</code> in source tree. It&rsquo;s easiest to see an example of <code>floki.yaml</code> to see how to configure this.</p>
 
-<pre><code>image:
+<pre><code class="language-yaml">image:
   build:
-    name: foo                    # Will create an image called foo:floki
-    dockerfile: Dockerfile.foo   # Defaults to Dockerfile
+    name: foo                    # Will build the image with name foo:floki
+    dockerfile: Dockerfile.foo   # Relative location in source tree; defaults to Dockerfile
     context: .                   # Defaults to .
-    target: builder              # Target to use, for multi-stage dockerfiles (optional).
+    target: builder              # Target to use, for multi-stage dockerfiles (optional)
 </code></pre>
 
 <h2 id="referencing-a-key-in-another-yaml-file">Referencing a key in another yaml file</h2>
 
-<p><code>floki</code> can use an image referenced in another yaml file. This can help keep local development environments sync&rsquo;d with a CI environment.</p>
+<p><code>floki</code> can use an image by reference to another yaml file. This can help keep local development environments synced with a CI environment.</p>
 
-<pre><code>image:
+<pre><code class="language-yaml">image:
   yaml:
     file: .gitlab-ci.yaml
     key: variables.RUST-IMAGE
@@ -138,7 +140,7 @@
 
 <h2 id="updating-an-image">Updating an image</h2>
 
-<p><code>floki pull</code> pulls the container under the <code>image</code> key again. While it is better to version images, this can be used when working against e.g. a <code>latest</code> tag.</p>
+<p><code>floki pull</code> forces a pull of the container specified in <code>image</code>. While it is better to version images properly, this can be used when tracking a <code>latest</code> tag, or similar.</p>
 
 <h1 id="setting-the-shell">Setting the shell</h1>
 
@@ -150,7 +152,7 @@
 
 <p>A shell can be set for a container using the top-level <code>shell</code> key:</p>
 
-<pre><code>image: alpine:latest
+<pre><code class="language-yaml">image: alpine:latest
 shell: sh
 </code></pre>
 
@@ -158,7 +160,7 @@ shell: sh
 
 <p>A different shell can be used for initialization and the interactive shell provided to the user.</p>
 
-<pre><code>image: alpine:latest
+<pre><code class="language-yaml">image: alpine:latest
 shell:
   inner: bash
   outer: sh
@@ -166,9 +168,9 @@ init:
   - apk update &amp;&amp; apk install bash
 </code></pre>
 
-<p>A useful use case here is if you want to run the container with the same user as on the host. <code>floki</code> exposes the user id and user group id in environment variables, so you can add a user to the container and switch to it as an inner shell:</p>
+<p>A useful use case here is if you want to run the container with the same user as on the host. <code>floki</code> exposes the user id and user group id in environment variables, so you can add a user to the running container and switch to the new user in the inner shell:</p>
 
-<pre><code>image: foo:latest
+<pre><code class="language-yaml">image: foo:latest
 shell:
   inner: bash
   outer: switch_user
@@ -176,23 +178,31 @@ init:
   - add_new_user $FLOKI_HOST_UID $FLOKI_HOST_GID
 </code></pre>
 
-<p>The commands to make the above work depend on the container you are running. <code>floki</code> aims to provide the tools to make it happen.</p>
+<p>The commands to make the above work depend on the container you are running. <code>floki</code> just provides the tools to allow you to make it happen.</p>
 
 <h1 id="docker-in-docker">Docker-in-docker</h1>
 
 <p>Docker-in-docker (<code>dind</code>) can be enabled by setting the top-level <code>dind</code> key to <code>true</code>.</p>
 
-<pre><code>image: foo:bar
+<pre><code class="language-yaml">image: foo:bar
 dind: true
 </code></pre>
 
 <p>Note that the docker CLI tools are still required in the container, and the docker host is a linked container, with the working directory mounted in the same place as the interactive container.</p>
 
+<p>The precise <code>dind</code> image can also be set</p>
+
+<pre><code class="language-yaml">dind:
+  image: docker:stable-dind
+</code></pre>
+
+<p>This helps properly pin and version the docker-in-docker container.</p>
+
 <h1 id="floki-volumes">Floki volumes</h1>
 
 <p><code>floki</code> has the ability to use volumes for caching build artifacts between runs of the container (amongst other things). Volumes can be configured in <code>floki.yaml</code>:</p>
 
-<pre><code>volumes:
+<pre><code class="language-yaml">volumes:
   cargo-registry:
     mount: /home/rust/.cargo/registry
 </code></pre>
@@ -201,13 +211,13 @@ dind: true
 
 <p>It&rsquo;s also possible to share volumes across different <code>floki.yaml</code>s. For example, you may want to share a <code>cargo</code> registry across all Rust build containers. These shared volumes are identified by the name given to the volume.</p>
 
-<pre><code>volumes:
+<pre><code class="language-yaml">volumes:
   cargo-registry:
     shared: true
     mount: /home/rust/.cargo/registry
 </code></pre>
 
-<p><code>floki</code> creates directories on the host to back these volumes in <code>~/.floki/volumes</code>.</p>
+<p><code>floki</code> creates directories on the host to back these volumes in <code>~/.floki/volumes</code>. Non-shared volumes are given names unique to the source directory.</p>
 
 <h1 id="environment-forwarding">Environment forwarding</h1>
 
@@ -230,7 +240,10 @@ dind: true
 
 <h2 id="ssh-agent">SSH agent</h2>
 
-<p>Sometimes it is useful to be able to pull dependencies for source code management servers for builds. To make this easier to do in an automated fashion, <code>floki</code> can forward and <code>ssh-agent</code> socket into the container, and expose its path through <code>SSH_AUTH_SOCK</code>.</p>
+<p>Sometimes it is useful to be able to pull dependencies from source code management servers for builds. To make this easier to do in an automated fashion, <code>floki</code> can forward and <code>ssh-agent</code> socket into the container, and expose its path through <code>SSH_AUTH_SOCK</code>.</p>
+
+<pre><code class="language-yaml">forward_ssh_agent: true
+</code></pre>
 
 <p>You will need to have an <code>ssh-agent</code> running on the host before launching <code>floki</code>.</p>
 
@@ -238,7 +251,7 @@ dind: true
 
 <p><code>floki</code> also allows single commands to be run, rather than dropping into an interactive shell.</p>
 
-<pre><code>$ floki run ls
+<pre><code class="language-shell">$ floki run ls
 floki.yaml
 </code></pre>
 
@@ -248,7 +261,7 @@ floki.yaml
 
 <p><code>floki</code> also allows you to pass additional switches to the underlying docker command, for example to forward port <code>8080</code> to the host.</p>
 
-<pre><code>image: debian:sid
+<pre><code class="language-yaml">image: debian:sid
 docker_switches:
   - -p
   - 8080:8080
@@ -256,11 +269,10 @@ init:
   - echo &quot;Welcome to your server container!&quot;
 </code></pre>
 
-<p>Note that use of <code>docker_switches</code> may reduce the reproducibility and shareability of your <code>floki.yaml</code> (for instance it could be used to
-mount a volume with a specific host path that works on no other machines).</p>
+<p>Note that use of <code>docker_switches</code> may reduce the reproducibility and shareability of your <code>floki.yaml</code> (for instance it could be used to mount a volume with a specific host path that works on no other machines).</p>
 
 <p>Nonetheless, it is useful to be able to add arbitrary switches in a pinch, just to be able to get something working.
-There are things you can add with <code>docker_switches</code> which are reproducible and shareable. If something is needed, raise a feature request.</p>
+If there are things you can add with <code>docker_switches</code> which are reproducible and shareable, please raise a feature request, or go ahead and implement it yourself!</p>
 
                     </div>
                     

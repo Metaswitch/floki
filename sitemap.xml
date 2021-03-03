@@ -3,17 +3,22 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>https://metaswitch.github.io/floki/intro/feature-overview/</loc>
-    <lastmod>2019-04-06T20:22:44+01:00</lastmod>
+    <loc>https://metaswitch.github.io/floki/intro/navigation/</loc>
+    <lastmod>2020-12-21T20:26:44+00:00</lastmod>
   </url>
   
   <url>
     <loc>https://metaswitch.github.io/floki/</loc>
-    <lastmod>2019-04-06T20:22:44+01:00</lastmod>
+    <lastmod>2020-12-21T20:26:44+00:00</lastmod>
   </url>
   
   <url>
     <loc>https://metaswitch.github.io/floki/intro/</loc>
+    <lastmod>2020-12-21T20:26:44+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://metaswitch.github.io/floki/intro/feature-overview/</loc>
     <lastmod>2019-04-06T20:22:44+01:00</lastmod>
   </url>
   

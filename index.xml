@@ -6,10 +6,21 @@
     <description>Recent content on floki</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 06 Apr 2019 20:22:44 +0100</lastBuildDate>
+    <lastBuildDate>Mon, 21 Dec 2020 20:26:44 +0000</lastBuildDate>
     
 	<atom:link href="https://metaswitch.github.io/floki/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Navigation</title>
+      <link>https://metaswitch.github.io/floki/intro/navigation/</link>
+      <pubDate>Mon, 21 Dec 2020 20:26:44 +0000</pubDate>
+      
+      <guid>https://metaswitch.github.io/floki/intro/navigation/</guid>
+      <description>For installation, and basic usage, see getting started.
+For an overview of the features of floki, see the feature overview.
+Full documentation can be found here.</description>
+    </item>
     
     <item>
       <title>Feature Overview</title>
@@ -19,9 +30,8 @@
       <guid>https://metaswitch.github.io/floki/intro/feature-overview/</guid>
       <description>floki aims to provide reproducible and shareable build tooling. It does this by helping you run docker containers interactively from a declarative yaml file.
 The ideal workflow is
- clone the source repository run floki build  floki has a number of features to help achieve this. The following outlines the current list.
-Container images floki offers a couple of ways to configure the container image to use.
-Prebuilt images Using a prebuilt image (e.</description>
+ clone the source repository run floki get to work  floki has a number of features to help achieve this. The following outlines these features.
+Container images floki offers a couple of ways to configure the container image to use.</description>
     </item>
     
     <item>
@@ -30,11 +40,11 @@ Prebuilt images Using a prebuilt image (e.</description>
       <pubDate>Wed, 03 Apr 2019 23:01:31 +0100</pubDate>
       
       <guid>https://metaswitch.github.io/floki/documentation/getting-started/</guid>
-      <description>Installation Precompiled binaries can be downloaded from the releases page (for linux (statically linked) and OSX).
-To obtain curl and extract the latest linux binary directly in your shell, run
-$ curl -L https://github.com/Metaswitch/floki/releases/download/0.6.1/floki-0.6.1-linux.tar.gz | tar xzvf -  You should be able to run floki from your working directory:
-$ ./floki --version floki 0.1.0  Move it onto your path to run it from anywhere. E.g.
-# mv floki /usr/local/bin/  Generate shell completions with:</description>
+      <description>Installation Prerequisites It&amp;rsquo;s recommended you add your user to the docker group:
+$ sudo usermod -a -G docker USERNAME  and logout and in again to pick up the changes.
+Alternatively you can run floki (after installation) with sudo -E floki.
+Installation from pre-built binaries Precompiled binaries for linux and OSX can be downloaded from the releases page.
+For example, to obtain the latest binary with curl and extract it, run</description>
     </item>
     
   </channel>
