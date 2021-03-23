@@ -28,7 +28,7 @@ uuid = { version = "0.8", features = ["v4"] }
 yaml-rust = "0.4.4"
 rust-crypto = "^0.2"
 simplelog = "0.9"
-nix = "0.19"
+nix = "0.20"
 shlex = "1.0"
 
 [dev-dependencies]
