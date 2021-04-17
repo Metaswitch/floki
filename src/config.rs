@@ -72,6 +72,21 @@ pub(crate) struct Volume {
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[serde(untagged)]
+pub(crate) enum Entrypoint {
+    Suppress { suppress: bool },
+}
+
+impl Entrypoint {
+    pub fn value(&self) -> Option<&str> {
+        match self {
+            Entrypoint::Suppress { suppress } if *suppress => Some(""),
+            _ => None,
+        }
+    }
+}
+
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(crate) struct FlokiConfig {
     pub(crate) image: image::Image,
@@ -91,6 +106,8 @@ pub(crate) struct FlokiConfig {
     pub(crate) forward_user: bool,
     #[serde(default = "BTreeMap::new")]
     pub(crate) volumes: BTreeMap<String, Volume>,
+    #[serde(default = "default_entrypoint")]
+    pub(crate) entrypoint: Entrypoint,
 }
 
 impl FlokiConfig {
@@ -148,6 +165,10 @@ fn default_mount() -> path::PathBuf {
 
 fn default_to_false() -> bool {
     false
+}
+
+fn default_entrypoint() -> Entrypoint {
+    Entrypoint::Suppress { suppress: true }
 }
 
 #[cfg(test)]
@@ -213,5 +234,32 @@ mod test {
         assert_eq!(actual, expected);
         assert_eq!(actual.dind.enabled(), true);
         assert_eq!(actual.dind.image(), "dind:custom");
+    }
+
+    #[derive(Debug, PartialEq, Serialize, Deserialize)]
+    struct TestEntrypointConfig {
+        entrypoint: Entrypoint,
+    }
+
+    #[test]
+    fn test_entrypoint_suppress() {
+        let yaml = "entrypoint:\n  suppress: true";
+        let expected = TestEntrypointConfig {
+            entrypoint: Entrypoint::Suppress { suppress: true },
+        };
+        let actual: TestEntrypointConfig = serde_yaml::from_str(yaml).unwrap();
+        assert_eq!(actual, expected);
+        assert_eq!(actual.entrypoint.value(), Some(""));
+    }
+
+    #[test]
+    fn test_entrypoint_no_suppress() {
+        let yaml = "entrypoint:\n  suppress: false";
+        let expected = TestEntrypointConfig {
+            entrypoint: Entrypoint::Suppress { suppress: false },
+        };
+        let actual: TestEntrypointConfig = serde_yaml::from_str(yaml).unwrap();
+        assert_eq!(actual, expected);
+        assert_eq!(actual.entrypoint.value(), None);
     }
 }
