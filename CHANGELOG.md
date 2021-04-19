@@ -13,7 +13,11 @@ Status: Available for use
 
 ### Changed
 
+- Automatically suppress the container entrypoint - MAJOR
+
 ### Added
+
+- Allow entrypoint suppression to be set in the configuration file - MINOR
 
 ### Fixed
 

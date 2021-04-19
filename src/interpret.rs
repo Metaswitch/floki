@@ -30,6 +30,7 @@ pub(crate) fn run_container(
     cmd = configure_floki_host_mountdir_env(cmd, &environ.floki_root);
     cmd = configure_forward_user(cmd, &config, &environ);
     cmd = configure_forward_ssh_agent(cmd, &config, &environ)?;
+    cmd = configure_entrypoint(cmd, &config);
     cmd = configure_docker_switches(cmd, &config)?;
     cmd = configure_working_directory(cmd, &environ, &config);
     cmd = configure_volumes(cmd, &volumes);
@@ -101,6 +102,14 @@ fn configure_forward_ssh_agent(
     }
 }
 
+fn configure_entrypoint(cmd: DockerCommandBuilder, config: &FlokiConfig) -> DockerCommandBuilder {
+    if let Some(entrypoint) = config.entrypoint.value() {
+        cmd.add_docker_switch(&format!("--entrypoint={}", entrypoint))
+    } else {
+        cmd
+    }
+}
+
 fn configure_docker_switches(
     cmd: DockerCommandBuilder,
     config: &FlokiConfig,
@@ -112,9 +121,7 @@ fn configure_docker_switches(
     Ok(cmd)
 }
 
-fn decompose_switches(
-    specs: &Vec<String>,
-) -> Result<Vec<String>, Error> {
+fn decompose_switches(specs: &Vec<String>) -> Result<Vec<String>, Error> {
     let mut flattened = Vec::new();
 
     for spec in specs {
@@ -233,12 +240,9 @@ mod test {
     fn test_decompose_switches() -> Result<(), Error> {
         let switches = vec!["-e FOO='bar baz'".to_string()];
 
-        let want: Vec<String> = vec![
-            "-e".to_string(),
-	    "FOO=bar baz".to_string(),
-        ];
+        let want: Vec<String> = vec!["-e".to_string(), "FOO=bar baz".to_string()];
 
-	let got = decompose_switches(&switches)?;
+        let got = decompose_switches(&switches)?;
 
         assert_eq!(want, got);
 
@@ -248,7 +252,7 @@ mod test {
     #[test]
     fn test_decompose_switches_error() {
         let switches = vec!["-e FOO='bar baz".to_string()];
-	let got = decompose_switches(&switches);
-	assert!(got.is_err());
+        let got = decompose_switches(&switches);
+        assert!(got.is_err());
     }
 }

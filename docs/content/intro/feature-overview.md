@@ -98,6 +98,15 @@ init:
 
 The commands to make the above work depend on the container you are running. `floki` just provides the tools to allow you to make it happen.
 
+# Entrypoints
+
+By default `floki` will suppress the container entrypoint. This can be overridden in the configuration file with:
+
+```yaml
+entrypoint:
+  suppress: false
+```
+
 # Docker-in-docker
 
 Docker-in-docker (`dind`) can be enabled by setting the top-level `dind` key to `true`.
