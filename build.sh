@@ -2,17 +2,19 @@
 
 set -x
 
-LABEL=${TRAVIS_TAG}-${TRAVIS_OS_NAME}
+TAG=$(tomlq -r '.package.version' Cargo.toml)
+
+LABEL=${TAG}-${OS_NAME}
 
 rm -rf target
 echo "Starting release build for ${LABEL}"
 
-if [ ${TRAVIS_OS_NAME} = "linux" ]
+if [ ${OS_NAME} = "ubuntu-18.04" ]
 then
   echo "Building statically linked linux binary"
   docker run --rm -v $(pwd):/home/rust/src -w /home/rust/src ekidd/rust-musl-builder \
     sh -c 'sudo chown -R rust:rust . && cargo build --release && cp target/x86_64-unknown-linux-musl/release/floki .'
-  sudo chown -R travis:travis .
+  sudo chown -R $(id -u):$(id -g) .
   tar -cvzf floki-${LABEL}.tar.gz floki
 
 else
