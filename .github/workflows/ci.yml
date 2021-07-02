@@ -1,0 +1,56 @@
+name: floki-ci
+'on':
+  push:
+    branches:
+      - master
+      # bors
+      - staging
+      - trying
+      # dependabot, which creates all MRs in dependabot/
+      - dependabot/**
+      # release branching and tagging
+      - release-[0-9]+.[0-9]+.[0-9]+
+      - release-[0-9]+.[0-9]+.[0-9]+-*
+    tags:
+      # Full version
+      - "[0-9]+.[0-9]+.[0-9]+"
+      # Prerelease version
+      - "[0-9]+.[0-9]+.[0-9]+-*"
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.experimental }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-18.04
+          - macos-latest
+        rust:
+          - stable
+          - beta
+        experimental: [false]
+        include:
+          - os: ubuntu-18.04
+            rust: nightly
+            experimental: true
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install rust
+        uses: actions-rs/toolchain@v1
+        with:
+            toolchain: ${{ matrix.rust }}
+      - run: pip install --user -U tomlq
+      - run: "./build.sh"
+        env:
+          OS_NAME: ${{ matrix.os }}
+
+  ci-success:
+    name: ci
+    if: ${{ success() }}
+    needs:
+      - build
+    runs-on: ubuntu-latest
+    steps:
+      - name: CI succeeded
+        run: exit 0
