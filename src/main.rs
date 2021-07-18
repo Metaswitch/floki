@@ -103,6 +103,7 @@ fn configure_logging(verbosity: u8) -> Result<(), Error> {
         level,
         simplelog::Config::default(),
         simplelog::TerminalMode::Stderr,
+        simplelog::ColorChoice::Auto,
     )?;
     Ok(())
 }
