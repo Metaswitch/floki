@@ -24,7 +24,7 @@ structopt = "0.3"
 uuid = { version = "0.8", features = ["v4"] }
 yaml-rust = "0.4.4"
 rust-crypto = "^0.2"
-simplelog = "0.9"
+simplelog = "0.10"
 nix = "0.20"
 shlex = "1.0"
 

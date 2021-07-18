@@ -14,6 +14,7 @@ Status: Available for use
 ### Changed
 
 - Automatically suppress the container entrypoint - MAJOR
+- Update simplelog from 0.9 to 0.10 - MINOR
 
 ### Added
 
