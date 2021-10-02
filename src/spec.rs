@@ -38,6 +38,8 @@ pub(crate) struct SshAgent {
 pub(crate) struct Paths {
     /// The directory floki was launched in
     pub(crate) current_directory: path::PathBuf,
+    /// The internal working directory
+    pub(crate) internal_working_directory: path::PathBuf,
     /// The root directory for the project (location of floki.yaml or
     /// configuration file)
     pub(crate) root: path::PathBuf,
@@ -103,14 +105,21 @@ impl FlokiSpec {
             None
         };
 
+        let internal_working_directory = get_working_directory(
+            &environ.current_directory,
+            &environ.floki_root,
+            &path::PathBuf::from(&config.mount),
+        );
+
         let paths = Paths {
             current_directory: environ.current_directory,
+            internal_working_directory,
             root: environ.floki_root,
             config: environ.config_file,
             workspace: environ.floki_workspace,
         };
 
-	let docker_switches = decompose_switches(&config.docker_switches)?;
+        let docker_switches = decompose_switches(&config.docker_switches)?;
 
         let spec = FlokiSpec {
             image: config.image,
@@ -148,6 +157,18 @@ fn decompose_switches(specs: &Vec<String>) -> Result<Vec<String>, Error> {
     Ok(flattened)
 }
 
+/// Determine what directory we are currently in
+fn get_working_directory(
+    current_directory: &path::Path,
+    floki_root: &path::Path,
+    mount: &path::Path,
+) -> path::PathBuf {
+    mount.join(current_directory.strip_prefix(&floki_root).expect(
+        "failed to deduce working directory - \
+         floki_root should always be an ancestor of current_directory",
+    ))
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -169,5 +190,17 @@ mod test {
         let switches = vec!["-e FOO='bar baz".to_string()];
         let got = decompose_switches(&switches);
         assert!(got.is_err());
+    }
+
+    #[test]
+    fn test_get_working_directory() {
+        let current_directory = path::PathBuf::from("/host/workingdir/");
+        let floki_root = path::PathBuf::from("/host");
+        let mount = path::PathBuf::from("/guest");
+
+        assert!(
+            get_working_directory(&current_directory, &floki_root, &mount)
+                == path::PathBuf::from("/guest/workingdir/")
+        )
     }
 }

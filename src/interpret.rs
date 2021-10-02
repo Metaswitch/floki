@@ -19,9 +19,11 @@ pub(crate) fn run_floki_container(
     let volumes = resolve_volume_mounts(&spec.paths.config, &spec.paths.workspace, &spec.volumes);
     instantiate_volumes(&volumes)?;
 
+    cmd = configure_volumes(cmd, &volumes);
     cmd = cmd.add_environment("FLOKI_HOST_MOUNTDIR", &spec.paths.root);
     cmd = cmd.add_environment("FLOKI_HOST_UID", spec.user.uid.to_string());
     cmd = cmd.add_environment("FLOKI_HOST_GID", spec.user.gid.to_string());
+    cmd = cmd.set_working_directory(&spec.paths.internal_working_directory);
 
     if spec.user.forward {
         cmd = cmd
@@ -40,14 +42,6 @@ pub(crate) fn run_floki_container(
     for switch in &spec.docker_switches {
         cmd = cmd.add_docker_switch(switch);
     }
-
-    cmd = cmd.set_working_directory(get_working_directory(
-        &spec.paths.current_directory,
-        &spec.paths.root,
-        &path::PathBuf::from(&spec.mount),
-    ));
-
-    cmd = configure_volumes(cmd, &volumes);
 
     // Finally configure dind, taking care to hold a handle for the linked dind container
     let _handle = if let Some(spec::Dind { image }) = &spec.dind {
@@ -89,18 +83,6 @@ fn instantiate_volumes(volumes: &[(path::PathBuf, &path::PathBuf)]) -> Result<()
     Ok(())
 }
 
-/// Determine what directory we are currently in
-fn get_working_directory(
-    current_directory: &path::Path,
-    floki_root: &path::Path,
-    mount: &path::Path,
-) -> path::PathBuf {
-    mount.join(current_directory.strip_prefix(&floki_root).expect(
-        "failed to deduce working directory - \
-         floki_root should always be an ancestor of current_directory",
-    ))
-}
-
 /// Turn the init section of a floki.yaml file into a command
 /// that can be given to a shell
 fn subshell_command(init: &[String], command: &str) -> String {
@@ -121,17 +103,5 @@ mod test {
         let expected = String::from("bash -c \"foo bar\"");
 
         assert!(result == expected);
-    }
-
-    #[test]
-    fn test_get_working_directory() {
-        let current_directory = path::PathBuf::from("/host/workingdir/");
-        let floki_root = path::PathBuf::from("/host");
-        let mount = path::PathBuf::from("/guest");
-
-        assert!(
-            get_working_directory(&current_directory, &floki_root, &mount)
-                == path::PathBuf::from("/guest/workingdir/")
-        )
     }
 }
