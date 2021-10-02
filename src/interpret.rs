@@ -1,7 +1,6 @@
 use crate::command;
 use crate::command::DockerCommandBuilder;
 use crate::dind::Dind;
-use crate::errors;
 use crate::spec;
 use crate::volumes::resolve_volume_mounts;
 
@@ -38,7 +37,7 @@ pub(crate) fn run_floki_container(
         cmd = cmd.add_docker_switch(&format!("--entrypoint={}", entrypoint))
     }
 
-    for switch in decompose_switches(&spec.docker_switches)? {
+    for switch in &spec.docker_switches {
         cmd = cmd.add_docker_switch(switch);
     }
 
@@ -68,22 +67,6 @@ pub(crate) fn command_in_shell(shell: &str, command: &[String]) -> String {
     // Make sure our command runs in a subshell (we might switch user)
     let inner_shell: String = shell.to_string();
     inner_shell + " -c \"" + &command.join(" ") + "\""
-}
-
-fn decompose_switches(specs: &Vec<String>) -> Result<Vec<String>, Error> {
-    let mut flattened = Vec::new();
-
-    for spec in specs {
-        if let Some(switches) = shlex::split(spec) {
-            for s in switches {
-                flattened.push(s);
-            }
-        } else {
-            Err(errors::FlokiError::MalformedDockerSwitch { item: spec.into() })?
-        }
-    }
-
-    Ok(flattened)
 }
 
 /// Add mounts for each of the passed in volumes
@@ -150,25 +133,5 @@ mod test {
             get_working_directory(&current_directory, &floki_root, &mount)
                 == path::PathBuf::from("/guest/workingdir/")
         )
-    }
-
-    #[test]
-    fn test_decompose_switches() -> Result<(), Error> {
-        let switches = vec!["-e FOO='bar baz'".to_string()];
-
-        let want: Vec<String> = vec!["-e".to_string(), "FOO=bar baz".to_string()];
-
-        let got = decompose_switches(&switches)?;
-
-        assert_eq!(want, got);
-
-        Ok(())
-    }
-
-    #[test]
-    fn test_decompose_switches_error() {
-        let switches = vec!["-e FOO='bar baz".to_string()];
-        let got = decompose_switches(&switches);
-        assert!(got.is_err());
     }
 }

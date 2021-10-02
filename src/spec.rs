@@ -110,6 +110,8 @@ impl FlokiSpec {
             workspace: environ.floki_workspace,
         };
 
+	let docker_switches = decompose_switches(&config.docker_switches)?;
+
         let spec = FlokiSpec {
             image: config.image,
             init: config.init,
@@ -119,7 +121,7 @@ impl FlokiSpec {
             volumes: config.volumes,
             user,
             ssh_agent,
-            docker_switches: config.docker_switches,
+            docker_switches,
             dind,
             paths,
         };
@@ -127,5 +129,45 @@ impl FlokiSpec {
         debug!("built spec from config and environment: {:?}", spec);
 
         Ok(spec)
+    }
+}
+
+fn decompose_switches(specs: &Vec<String>) -> Result<Vec<String>, Error> {
+    let mut flattened = Vec::new();
+
+    for spec in specs {
+        if let Some(switches) = shlex::split(spec) {
+            for s in switches {
+                flattened.push(s);
+            }
+        } else {
+            Err(errors::FlokiError::MalformedDockerSwitch { item: spec.into() })?
+        }
+    }
+
+    Ok(flattened)
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    #[test]
+    fn test_decompose_switches() -> Result<(), Error> {
+        let switches = vec!["-e FOO='bar baz'".to_string()];
+
+        let want: Vec<String> = vec!["-e".to_string(), "FOO=bar baz".to_string()];
+
+        let got = decompose_switches(&switches)?;
+
+        assert_eq!(want, got);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_decompose_switches_error() {
+        let switches = vec!["-e FOO='bar baz".to_string()];
+        let got = decompose_switches(&switches);
+        assert!(got.is_err());
     }
 }
