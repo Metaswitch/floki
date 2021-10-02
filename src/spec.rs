@@ -1,12 +1,12 @@
 use crate::config::{DindConfig, FlokiConfig};
-use crate::errors;
 use crate::environment::Environment;
+use crate::errors;
 
 use failure::Error;
 
 use std::collections::BTreeMap;
-use std::path;
 use std::ffi::OsString;
+use std::path;
 
 pub(crate) struct Docker {
     pub(crate) image: String,
@@ -87,7 +87,7 @@ impl FlokiEnvironment {
         };
 
         let paths = Paths {
-	    current_directory: environ.current_directory,
+            current_directory: environ.current_directory,
             root: environ.floki_root,
             config: environ.config_file,
             workspace: environ.floki_workspace,

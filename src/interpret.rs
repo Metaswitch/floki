@@ -1,124 +1,73 @@
 use crate::command;
 use crate::command::DockerCommandBuilder;
-use crate::config::FlokiConfig;
 use crate::dind::Dind;
-use crate::environment::Environment;
 use crate::errors;
+use crate::spec;
 use crate::volumes::resolve_volume_mounts;
 
 use failure::Error;
 use std::path;
 
-/// Build a spec for the docker container, and then run it
-pub(crate) fn run_container(
-    environ: &Environment,
-    config: &FlokiConfig,
+pub(crate) fn run_floki_container(
+    spec: &crate::spec::FlokiEnvironment,
     inner_command: &str,
 ) -> Result<(), Error> {
-    let mount = get_mount_specification(&environ.floki_root, &config);
-    let dind = Dind::new(config.dind.image(), mount);
-    let mut cmd = command::DockerCommandBuilder::new(&config.image.name()?).add_volume(mount);
+    spec.image.obtain_image(&spec.paths.root)?;
 
-    let volumes = resolve_volume_mounts(
-        &environ.config_file,
-        &environ.floki_workspace,
-        &config.volumes,
-    );
+    let mut cmd = command::DockerCommandBuilder::new(&spec.image.name()?)
+        .add_volume((&spec.paths.root, &spec.mount));
 
-    cmd = configure_dind(cmd, &config, &dind)?;
-    cmd = configure_floki_user_env(cmd, &environ);
-    cmd = configure_floki_host_mountdir_env(cmd, &environ.floki_root);
-    cmd = configure_forward_user(cmd, &config, &environ);
-    cmd = configure_forward_ssh_agent(cmd, &config, &environ)?;
-    cmd = configure_entrypoint(cmd, &config);
-    cmd = configure_docker_switches(cmd, &config)?;
-    cmd = configure_working_directory(cmd, &environ, &config);
+    let volumes = resolve_volume_mounts(&spec.paths.config, &spec.paths.workspace, &spec.volumes);
+    instantiate_volumes(&volumes)?;
+
+    cmd = cmd.add_environment("FLOKI_HOST_MOUNTDIR", &spec.paths.root);
+    cmd = cmd.add_environment("FLOKI_HOST_UID", spec.user.uid.to_string());
+    cmd = cmd.add_environment("FLOKI_HOST_GID", spec.user.gid.to_string());
+
+    if spec.user.forward {
+        cmd = cmd
+            .add_docker_switch("--user")
+            .add_docker_switch(&format!("{}:{}", spec.user.uid, spec.user.gid));
+    }
+
+    if let Some(spec::SshAgent { path }) = &spec.ssh {
+        cmd = command::enable_forward_ssh_agent(cmd, &path);
+    }
+
+    if let Some(entrypoint) = &spec.entrypoint {
+        cmd = cmd.add_docker_switch(&format!("--entrypoint={}", entrypoint))
+    }
+
+    for switch in decompose_switches(&spec.docker_switches)? {
+        cmd = cmd.add_docker_switch(switch);
+    }
+
+    cmd = cmd.set_working_directory(get_working_directory(
+        &spec.paths.current_directory,
+        &spec.paths.root,
+        &path::PathBuf::from(&spec.mount),
+    ));
+
     cmd = configure_volumes(cmd, &volumes);
 
-    instantiate_volumes(&volumes)?;
-    let _handle = launch_dind_if_needed(&config, dind)?;
-    let subshell_command = subshell_command(&config.init, inner_command);
-    cmd.run(&[config.shell.outer_shell(), "-c", &subshell_command])
+    // Finally configure dind, taking care to return a handle for the linked dind container
+    let _handle = if let Some(dind) = &spec.docker {
+        let dind_spec = Dind::new(&dind.image, (&spec.paths.root, &spec.mount));
+        cmd = command::enable_docker_in_docker(cmd, &dind_spec)?;
+        crate::dind::dind_preflight(&dind.image)?;
+        Some(dind_spec.launch()?)
+    } else {
+        None
+    };
+
+    let subshell_command = subshell_command(&spec.init, inner_command);
+    cmd.run(&[spec.shell.outer_shell(), "-c", &subshell_command])
 }
 
 pub(crate) fn command_in_shell(shell: &str, command: &[String]) -> String {
     // Make sure our command runs in a subshell (we might switch user)
     let inner_shell: String = shell.to_string();
     inner_shell + " -c \"" + &command.join(" ") + "\""
-}
-
-fn configure_dind(
-    cmd: DockerCommandBuilder,
-    config: &FlokiConfig,
-    dind: &Dind,
-) -> Result<DockerCommandBuilder, Error> {
-    if config.dind.enabled() {
-        Ok(command::enable_docker_in_docker(cmd, dind)?)
-    } else {
-        Ok(cmd)
-    }
-}
-
-fn configure_floki_user_env(cmd: DockerCommandBuilder, env: &Environment) -> DockerCommandBuilder {
-    let user = env.user_details;
-    let new_cmd = cmd.add_environment("FLOKI_HOST_UID", user.uid.to_string());
-    new_cmd.add_environment("FLOKI_HOST_GID", user.gid.to_string())
-}
-
-fn configure_floki_host_mountdir_env(
-    cmd: DockerCommandBuilder,
-    floki_root: &path::Path,
-) -> DockerCommandBuilder {
-    cmd.add_environment("FLOKI_HOST_MOUNTDIR", floki_root)
-}
-
-fn configure_forward_user(
-    cmd: DockerCommandBuilder,
-    config: &FlokiConfig,
-    env: &Environment,
-) -> DockerCommandBuilder {
-    if config.forward_user {
-        let user = env.user_details;
-        cmd.add_docker_switch("--user")
-            .add_docker_switch(&format!("{}:{}", user.uid, user.gid))
-    } else {
-        cmd
-    }
-}
-
-fn configure_forward_ssh_agent(
-    cmd: DockerCommandBuilder,
-    config: &FlokiConfig,
-    env: &Environment,
-) -> Result<DockerCommandBuilder, Error> {
-    if config.forward_ssh_agent {
-        if let Some(ref path) = env.ssh_agent_socket {
-            Ok(command::enable_forward_ssh_agent(cmd, path))
-        } else {
-            Err(errors::FlokiError::NoSshAuthSock {}.into())
-        }
-    } else {
-        Ok(cmd)
-    }
-}
-
-fn configure_entrypoint(cmd: DockerCommandBuilder, config: &FlokiConfig) -> DockerCommandBuilder {
-    if let Some(entrypoint) = config.entrypoint.value() {
-        cmd.add_docker_switch(&format!("--entrypoint={}", entrypoint))
-    } else {
-        cmd
-    }
-}
-
-fn configure_docker_switches(
-    cmd: DockerCommandBuilder,
-    config: &FlokiConfig,
-) -> Result<DockerCommandBuilder, Error> {
-    let mut cmd = cmd;
-    for switch in decompose_switches(&config.docker_switches)? {
-        cmd = cmd.add_docker_switch(switch);
-    }
-    Ok(cmd)
 }
 
 fn decompose_switches(specs: &Vec<String>) -> Result<Vec<String>, Error> {
@@ -135,18 +84,6 @@ fn decompose_switches(specs: &Vec<String>) -> Result<Vec<String>, Error> {
     }
 
     Ok(flattened)
-}
-
-fn configure_working_directory(
-    cmd: DockerCommandBuilder,
-    env: &Environment,
-    config: &FlokiConfig,
-) -> DockerCommandBuilder {
-    cmd.set_working_directory(get_working_directory(
-        &env.current_directory,
-        &env.floki_root,
-        &path::PathBuf::from(&config.mount),
-    ))
 }
 
 /// Add mounts for each of the passed in volumes
@@ -181,33 +118,12 @@ fn get_working_directory(
     ))
 }
 
-/// Specify the primary mount for the floki container
-fn get_mount_specification<'a, 'b>(
-    floki_root: &'a path::PathBuf,
-    config: &'b FlokiConfig,
-) -> (&'a path::PathBuf, &'b path::PathBuf) {
-    (floki_root, &config.mount)
-}
-
 /// Turn the init section of a floki.yaml file into a command
 /// that can be given to a shell
 fn subshell_command(init: &[String], command: &str) -> String {
     let mut args: Vec<&str> = init.iter().map(|s| s as &str).collect::<Vec<&str>>();
     args.push(command);
     args.join(" && ")
-}
-
-/// Launch dind if specified by the configuration
-fn launch_dind_if_needed(
-    config: &FlokiConfig,
-    dind: Dind,
-) -> Result<Option<command::DaemonHandle>, Error> {
-    if config.dind.enabled() {
-        crate::dind::dind_preflight(config.dind.image())?;
-        Ok(Some(dind.launch()?))
-    } else {
-        Ok(None)
-    }
 }
 
 #[cfg(test)]
