@@ -8,29 +8,49 @@ use std::collections::BTreeMap;
 use std::ffi::OsString;
 use std::path;
 
-pub(crate) struct Docker {
+/// Information for running docker-in-docker
+#[derive(Debug)]
+pub(crate) struct Dind {
+    /// The image to use
     pub(crate) image: String,
 }
 
+/// Information about the user
+#[derive(Debug)]
 pub(crate) struct User {
+    /// Should the user be forwarded?
     pub(crate) forward: bool,
+    /// User host UID
     pub(crate) uid: nix::unistd::Uid,
+    /// User host GID
     pub(crate) gid: nix::unistd::Gid,
 }
 
+/// Information about the host SSH agent
+#[derive(Debug)]
 pub(crate) struct SshAgent {
+    /// Path to the agents socket
     pub(crate) path: OsString,
 }
 
+/// Paths used for running floki
+#[derive(Debug)]
 pub(crate) struct Paths {
+    /// The directory floki was launched in
     pub(crate) current_directory: path::PathBuf,
+    /// The root directory for the project (location of floki.yaml or
+    /// configuration file)
     pub(crate) root: path::PathBuf,
+    /// The path to the configuration file
     pub(crate) config: path::PathBuf,
+    /// The base directory for storing volumes
     pub(crate) workspace: path::PathBuf,
 }
 
-/// A fully resolved specification of a container to run
-pub(crate) struct FlokiEnvironment {
+/// FlokiSpec provides a fully resolved and preprocessed block of
+/// configuration data which is clearer to construct a command from.
+#[derive(Debug)]
+pub(crate) struct FlokiSpec {
     /// Details of the image to use
     pub(crate) image: crate::image::Image,
     /// Commands to run on initialization
@@ -46,26 +66,23 @@ pub(crate) struct FlokiEnvironment {
     /// User details and forwarding
     pub(crate) user: User,
     /// SSH agent forwarding
-    pub(crate) ssh: Option<SshAgent>,
+    pub(crate) ssh_agent: Option<SshAgent>,
     /// Explicit docker switches to use
     pub(crate) docker_switches: Vec<String>,
     /// Linked docker environments
-    pub(crate) docker: Option<Docker>,
+    pub(crate) dind: Option<Dind>,
     /// Paths on the host which are relevant to running
     pub(crate) paths: Paths,
 }
 
-impl FlokiEnvironment {
-    pub(crate) fn from(
-        config: FlokiConfig,
-        environ: Environment,
-    ) -> Result<FlokiEnvironment, Error> {
-        let docker = match config.dind {
-            DindConfig::Toggle(true) => Some(Docker {
+impl FlokiSpec {
+    pub(crate) fn from(config: FlokiConfig, environ: Environment) -> Result<Self, Error> {
+        let dind = match config.dind {
+            DindConfig::Toggle(true) => Some(Dind {
                 image: "docker:stable-dind".to_string(),
             }),
             DindConfig::Toggle(false) => None,
-            DindConfig::Image { image } => Some(Docker { image }),
+            DindConfig::Image { image } => Some(Dind { image }),
         };
 
         let user = User {
@@ -76,7 +93,7 @@ impl FlokiEnvironment {
 
         let entrypoint = config.entrypoint.value().map(|v| v.to_string());
 
-        let ssh = if config.forward_ssh_agent {
+        let ssh_agent = if config.forward_ssh_agent {
             if let Some(path) = environ.ssh_agent_socket {
                 Ok(Some(SshAgent { path }))
             } else {
@@ -93,7 +110,7 @@ impl FlokiEnvironment {
             workspace: environ.floki_workspace,
         };
 
-        Ok(FlokiEnvironment {
+        let spec = FlokiSpec {
             image: config.image,
             init: config.init,
             mount: config.mount,
@@ -101,10 +118,14 @@ impl FlokiEnvironment {
             entrypoint,
             volumes: config.volumes,
             user,
-            ssh,
+            ssh_agent,
             docker_switches: config.docker_switches,
-            docker,
+            dind,
             paths,
-        })
+        };
+
+        debug!("built spec from config and environment: {:?}", spec);
+
+        Ok(spec)
     }
 }

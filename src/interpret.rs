@@ -9,7 +9,7 @@ use failure::Error;
 use std::path;
 
 pub(crate) fn run_floki_container(
-    spec: &crate::spec::FlokiEnvironment,
+    spec: &spec::FlokiSpec,
     inner_command: &str,
 ) -> Result<(), Error> {
     spec.image.obtain_image(&spec.paths.root)?;
@@ -30,7 +30,7 @@ pub(crate) fn run_floki_container(
             .add_docker_switch(&format!("{}:{}", spec.user.uid, spec.user.gid));
     }
 
-    if let Some(spec::SshAgent { path }) = &spec.ssh {
+    if let Some(spec::SshAgent { path }) = &spec.ssh_agent {
         cmd = command::enable_forward_ssh_agent(cmd, &path);
     }
 
@@ -50,12 +50,12 @@ pub(crate) fn run_floki_container(
 
     cmd = configure_volumes(cmd, &volumes);
 
-    // Finally configure dind, taking care to return a handle for the linked dind container
-    let _handle = if let Some(dind) = &spec.docker {
-        let dind_spec = Dind::new(&dind.image, (&spec.paths.root, &spec.mount));
-        cmd = command::enable_docker_in_docker(cmd, &dind_spec)?;
-        crate::dind::dind_preflight(&dind.image)?;
-        Some(dind_spec.launch()?)
+    // Finally configure dind, taking care to hold a handle for the linked dind container
+    let _handle = if let Some(spec::Dind { image }) = &spec.dind {
+        let dind = Dind::new(&image, (&spec.paths.root, &spec.mount));
+        cmd = command::enable_docker_in_docker(cmd, &dind)?;
+        crate::dind::dind_preflight(&image)?;
+        Some(dind.launch()?)
     } else {
         None
     };
