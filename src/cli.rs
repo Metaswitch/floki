@@ -13,6 +13,10 @@ pub(crate) enum Subcommand {
     #[structopt(name = "pull")]
     Pull {},
 
+    /// Emit information about volumes
+    #[structopt(name = "volumes")]
+    Volume {},
+
     /// Generate shell completions to stdout.
     #[structopt(name = "completion")]
     Completion {
