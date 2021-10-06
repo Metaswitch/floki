@@ -12,6 +12,7 @@ mod environment;
 mod errors;
 mod image;
 mod interpret;
+mod spec;
 mod volumes;
 
 use cli::{Cli, Subcommand};
@@ -58,7 +59,7 @@ fn run_floki_from_args(args: &Cli) -> Result<(), Error> {
             let env = Environment::gather(&args.config_file)?;
             let config = FlokiConfig::from_file(&env.config_file)?;
             let inner_command = interpret::command_in_shell(config.shell.inner_shell(), &command);
-            run_floki_container(&env, &config, inner_command)
+            interpret::run_floki_container(&spec::FlokiSpec::from(config, env)?, &inner_command)
         }
 
         Some(Subcommand::Completion { shell }) => {
@@ -71,19 +72,9 @@ fn run_floki_from_args(args: &Cli) -> Result<(), Error> {
             let env = Environment::gather(&args.config_file)?;
             let config = FlokiConfig::from_file(&env.config_file)?;
             let inner_command = config.shell.inner_shell().to_string();
-            run_floki_container(&env, &config, inner_command)
+            interpret::run_floki_container(&spec::FlokiSpec::from(config, env)?, &inner_command)
         }
     }
-}
-
-/// Launch a floki container running the inner command
-fn run_floki_container(
-    environ: &environment::Environment,
-    config: &FlokiConfig,
-    inner_command: String,
-) -> Result<(), Error> {
-    config.image.obtain_image(&environ.floki_root)?;
-    interpret::run_container(&environ, &config, &inner_command)
 }
 
 /// Configure the logger

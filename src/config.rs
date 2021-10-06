@@ -42,20 +42,6 @@ impl DindConfig {
     pub fn deactivated() -> Self {
         DindConfig::Toggle(false)
     }
-
-    pub fn enabled(&self) -> bool {
-        match self {
-            DindConfig::Toggle(v) => *v,
-            _ => true,
-        }
-    }
-
-    pub fn image(&self) -> &str {
-        match self {
-            DindConfig::Image { image } => image,
-            _ => "docker:stable-dind",
-        }
-    }
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
@@ -218,8 +204,6 @@ mod test {
         };
         let actual: TestDindConfig = serde_yaml::from_str(yaml).unwrap();
         assert_eq!(actual, expected);
-        assert_eq!(actual.dind.enabled(), true);
-        assert_eq!(actual.dind.image(), "docker:stable-dind");
     }
 
     #[test]
@@ -232,8 +216,6 @@ mod test {
         };
         let actual: TestDindConfig = serde_yaml::from_str(yaml).unwrap();
         assert_eq!(actual, expected);
-        assert_eq!(actual.dind.enabled(), true);
-        assert_eq!(actual.dind.image(), "dind:custom");
     }
 
     #[derive(Debug, PartialEq, Serialize, Deserialize)]
