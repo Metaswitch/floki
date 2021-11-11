@@ -1,23 +1,17 @@
 name: floki-ci
-'on':
+on:
   push:
-    branches:
-      - master
-      # bors
-      - staging
-      - trying
-      # Any ci/ prefixed branches
-      - ci/**
-      # dependabot, which creates all MRs in dependabot/
-      - dependabot/**
-      # release branching and tagging
-      - release-[0-9]+.[0-9]+.[0-9]+
-      - release-[0-9]+.[0-9]+.[0-9]+-*
     tags:
       # Full version
       - "[0-9]+.[0-9]+.[0-9]+"
       # Prerelease version
       - "[0-9]+.[0-9]+.[0-9]+-*"
+
+  pull_request:
+    branches:
+      # Trigger on pull requests into master
+      - master
+    types: [ opened, synchronize ]
 
 jobs:
   build:
