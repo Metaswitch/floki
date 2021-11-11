@@ -23,6 +23,13 @@ pub struct YamlSpec {
     key: String,
 }
 
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+pub struct ExecSpec {
+    command: String,
+    args: Vec<String>,
+    tag: String,
+}
+
 fn default_dockerfile() -> PathBuf {
     "Dockerfile".into()
 }
@@ -37,6 +44,7 @@ pub enum Image {
     Name(String),
     Build { build: BuildSpec },
     Yaml { yaml: YamlSpec },
+    Exec { exec: ExecSpec },
 }
 
 impl Image {
@@ -69,6 +77,7 @@ impl Image {
                         .into()
                     })
             }
+            Image::Exec { ref exec } => Ok(exec.tag.clone()),
         }
     }
 
@@ -101,6 +110,25 @@ impl Image {
                         image: self.name()?,
                         exit_status: FlokiSubprocessExitStatus {
                             process_description: "docker build".into(),
+                            exit_status,
+                        },
+                    }
+                    .into())
+                }
+            }
+            Image::Exec { ref exec } => {
+                let exit_status = Command::new(&exec.command)
+                    .args(&exec.args)
+                    .spawn()?
+                    .wait()?;
+
+                if exit_status.success() {
+                    Ok(self.name()?)
+                } else {
+                    Err(FlokiError::FailedToBuildImage {
+                        image: self.name()?,
+                        exit_status: FlokiSubprocessExitStatus {
+                            process_description: exec.command.clone(),
                             exit_status,
                         },
                     }
@@ -184,6 +212,29 @@ mod test {
                     dockerfile: "Dockerfile.test".into(),
                     context: "./context".into(),
                     target: Some("builder".into()),
+                },
+            },
+        };
+        let actual: TestImage = serde_yaml::from_str(yaml).unwrap();
+        assert!(actual == expected);
+    }
+
+    #[test]
+    fn test_image_spec_by_exec_spec() {
+        let yaml = r#"
+image:
+    exec:
+        command: foo
+        args:
+            - build
+        tag: "foobuild:1.0.0"
+"#;
+        let expected = TestImage {
+            image: Image::Exec {
+                exec: ExecSpec {
+                    command: "foo".into(),
+                    args: vec!["build".into()],
+                    tag: "foobuild:1.0.0".into(),
                 },
             },
         };
