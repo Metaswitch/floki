@@ -1,8 +1,7 @@
-use std::collections::BTreeMap;
 use std::path;
+use std::{collections::BTreeMap, os::unix::prelude::OsStrExt};
 
-use crypto::digest::Digest;
-use crypto::sha2::Sha256;
+use sha2::{Digest, Sha256};
 
 use crate::config::Volume;
 
@@ -44,8 +43,8 @@ fn prefix_cache(shared: bool, config_filepath: &path::Path) -> String {
 
 fn hash_path(path: &path::Path) -> String {
     let mut hasher = Sha256::new();
-    hasher.input_str(&path.as_os_str().to_string_lossy());
-    hasher.result_str()
+    hasher.update(path.as_os_str().as_bytes());
+    format!("{:x}", hasher.finalize())
 }
 
 #[cfg(test)]

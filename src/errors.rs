@@ -11,62 +11,56 @@ pub struct FlokiSubprocessExitStatus {
 }
 
 /// Error types for Floki
-#[derive(Debug, Fail)]
+#[derive(Debug, thiserror::Error)]
 pub enum FlokiError {
-    #[fail(display = "No floki.yaml found in tree")]
+    #[error("No floki.yaml found in tree")]
     ProblemFindingConfigYaml {},
 
-    #[fail(display = "Could not normalize the file path '{}': {}", name, error)]
+    #[error("Could not normalize the file path '{}': {}", name, error)]
     ProblemNormalizingFilePath { name: String, error: io::Error },
 
-    #[fail(
-        display = "There was a problem opening the configuration file '{}': {}",
-        name, error
-    )]
+    #[error("There was a problem opening the configuration file '{name:?}': {error:?}")]
     ProblemOpeningConfigYaml { name: String, error: io::Error },
 
-    #[fail(
-        display = "There was a problem parsing the configuration file '{}': {}",
-        name, error
-    )]
+    #[error("There was a problem parsing the configuration file '{name:?}': {error:?}")]
     ProblemParsingConfigYaml {
         name: String,
         error: serde_yaml::Error,
     },
 
-    #[fail(display = "Running docker command failed with error: {}", error)]
+    #[error("Running docker command failed with error: {error:?}")]
     FailedToLaunchDocker { error: io::Error },
 
-    #[fail(display = "Failed to complete docker command with error: {}", error)]
+    #[error("Failed to complete docker command with error: {error:?}")]
     FailedToCompleteDockerCommand { error: io::Error },
 
-    #[fail(display = "Failed to pull docker image '{}': {}", image, exit_status)]
+    #[error("Failed to pull docker image '{image}': {exit_status:?}")]
     FailedToPullImage {
         image: String,
         exit_status: FlokiSubprocessExitStatus,
     },
 
-    #[fail(display = "Failed to build docker image '{}': {}", image, exit_status)]
+    #[error("Failed to build docker image '{image}': {exit_status}")]
     FailedToBuildImage {
         image: String,
         exit_status: FlokiSubprocessExitStatus,
     },
 
-    #[fail(display = "Failed to check existence of image '{}': {}", image, error)]
+    #[error("Failed to check existence of image '{image}': {error:?}")]
     FailedToCheckForImage { image: String, error: io::Error },
 
-    #[fail(display = "Failed to find the key '{}' in file '{}'", key, file)]
+    #[error("Failed to find the key '{key}' in file '{file}'")]
     FailedToFindYamlKey { key: String, file: String },
 
-    #[fail(display = "Running container failed: {}", exit_status)]
+    #[error("Running container failed: {exit_status:?}")]
     RunContainerFailed {
         exit_status: FlokiSubprocessExitStatus,
     },
 
-    #[fail(display = "Unable to forward ssh socket - cannot find SSH_AUTH_SOCK in environment")]
+    #[error("Unable to forward ssh socket - cannot find SSH_AUTH_SOCK in environment")]
     NoSshAuthSock {},
 
-    #[fail(display = "Malformed item in docker_switches: {}", item)]
+    #[error("Malformed item in docker_switches: {item}")]
     MalformedDockerSwitch { item: String },
 }
 
@@ -104,21 +98,15 @@ impl fmt::Display for FlokiSubprocessExitStatus {
 
 /// Internal error types for floki - these represent failed assumptions of
 /// the developers, and shouldn't actually manifest.
-#[derive(Debug, Fail)]
+#[derive(Debug, thiserror::Error)]
 pub enum FlokiInternalError {
-    #[fail(
-        display = "An internal assertion failed '{}'.  This is probably a bug!",
-        description
-    )]
+    #[error("An internal assertion failed '{description}'.  This is probably a bug!")]
     InternalAssertionFailed { description: String },
 }
 
 /// Errors made by floki users.
-#[derive(Debug, Fail)]
+#[derive(Debug, thiserror::Error)]
 pub enum FlokiUserError {
-    #[fail(
-        display = "Invalid verbosity setting of {}. Use a setting between 0 and 3 (-vvv)",
-        setting
-    )]
+    #[error("Invalid verbosity setting of {setting:?}. Use a setting between 0 and 3 (-vvv)")]
     InvalidVerbositySetting { setting: u8 },
 }

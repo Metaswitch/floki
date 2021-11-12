@@ -1,6 +1,6 @@
 /// Query the current user environment
 use crate::errors;
-use failure::Error;
+use anyhow::Error;
 use std::env;
 use std::ffi::OsString;
 use std::path;
@@ -129,14 +129,13 @@ fn normalize_path(path: path::PathBuf) -> Result<path::PathBuf, Error> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use failure::format_err;
+    use anyhow::anyhow;
     use std::fs;
-    use tempdir;
 
     fn touch_file(path: &path::Path) -> Result<(), Error> {
         fs::create_dir_all(
             path.parent()
-                .ok_or(format_err!("Unable to take parent of path"))?,
+                .ok_or(anyhow!("Unable to take parent of path"))?,
         )?;
         fs::OpenOptions::new().create(true).write(true).open(path)?;
         Ok(())
@@ -144,16 +143,16 @@ mod test {
 
     #[test]
     fn test_find_floki_yaml_current_dir() -> Result<(), Error> {
-        let tmp_dir = tempdir::TempDir::new("")?;
+        let tmp_dir = tempfile::TempDir::new()?;
         let floki_yaml_path = tmp_dir.path().join("floki.yaml");
         touch_file(&floki_yaml_path)?;
-        assert_eq!(find_floki_yaml(&tmp_dir.path())?, floki_yaml_path);
+        assert_eq!(find_floki_yaml(tmp_dir.path())?, floki_yaml_path);
         Ok(())
     }
 
     #[test]
     fn test_find_floki_yaml_ancestor() -> Result<(), Error> {
-        let tmp_dir = tempdir::TempDir::new("")?;
+        let tmp_dir = tempfile::TempDir::new()?;
         let floki_yaml_path = tmp_dir.path().join("floki.yaml");
         touch_file(&floki_yaml_path)?;
         assert_eq!(
@@ -165,7 +164,7 @@ mod test {
 
     #[test]
     fn test_find_floki_yaml_sibling() -> Result<(), Error> {
-        let tmp_dir = tempdir::TempDir::new("")?;
+        let tmp_dir = tempfile::TempDir::new()?;
         let floki_yaml_path = tmp_dir.path().join("src/floki.yaml");
         touch_file(&floki_yaml_path)?;
         assert!(find_floki_yaml(&tmp_dir.path().join("include")).is_err());

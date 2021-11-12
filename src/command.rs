@@ -1,5 +1,5 @@
 use crate::errors::{FlokiError, FlokiSubprocessExitStatus};
-use failure::Error;
+use anyhow::Error;
 use std::ffi::{OsStr, OsString};
 use std::path;
 use std::process::{Command, Stdio};

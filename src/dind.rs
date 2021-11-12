@@ -1,5 +1,5 @@
 /// Docker-in-docker structures
-use failure::Error;
+use anyhow::Error;
 use std::path;
 
 use crate::command::{DaemonHandle, DockerCommandBuilder};

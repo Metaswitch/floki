@@ -1,7 +1,5 @@
 /// floki - the development container launcher
 #[macro_use]
-extern crate failure_derive;
-#[macro_use]
 extern crate log;
 
 mod cli;
@@ -15,15 +13,13 @@ mod interpret;
 mod spec;
 mod volumes;
 
+use anyhow::Error;
 use cli::{Cli, Subcommand};
 use config::FlokiConfig;
 use environment::Environment;
-
-use failure::Error;
-use quicli::prelude::*;
 use structopt::StructOpt;
 
-fn main() -> CliResult {
+fn main() -> Result<(), Error> {
     let args = Cli::from_args();
     configure_logging(args.verbosity)?;
 

@@ -1,5 +1,5 @@
-use failure::Error;
-use quicli::prelude::*;
+use anyhow::Error;
+use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};

@@ -2,7 +2,7 @@ use crate::config::{DindConfig, FlokiConfig};
 use crate::environment::Environment;
 use crate::errors;
 
-use failure::Error;
+use anyhow::Error;
 
 use std::collections::BTreeMap;
 use std::ffi::OsString;
