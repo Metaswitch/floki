@@ -21,6 +21,7 @@ Status: Available for use
 ### Added
 
 - Allow entrypoint suppression to be set in the configuration file - MINOR
+- Add exec mode for generating images - MINOR
 
 ### Fixed
 - Publish tags to crates.io - PATCH

@@ -53,6 +53,22 @@ image:
     key: variables.RUST-IMAGE
 ```
 
+## Build an image using any tool
+
+`floki` can use an image built using any arbitrary tool.
+
+```yaml
+image:
+  exec:
+    command: docker              # Will execute the program "docker"
+    args:                        # A set of arguments to be passed to the command
+      - build
+      - -t
+      - devimage
+      - .
+    image: devimage              # The name and tag of the image that is created by the command
+```
+
 ## Updating an image
 
 `floki pull` forces a pull of the container specified in `image`. While it is better to version images properly, this can be used when tracking a `latest` tag, or similar.
