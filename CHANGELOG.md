@@ -16,6 +16,7 @@ Status: Available for use
 - Automatically suppress the container entrypoint - MAJOR
 - Update simplelog from 0.9 to 0.10 - MINOR
 - Rework internals to have clear data structure for the runtime configuration - MINOR
+- Disable Bors as it's not gaining us much.
 
 ### Added
 
