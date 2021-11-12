@@ -9,8 +9,8 @@ use crate::config::Volume;
 static VOLUME_DIRECTORY: &str = "volumes/";
 
 pub(crate) fn resolve_volume_mounts<'a>(
-    config_filepath: &path::PathBuf,
-    work_path: &path::PathBuf,
+    config_filepath: &path::Path,
+    work_path: &path::Path,
     volumes: &'a BTreeMap<String, Volume>,
 ) -> Vec<(path::PathBuf, &'a path::PathBuf)> {
     volumes
@@ -25,8 +25,8 @@ pub(crate) fn resolve_volume_mounts<'a>(
 }
 
 fn cache_path(
-    work_path: &path::PathBuf,
-    config_filepath: &path::PathBuf,
+    work_path: &path::Path,
+    config_filepath: &path::Path,
     name: &str,
     config: &Volume,
 ) -> path::PathBuf {
@@ -34,7 +34,7 @@ fn cache_path(
     work_path.join(VOLUME_DIRECTORY).join::<String>(folder)
 }
 
-fn prefix_cache(shared: bool, config_filepath: &path::PathBuf) -> String {
+fn prefix_cache(shared: bool, config_filepath: &path::Path) -> String {
     if shared {
         "".into()
     } else {
@@ -42,7 +42,7 @@ fn prefix_cache(shared: bool, config_filepath: &path::PathBuf) -> String {
     }
 }
 
-fn hash_path(path: &path::PathBuf) -> String {
+fn hash_path(path: &path::Path) -> String {
     let mut hasher = Sha256::new();
     hasher.input_str(&path.as_os_str().to_string_lossy());
     hasher.result_str()
@@ -51,12 +51,13 @@ fn hash_path(path: &path::PathBuf) -> String {
 #[cfg(test)]
 mod test {
     use super::*;
+    use std::path::Path;
 
     #[test]
     fn test_shared_cache_path_is_shared_across_flokis() {
         let cache_1 = cache_path(
-            &"work_path".into(),
-            &"/floki/root/1/floki.yaml".into(),
+            Path::new("work_path"),
+            Path::new("/floki/root/1/floki.yaml"),
             "cache",
             &Volume {
                 shared: true,
@@ -64,8 +65,8 @@ mod test {
             },
         );
         let cache_2 = cache_path(
-            &"work_path".into(),
-            &"/floki/root/2/floki.yaml".into(),
+            Path::new("work_path"),
+            Path::new("/floki/root/2/floki.yaml"),
             "cache",
             &Volume {
                 shared: true,
@@ -79,8 +80,8 @@ mod test {
     #[test]
     fn test_local_cache_path_is_not_shared_across_flokis() {
         let cache_1 = cache_path(
-            &"work_path".into(),
-            &"/floki/root/1/floki.yaml".into(),
+            Path::new("work_path"),
+            Path::new("/floki/root/1/floki.yaml"),
             "cache",
             &Volume {
                 shared: false,
@@ -88,8 +89,8 @@ mod test {
             },
         );
         let cache_2 = cache_path(
-            &"work_path".into(),
-            &"/floki/root/2/floki.yaml".into(),
+            Path::new("work_path"),
+            Path::new("/floki/root/2/floki.yaml"),
             "cache",
             &Volume {
                 shared: false,
@@ -103,8 +104,8 @@ mod test {
     #[test]
     fn test_local_and_shared_caches_dont_collide() {
         let cache_shared = cache_path(
-            &"work_path".into(),
-            &"/floki/root/1/floki.yaml".into(),
+            Path::new("work_path"),
+            Path::new("/floki/root/1/floki.yaml"),
             "cache",
             &Volume {
                 shared: true,
@@ -112,8 +113,8 @@ mod test {
             },
         );
         let cache_local = cache_path(
-            &"work_path".into(),
-            &"/floki/root/1/floki.yaml".into(),
+            Path::new("work_path"),
+            Path::new("/floki/root/1/floki.yaml"),
             "cache",
             &Volume {
                 shared: false,
@@ -127,8 +128,8 @@ mod test {
     #[test]
     fn test_local_volumes_from_different_configs_dont_collide() {
         let cache_shared = cache_path(
-            &"work_path".into(),
-            &"/floki/root/1/floki-alternate.yaml".into(),
+            Path::new("work_path"),
+            Path::new("/floki/root/1/floki-alternate.yaml"),
             "cache",
             &Volume {
                 shared: false,
@@ -136,8 +137,8 @@ mod test {
             },
         );
         let cache_local = cache_path(
-            &"work_path".into(),
-            &"/floki/root/1/floki.yaml".into(),
+            Path::new("work_path"),
+            Path::new("/floki/root/1/floki.yaml"),
             "cache",
             &Volume {
                 shared: false,
@@ -146,5 +147,15 @@ mod test {
         );
 
         assert_ne!(cache_shared, cache_local);
+    }
+
+    #[test]
+    fn test_path_sha() {
+        let path = Path::new("/floki/root/1/floki.yaml");
+        let hash = hash_path(path);
+        assert_eq!(
+            hash,
+            "04820cace8be1a2e8057c92231963c269cc0fd0fef01fd3fdf2deaffb62dc48d"
+        );
     }
 }
