@@ -27,7 +27,7 @@ pub struct YamlSpec {
 pub struct ExecSpec {
     command: String,
     args: Vec<String>,
-    tag: String,
+    image: String,
 }
 
 fn default_dockerfile() -> PathBuf {
@@ -77,7 +77,7 @@ impl Image {
                         .into()
                     })
             }
-            Image::Exec { ref exec } => Ok(exec.tag.clone()),
+            Image::Exec { ref exec } => Ok(exec.image.clone()),
         }
     }
 
@@ -227,14 +227,14 @@ image:
         command: foo
         args:
             - build
-        tag: "foobuild:1.0.0"
+        image: "foobuild:1.0.0"
 "#;
         let expected = TestImage {
             image: Image::Exec {
                 exec: ExecSpec {
                     command: "foo".into(),
                     args: vec!["build".into()],
-                    tag: "foobuild:1.0.0".into(),
+                    image: "foobuild:1.0.0".into(),
                 },
             },
         };
