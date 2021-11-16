@@ -1,8 +1,8 @@
 /// Configuration file format for floki
 use crate::errors;
 use crate::image;
-use failure::Error;
-use quicli::prelude::*;
+use anyhow::Error;
+use serde::{Deserialize, Serialize};
 
 use std::collections::BTreeMap;
 use std::fs::File;

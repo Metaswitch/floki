@@ -4,7 +4,7 @@ use crate::dind::Dind;
 use crate::spec;
 use crate::volumes::resolve_volume_mounts;
 
-use failure::Error;
+use anyhow::Error;
 use std::path;
 
 pub(crate) fn run_floki_container(

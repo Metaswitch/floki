@@ -24,6 +24,7 @@ Status: Available for use
 - Add exec mode for generating images - MINOR
 
 ### Fixed
+- Fix up old dependencies; move to thiserror/anyhow instead of failure - MINOR
 - Publish tags to crates.io - PATCH
 
 ## [0.6.2] - 2021-03-03
