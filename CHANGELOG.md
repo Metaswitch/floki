@@ -13,8 +13,16 @@ Status: Available for use
 
 ### Changed
 
+### Added
+
+### Fixed
+
+## [0.7.0] - 2021-11-16
+
+### Changed
+
 - Automatically suppress the container entrypoint - MAJOR
-- Update simplelog from 0.9 to 0.10 - MINOR
+- Update simplelog from 0.9 to 0.11 - MINOR
 - Rework internals to have clear data structure for the runtime configuration - MINOR
 - Disable Bors as it's not gaining us much.
 
@@ -274,7 +282,8 @@ Status: Available for use
 - Initial primitive version
 ### Changed
 
-[unreleased]: https://github.com/Metaswitch/floki/compare/0.6.2...HEAD
+[unreleased]: https://github.com/Metaswitch/floki/compare/0.7.0...HEAD
+[0.7.0]: https://github.com/Metaswitch/floki/compare/0.6.2...0.7.0
 [0.6.2]: https://github.com/Metaswitch/floki/compare/0.6.1...0.6.2
 [0.6.1]: https://github.com/Metaswitch/floki/compare/0.6.0...0.6.1
 [0.6.0]: https://github.com/Metaswitch/floki/compare/0.5.0...0.6.0
