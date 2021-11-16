@@ -16,13 +16,13 @@ pub enum FlokiError {
     #[error("No floki.yaml found in tree")]
     ProblemFindingConfigYaml {},
 
-    #[error("Could not normalize the file path '{}': {}", name, error)]
+    #[error("Could not normalize the file path '{name}': {error:?}")]
     ProblemNormalizingFilePath { name: String, error: io::Error },
 
-    #[error("There was a problem opening the configuration file '{name:?}': {error:?}")]
+    #[error("There was a problem opening the configuration file '{name}': {error:?}")]
     ProblemOpeningConfigYaml { name: String, error: io::Error },
 
-    #[error("There was a problem parsing the configuration file '{name:?}': {error:?}")]
+    #[error("There was a problem parsing the configuration file '{name}': {error:?}")]
     ProblemParsingConfigYaml {
         name: String,
         error: serde_yaml::Error,
