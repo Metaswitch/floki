@@ -57,7 +57,7 @@ pub enum FlokiError {
         exit_status: FlokiSubprocessExitStatus,
     },
 
-    #[error("Unable to forward ssh socket - cannot find SSH_AUTH_SOCK in environment")]
+    #[error("Unable to forward ssh socket - cannot find SSH_AUTH_SOCK in environment - do you have an ssh agent running?")]
     NoSshAuthSock {},
 
     #[error("Malformed item in docker_switches: {item}")]
