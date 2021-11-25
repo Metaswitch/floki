@@ -13,6 +13,8 @@ Status: Available for use
 
 ### Changed
 
+- Adjust SSH agent forwarding error message - MINOR
+
 ### Added
 
 ### Fixed
