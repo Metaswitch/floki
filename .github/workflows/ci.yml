@@ -40,6 +40,14 @@ jobs:
       - run: "./build.sh"
         env:
           OS_NAME: ${{ matrix.os }}
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v2
+        if: ${{ matrix.rust == 'stable' }}
+        with:
+          name: stableartifacts
+          path: |
+            floki*.zip
+            floki*.tar.gz
 
   publish:
     runs-on: ubuntu-18.04
@@ -51,6 +59,10 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
             toolchain: stable
+      - name: Download archives
+        uses: actions/download-artifact@v2
+        with:
+          name: stableartifacts
       - name: Publish to crates.io on tags
         uses: actions-rs/cargo@v1
         if: startsWith(github.ref, 'refs/tags/')
