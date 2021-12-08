@@ -115,7 +115,7 @@ checksum = "56899898ce76aaf4a0f24d914c97ea6ed976d42fec6ad33fcbb0a1103e07b2b0"
 
 [[package]]
 name = "floki"
-version = "0.7.0"
+version = "0.7.1"
 dependencies = [
  "anyhow",
  "log",
