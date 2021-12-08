@@ -40,6 +40,14 @@ jobs:
       - run: "./build.sh"
         env:
           OS_NAME: ${{ matrix.os }}
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v2
+        if: ${{ matrix.rust == 'stable' }}
+        with:
+          name: stableartifacts
+          path: |
+            floki*.zip
+            floki*.tar.gz
 
   publish:
     runs-on: ubuntu-18.04
@@ -47,6 +55,7 @@ jobs:
       - build
     steps:
       - uses: actions/checkout@v2
+      - run: pip3 install -U tomlq
       - name: Install rust
         uses: actions-rs/toolchain@v1
         with:
@@ -68,3 +77,19 @@ jobs:
           args: --dry-run
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.PUBLISH_SECRET }}
+      # After publishing, create a release
+      - name: Download archives
+        uses: actions/download-artifact@v2
+        with:
+          name: stableartifacts
+      - name: Generate release.txt
+        run: "./changelog.sh"
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          body_path: release.txt
+          token: ${{ secrets.PAT_GITHUB }}
+          files: |
+            floki*.zip
+            floki*.tar.gz
