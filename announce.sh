@@ -5,15 +5,14 @@ echo "Announce changes to the world!"
 VERSION=$(tomlq -r '.package.version' Cargo.toml)
 echo "Version: $VERSION"
 
-# Send announcement to a standalone test Slack channel.
 docker run \
    --rm \
   -v $PWD:/floki \
-  metaswitch/announcer:2.3.0 \
+  metaswitch/announcer:3.0.2 \
     announce \
-    --slackhook $ANNOUNCE_HOOK \
+    --webhook $ANNOUNCE_HOOK \
+    --target teams \
     --changelogversion $VERSION \
     --changelogfile /floki/CHANGELOG.md \
     --projectname floki \
-    --username travis-announcer \
     --iconemoji ship
