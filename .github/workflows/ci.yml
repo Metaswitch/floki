@@ -93,3 +93,8 @@ jobs:
           files: |
             floki*.zip
             floki*.tar.gz
+      # Announce the release
+      - run: "./announce.sh"
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          ANNOUNCE_HOOK: ${{ secrets.ANNOUNCE_HOOK }}
