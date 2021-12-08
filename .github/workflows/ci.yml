@@ -36,6 +36,13 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
             toolchain: ${{ matrix.rust }}
+      - name: Run cargo clippy to pick up any errors
+        uses: actions-rs/cargo@v1
+        if: ${{ matrix.rust == 'stable' }}
+        with:
+          toolchain: ${{ matrix.rust }}
+          command: clippy
+          args: -- -Dwarnings
       - run: pip3 install -U tomlq
       - run: "./build.sh"
         env:

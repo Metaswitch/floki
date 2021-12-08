@@ -154,8 +154,8 @@ impl DockerCommandBuilder {
         switches
     }
 
-    fn volume_mapping(src: &path::PathBuf, dst: &path::PathBuf) -> OsString {
-        let mut mapping = src.clone().into_os_string();
+    fn volume_mapping(src: &path::Path, dst: &path::Path) -> OsString {
+        let mut mapping = src.to_path_buf().into_os_string();
         mapping.push(":");
         mapping.push(dst);
         mapping
