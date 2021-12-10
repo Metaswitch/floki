@@ -185,7 +185,6 @@ pub fn image_exists_locally(name: &str) -> Result<bool, Error> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use serde_yaml;
 
     #[derive(Debug, PartialEq, Serialize, Deserialize)]
     struct TestImage {

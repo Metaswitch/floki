@@ -36,8 +36,6 @@ pub(crate) struct SshAgent {
 /// Paths used for running floki
 #[derive(Debug)]
 pub(crate) struct Paths {
-    /// The directory floki was launched in
-    pub(crate) current_directory: path::PathBuf,
     /// The internal working directory
     pub(crate) internal_working_directory: path::PathBuf,
     /// The root directory for the project (location of floki.yaml or
@@ -112,7 +110,6 @@ impl FlokiSpec {
         );
 
         let paths = Paths {
-            current_directory: environ.current_directory,
             internal_working_directory,
             root: environ.floki_root,
             config: environ.config_file,
@@ -141,7 +138,7 @@ impl FlokiSpec {
     }
 }
 
-fn decompose_switches(specs: &Vec<String>) -> Result<Vec<String>, Error> {
+fn decompose_switches(specs: &[String]) -> Result<Vec<String>, Error> {
     let mut flattened = Vec::new();
 
     for spec in specs {
@@ -150,7 +147,7 @@ fn decompose_switches(specs: &Vec<String>) -> Result<Vec<String>, Error> {
                 flattened.push(s);
             }
         } else {
-            Err(errors::FlokiError::MalformedDockerSwitch { item: spec.into() })?
+            return Err(errors::FlokiError::MalformedDockerSwitch { item: spec.into() }.into());
         }
     }
 

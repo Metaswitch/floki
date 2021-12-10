@@ -160,7 +160,6 @@ fn default_entrypoint() -> Entrypoint {
 #[cfg(test)]
 mod test {
     use super::*;
-    use serde_yaml;
 
     #[derive(Debug, PartialEq, Serialize, Deserialize)]
     struct TestShellConfig {

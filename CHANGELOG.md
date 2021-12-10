@@ -17,6 +17,8 @@ Status: Available for use
 
 ### Fixed
 
+- Fix up clippy warnings and enforce clippy going forward
+
 ## [0.7.1] - 2021-12-08
 
 ### Fixed

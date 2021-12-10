@@ -32,7 +32,7 @@ pub(crate) fn run_floki_container(
     }
 
     if let Some(spec::SshAgent { path }) = &spec.ssh_agent {
-        cmd = command::enable_forward_ssh_agent(cmd, &path);
+        cmd = command::enable_forward_ssh_agent(cmd, path);
     }
 
     if let Some(entrypoint) = &spec.entrypoint {
@@ -45,9 +45,9 @@ pub(crate) fn run_floki_container(
 
     // Finally configure dind, taking care to hold a handle for the linked dind container
     let _handle = if let Some(spec::Dind { image }) = &spec.dind {
-        let dind = Dind::new(&image, (&spec.paths.root, &spec.mount));
+        let dind = Dind::new(image, (&spec.paths.root, &spec.mount));
         cmd = command::enable_docker_in_docker(cmd, &dind)?;
-        crate::dind::dind_preflight(&image)?;
+        crate::dind::dind_preflight(image)?;
         Some(dind.launch()?)
     } else {
         None

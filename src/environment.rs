@@ -135,7 +135,7 @@ mod test {
     fn touch_file(path: &path::Path) -> Result<(), Error> {
         fs::create_dir_all(
             path.parent()
-                .ok_or(anyhow!("Unable to take parent of path"))?,
+                .ok_or_else(|| anyhow!("Unable to take parent of path"))?,
         )?;
         fs::OpenOptions::new().create(true).write(true).open(path)?;
         Ok(())
