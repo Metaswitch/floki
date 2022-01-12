@@ -14,11 +14,12 @@ Status: Available for use
 ### Breaking Changes
 
 ### Added
+- Change docker in docker image tag from `stable-dind` to `dind`
 
 ### Fixed
 
 - Fix up clippy warnings and enforce clippy going forward
-- Change docker in docker image tag from `stable-dind` to `dind`
+- `image_exists_locally` now checks that the specified image exists
 ## [0.7.1] - 2021-12-08
 
 ### Fixed

@@ -1,4 +1,5 @@
 use crate::config::{DindConfig, FlokiConfig};
+use crate::dind::DEFAULT_DIND_IMAGE;
 use crate::environment::Environment;
 use crate::errors;
 
@@ -79,7 +80,7 @@ impl FlokiSpec {
     pub(crate) fn from(config: FlokiConfig, environ: Environment) -> Result<Self, Error> {
         let dind = match config.dind {
             DindConfig::Toggle(true) => Some(Dind {
-                image: "docker:dind".to_string(),
+                image: DEFAULT_DIND_IMAGE.to_string(),
             }),
             DindConfig::Toggle(false) => None,
             DindConfig::Image { image } => Some(Dind { image }),

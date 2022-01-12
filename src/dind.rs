@@ -5,6 +5,8 @@ use std::path;
 use crate::command::{DaemonHandle, DockerCommandBuilder};
 use crate::image::{image_exists_locally, pull_image};
 
+pub const DEFAULT_DIND_IMAGE: &str = "docker:dind";
+
 #[derive(Debug)]
 pub struct Dind {
     command: DockerCommandBuilder,
