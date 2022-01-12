@@ -49,9 +49,6 @@ pub enum FlokiError {
     #[error("Failed to check existence of image '{image}': {error:?}")]
     FailedToCheckForImage { image: String, error: io::Error },
 
-    #[error("Failed to find the key '{key}' in file '{file}'")]
-    FailedToFindYamlKey { key: String, file: String },
-
     #[error("Running container failed: {exit_status:?}")]
     RunContainerFailed {
         exit_status: FlokiSubprocessExitStatus,

@@ -53,6 +53,18 @@ image:
     key: variables.RUST-IMAGE
 ```
 
+### Referencing a key in a yaml file at a url
+You may also fetch a file at a url.
+Optionally, headers may be appended, where the header value is replaced by an environment variable
+
+```yaml
+image:
+  yaml:
+    url: https://example.com/example.yaml
+    key: variables.RUST-IMAGE
+    headers:
+      PRIVATE-TOKEN: LOCAL_ENV_VARIABLE
+```
 ## Build an image using any tool
 
 `floki` can use an image built using any arbitrary tool.

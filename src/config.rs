@@ -118,16 +118,18 @@ impl FlokiConfig {
         // already have the path to the floki config file, so we
         // just prepend that to image.yaml.path.
         if let image::Image::Yaml { ref mut yaml } = config.image {
-            if yaml.file.is_relative() {
-                yaml.file = file
-                    .parent()
-                    .ok_or_else(|| errors::FlokiInternalError::InternalAssertionFailed {
-                        description: format!(
-                            "could not construct path to external yaml file '{:?}'",
-                            &yaml.file
-                        ),
-                    })?
-                    .join(yaml.file.clone());
+            if let image::YamlSpec::File { file, .. } = yaml {
+                if file.is_relative() {
+                    *file = file
+                        .parent()
+                        .ok_or_else(|| errors::FlokiInternalError::InternalAssertionFailed {
+                            description: format!(
+                                "could not construct path to external yaml file '{:?}'",
+                                &file
+                            ),
+                        })?
+                        .join(file.clone());
+                }
             }
         }
 

@@ -1,8 +1,12 @@
-use anyhow::Error;
+use anyhow::{Context, Error};
 use serde::{Deserialize, Serialize};
-use std::fs;
-use std::path::{Path, PathBuf};
-use std::process::{Command, Stdio};
+use std::{
+    collections::HashMap,
+    env, fs,
+    path::{Path, PathBuf},
+    process::{Command, Stdio},
+};
+use url::Url;
 use yaml_rust::YamlLoader;
 
 use crate::errors::{FlokiError, FlokiSubprocessExitStatus};
@@ -18,9 +22,17 @@ pub struct BuildSpec {
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
-pub struct YamlSpec {
-    pub file: PathBuf,
-    key: String,
+#[serde(untagged)]
+pub enum YamlSpec {
+    File {
+        file: PathBuf,
+        key: String,
+    },
+    Url {
+        url: Url,
+        key: String,
+        headers: Option<HashMap<String, String>>,
+    },
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
@@ -54,9 +66,41 @@ impl Image {
             Image::Name(ref s) => Ok(s.clone()),
             Image::Build { ref build } => Ok(build.name.clone() + ":floki"),
             Image::Yaml { ref yaml } => {
-                let contents = fs::read_to_string(&yaml.file)?;
-                let raw = YamlLoader::load_from_str(&contents)?;
-                let path = yaml.key.split('.').collect::<Vec<_>>();
+                let key = match yaml {
+                    YamlSpec::File { key, .. } => key,
+                    YamlSpec::Url { key, .. } => key,
+                };
+                let path = key.split('.').collect::<Vec<_>>();
+
+                let contents = match yaml {
+                    YamlSpec::File { file, .. } => fs::read_to_string(file)?,
+                    YamlSpec::Url { url, headers, .. } => {
+                        let mut builder = reqwest::blocking::Client::new().get(url.as_ref());
+
+                        if let Some(headers) = headers {
+                            for (key, value) in headers {
+                                builder = builder.header(
+                                    key,
+                                    env::var(value).context(format!(
+                                        "Couldn't fetch environment variable {}",
+                                        value
+                                    ))?,
+                                )
+                            }
+                        }
+
+                        builder
+                            .send()
+                            .context("Couldn't send request")?
+                            .error_for_status()
+                            .context("GET returned error")?
+                            .text()
+                            .context("Response is not text")?
+                    }
+                };
+
+                let raw = YamlLoader::load_from_str(&contents)
+                    .context("Retrieved file doesn't seem to be YAML")?;
                 let mut val = &raw[0];
 
                 for key in &path {
@@ -69,13 +113,14 @@ impl Image {
                 }
                 val.as_str()
                     .map(std::string::ToString::to_string)
-                    .ok_or_else(|| {
-                        FlokiError::FailedToFindYamlKey {
-                            key: yaml.key.to_string(),
-                            file: yaml.file.display().to_string(),
+                    .context(format!(
+                        "Couldn't find key {} in file {}",
+                        key,
+                        match yaml {
+                            YamlSpec::File { file, .. } => file.to_string_lossy().to_string(),
+                            YamlSpec::Url { url, .. } => url.to_string(),
                         }
-                        .into()
-                    })
+                    ))
             }
             Image::Exec { ref exec } => Ok(exec.image.clone()),
         }
