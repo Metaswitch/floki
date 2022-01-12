@@ -138,7 +138,7 @@ The precise `dind` image can also be set
 
 ```yaml
 dind:
-  image: docker:stable-dind
+  image: docker:dind
 ```
 
 This helps properly pin and version the docker-in-docker container.

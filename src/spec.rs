@@ -79,7 +79,7 @@ impl FlokiSpec {
     pub(crate) fn from(config: FlokiConfig, environ: Environment) -> Result<Self, Error> {
         let dind = match config.dind {
             DindConfig::Toggle(true) => Some(Dind {
-                image: "docker:stable-dind".to_string(),
+                image: "docker:dind".to_string(),
             }),
             DindConfig::Toggle(false) => None,
             DindConfig::Image { image } => Some(Dind { image }),
