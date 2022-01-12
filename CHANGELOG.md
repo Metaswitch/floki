@@ -14,6 +14,7 @@ Status: Available for use
 ### Breaking Changes
 
 ### Added
+- Support fetching yaml files from URLs
 
 ### Fixed
 
