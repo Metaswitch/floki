@@ -229,6 +229,9 @@ pub fn image_exists_locally(name: &str) -> Result<bool, Error> {
 
 #[cfg(test)]
 mod test {
+    use maplit::hashmap;
+    use std::convert::TryInto;
+
     use super::*;
 
     #[derive(Debug, PartialEq, Serialize, Deserialize)]
@@ -283,6 +286,29 @@ image:
             },
         };
         let actual: TestImage = serde_yaml::from_str(yaml).unwrap();
+        assert!(actual == expected);
+    }
+
+    #[test]
+    fn test_serialize_url() {
+        let yaml = "
+            image:
+              yaml:
+                url: https://example.com/example.yaml
+                key: variables.RUST-IMAGE
+                headers:
+                  PRIVATE-TOKEN: LOCAL_ENV_VARIABLE";
+        let expected = TestImage {
+            image: Image::Yaml {
+                yaml: YamlSpec::Url {
+                    url: "https://example.com/example.yaml".try_into().unwrap(),
+                    key: "variables.RUST-IMAGE".into(),
+                    headers: Some(hashmap!("PRIVATE-TOKEN".into() => "LOCAL_ENV_VARIABLE".into())),
+                },
+            },
+        };
+
+        let actual: TestImage = serde_yaml::from_str(&yaml).unwrap();
         assert!(actual == expected);
     }
 }
