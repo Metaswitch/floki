@@ -168,8 +168,9 @@ pub fn pull_image(name: &str) -> Result<(), Error> {
 
 /// Determine whether an image exists locally
 pub fn image_exists_locally(name: &str) -> Result<bool, Error> {
+    debug!("Checking for image: {}", name);
     let ret = Command::new("docker")
-        .args(&["history", "docker:stable-dind"])
+        .args(&["history", name])
         .stdin(Stdio::null())
         .stdout(Stdio::null())
         .stderr(Stdio::null())
@@ -178,7 +179,6 @@ pub fn image_exists_locally(name: &str) -> Result<bool, Error> {
             image: name.to_string(),
             error: e,
         })?;
-
     Ok(ret.code() == Some(0))
 }
 
