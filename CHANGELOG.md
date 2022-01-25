@@ -14,12 +14,19 @@ Status: Available for use
 ### Breaking Changes
 
 ### Added
+
+### Fixed
+
+## [0.8.0] - 2022-01-25
+
+### Added
 - Change docker in docker image tag from `stable-dind` to `dind`
 
 ### Fixed
 
 - Fix up clippy warnings and enforce clippy going forward
 - `image_exists_locally` now checks that the specified image exists
+
 ## [0.7.1] - 2021-12-08
 
 ### Fixed
@@ -292,7 +299,8 @@ Status: Available for use
 - Initial primitive version
 ### Changed
 
-[unreleased]: https://github.com/Metaswitch/floki/compare/0.7.1...HEAD
+[unreleased]: https://github.com/Metaswitch/floki/compare/0.8.0...HEAD
+[0.8.0]: https://github.com/Metaswitch/floki/compare/0.7.1...0.8.0
 [0.7.1]: https://github.com/Metaswitch/floki/compare/0.7.0...0.7.1
 [0.7.0]: https://github.com/Metaswitch/floki/compare/0.6.2...0.7.0
 [0.6.2]: https://github.com/Metaswitch/floki/compare/0.6.1...0.6.2
