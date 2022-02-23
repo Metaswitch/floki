@@ -23,7 +23,7 @@ yaml-rust = "0.4.4"
 simplelog = "0.11"
 nix = "0.23"
 shlex = "1.1"
-sha2 = "0.10.1"
+sha2 = "0.10.2"
 anyhow = "1.0.52"
 thiserror = "1.0.30"
 
