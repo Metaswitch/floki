@@ -16,7 +16,7 @@ Status: Available for use
 ### Added
 
 ### Fixed
-
+- Specify `--tls=false` for binding to `dind` container
 - Fix up clippy warnings and enforce clippy going forward
 
 ## [0.7.1] - 2021-12-08
