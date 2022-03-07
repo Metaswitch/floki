@@ -30,9 +30,11 @@ impl Dind {
             "Starting docker:dind container with name {}",
             self.command.name()
         );
-        let handle = self
-            .command
-            .start_as_daemon(&["dockerd", "--host=tcp://0.0.0.0:2375"])?;
+        let handle = self.command.start_as_daemon(&[
+            "dockerd",
+            "--tls=false",
+            "--host=tcp://0.0.0.0:2375",
+        ])?;
         info!("docker:dind launched");
         Ok(handle)
     }
