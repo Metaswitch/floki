@@ -15,6 +15,9 @@ Status: Available for use
 
 ### Added
 
+### Added
+- set `tls=false` for dind
+
 ### Fixed
 
 ## [0.8.0] - 2022-01-25
