@@ -20,7 +20,7 @@ serde_yaml = "0.8"
 structopt = "0.3"
 uuid = { version = "0.8", features = ["v4"] }
 yaml-rust = "0.4.4"
-simplelog = "0.11"
+simplelog = "0.12"
 nix = "0.23"
 shlex = "1.1"
 sha2 = "0.10.2"
