@@ -8,7 +8,7 @@ keywords = ["docker"]
 categories = ["command-line-utilities"]
 license = "MIT"
 
-version = "0.8.0"
+version = "0.9.0"
 authors = ["Richard Lupton <richard.lupton@gmail.com>",
            "Max Dymond <max.dymond@metaswitch.com>"]
 edition = '2018'
