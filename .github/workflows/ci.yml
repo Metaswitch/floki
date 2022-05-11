@@ -9,8 +9,8 @@ on:
 
   pull_request:
     branches:
-      # Trigger on pull requests into master
-      - master
+      # Trigger on pull requests into main
+      - main
     types: [ opened, synchronize ]
 
 jobs:
