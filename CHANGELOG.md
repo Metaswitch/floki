@@ -15,10 +15,12 @@ Status: Available for use
 
 ### Added
 
+### Fixed
+
+## [0.9.0] - 2022-05-11
+
 ### Added
 - set `tls=false` for dind
-
-### Fixed
 
 ## [0.8.0] - 2022-01-25
 
@@ -302,7 +304,8 @@ Status: Available for use
 - Initial primitive version
 ### Changed
 
-[unreleased]: https://github.com/Metaswitch/floki/compare/0.8.0...HEAD
+[unreleased]: https://github.com/Metaswitch/floki/compare/0.9.0...HEAD
+[0.9.0]: https://github.com/Metaswitch/floki/compare/0.8.0...0.9.0
 [0.8.0]: https://github.com/Metaswitch/floki/compare/0.7.1...0.8.0
 [0.7.1]: https://github.com/Metaswitch/floki/compare/0.7.0...0.7.1
 [0.7.0]: https://github.com/Metaswitch/floki/compare/0.6.2...0.7.0
