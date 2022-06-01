@@ -16,6 +16,7 @@ Status: Available for use
 ### Added
 
 ### Fixed
+- Don't add "-i" to docker command when invoked with `floki run`. This allows a one-off `floki run -- <command>` to be run from a non-interactive shell.
 
 ## [0.9.0] - 2022-05-11
 
