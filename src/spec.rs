@@ -74,10 +74,16 @@ pub(crate) struct FlokiSpec {
     pub(crate) dind: Option<Dind>,
     /// Paths on the host which are relevant to running
     pub(crate) paths: Paths,
+    /// Whether we're running an interactive shell in the container vs. just a one-off command
+    pub(crate) interactive: bool,
 }
 
 impl FlokiSpec {
-    pub(crate) fn from(config: FlokiConfig, environ: Environment) -> Result<Self, Error> {
+    pub(crate) fn from(
+        config: FlokiConfig,
+        environ: Environment,
+        interactive: bool,
+    ) -> Result<Self, Error> {
         let dind = match config.dind {
             DindConfig::Toggle(true) => Some(Dind {
                 image: DEFAULT_DIND_IMAGE.to_string(),
@@ -131,6 +137,7 @@ impl FlokiSpec {
             docker_switches,
             dind,
             paths,
+            interactive,
         };
 
         debug!("built spec from config and environment: {:?}", spec);

@@ -11,6 +11,7 @@ pub struct DockerCommandBuilder {
     environment: Vec<OsString>,
     switches: Vec<OsString>,
     image: String,
+    interactive: bool,
 }
 
 #[derive(Debug)]
@@ -47,7 +48,7 @@ impl DockerCommandBuilder {
         );
 
         let mut command = Command::new("docker")
-            .args(&["run", "--rm", "-it"])
+            .args(self.base_args())
             .args(&self.build_volume_switches())
             .args(self.build_environment_switches())
             .args(self.build_docker_switches())
@@ -114,6 +115,7 @@ impl DockerCommandBuilder {
             environment: Vec::new(),
             switches: Vec::new(),
             image: image.into(),
+            interactive: true,
         }
     }
 
@@ -145,6 +147,11 @@ impl DockerCommandBuilder {
         cmd
     }
 
+    pub fn set_interactive(mut self, interactive: bool) -> Self {
+        self.interactive = interactive;
+        self
+    }
+
     fn build_volume_switches(&self) -> Vec<&OsStr> {
         let mut switches = Vec::new();
         for mapping in self.volumes.iter() {
@@ -174,6 +181,14 @@ impl DockerCommandBuilder {
 
     fn build_docker_switches(&self) -> &Vec<OsString> {
         &self.switches
+    }
+
+    fn base_args(&self) -> Vec<&OsStr> {
+        let mut base_args: Vec<&OsStr> = vec!["run".as_ref(), "--rm".as_ref(), "-t".as_ref()];
+        if self.interactive {
+            base_args.push("-i".as_ref());
+        }
+        base_args
     }
 }
 
