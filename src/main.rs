@@ -55,10 +55,7 @@ fn run_floki_from_args(args: &Cli) -> Result<(), Error> {
             let env = Environment::gather(&args.config_file)?;
             let config = FlokiConfig::from_file(&env.config_file)?;
             let inner_command = interpret::command_in_shell(config.shell.inner_shell(), command);
-            interpret::run_floki_container(
-                &spec::FlokiSpec::from(config, env, false)?,
-                &inner_command,
-            )
+            interpret::run_floki_container(&spec::FlokiSpec::from(config, env)?, &inner_command)
         }
 
         Some(Subcommand::Completion { shell }) => {
@@ -71,10 +68,7 @@ fn run_floki_from_args(args: &Cli) -> Result<(), Error> {
             let env = Environment::gather(&args.config_file)?;
             let config = FlokiConfig::from_file(&env.config_file)?;
             let inner_command = config.shell.inner_shell().to_string();
-            interpret::run_floki_container(
-                &spec::FlokiSpec::from(config, env, true)?,
-                &inner_command,
-            )
+            interpret::run_floki_container(&spec::FlokiSpec::from(config, env)?, &inner_command)
         }
     }
 }
