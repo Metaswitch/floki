@@ -47,7 +47,7 @@ impl DockerCommandBuilder {
         );
 
         let mut command = Command::new("docker")
-            .args(&["run", "--rm", "-it"])
+            .args(self.base_args())
             .args(&self.build_volume_switches())
             .args(self.build_environment_switches())
             .args(self.build_docker_switches())
@@ -174,6 +174,14 @@ impl DockerCommandBuilder {
 
     fn build_docker_switches(&self) -> &Vec<OsString> {
         &self.switches
+    }
+
+    fn base_args(&self) -> Vec<&OsStr> {
+        let mut base_args: Vec<&OsStr> = vec!["run".as_ref(), "--rm".as_ref(), "-t".as_ref()];
+        if atty::is(atty::Stream::Stdout) {
+            base_args.push("-i".as_ref());
+        }
+        base_args
     }
 }
 
