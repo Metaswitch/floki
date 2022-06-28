@@ -16,6 +16,10 @@ Status: Available for use
 ### Added
 
 ### Fixed
+
+## [0.9.1] - 2022-06-28
+
+### Fixed
 - Don't add "-i" to docker command when invoked without a tty. This allows a one-off `floki run -- <command>` to be run from a non-interactive shell.
 
 ## [0.9.0] - 2022-05-11
@@ -305,7 +309,8 @@ Status: Available for use
 - Initial primitive version
 ### Changed
 
-[unreleased]: https://github.com/Metaswitch/floki/compare/0.9.0...HEAD
+[unreleased]: https://github.com/Metaswitch/floki/compare/0.9.1...HEAD
+[0.9.1]: https://github.com/Metaswitch/floki/compare/0.9.0...0.9.1
 [0.9.0]: https://github.com/Metaswitch/floki/compare/0.8.0...0.9.0
 [0.8.0]: https://github.com/Metaswitch/floki/compare/0.7.1...0.8.0
 [0.7.1]: https://github.com/Metaswitch/floki/compare/0.7.0...0.7.1
