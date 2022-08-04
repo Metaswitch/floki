@@ -17,7 +17,7 @@ edition = '2018'
 atty = "0.2"
 log = "0.4"
 serde = { version = "1", features = ["derive"] }
-serde_yaml = "0.8"
+serde_yaml = "0.9"
 structopt = "0.3"
 uuid = { version = "1.1", features = ["v4"] }
 yaml-rust = "0.4.4"
