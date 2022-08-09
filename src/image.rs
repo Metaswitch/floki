@@ -7,19 +7,73 @@ use yaml_rust::YamlLoader;
 
 use crate::errors::{FlokiError, FlokiSubprocessExitStatus};
 
+/// Build Spec provides floki with the information needed to build
+/// a container image.
+///
+/// ---
+///
+/// Back to:
+/// - [Image Config](./enum.Image.html#variant.Build)
+/// - [Floki Config](../config/struct.FlokiConfig.html#structfield.image)
+///
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct BuildSpec {
+    /// The name to give the container.
+    ///
+    /// NOTE: floki will append ":floki" to provide a docker tag.  Do not
+    /// include a tag following a ":" in this name.
+    ///
     name: String,
+
+    /// _Optional_
+    ///
+    /// _Default:_ `Dockerfile`
+    ///
+    /// Path to the dockerfile to build the image from.
+    ///
     #[serde(default = "default_dockerfile")]
     dockerfile: PathBuf,
+
+    /// _Optional_
+    ///
+    /// _Default:_ `"."`
+    ///
+    /// Path to the root of the build context for the dockerfile.
+    ///
     #[serde(default = "default_context")]
     context: PathBuf,
+
+    /// _Optional_
+    ///
+    /// Target to use, for multi-stage dockerfiles.
+    ///
     target: Option<String>,
 }
 
+/// Data to reference an image name from the key of another YAML file.
+///
+/// ---
+///
+/// Back to:
+/// - [Image Config](./enum.Image.html#variant.Yaml)
+/// - [Floki Config](../config/struct.FlokiConfig.html#structfield.image)
+///
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct YamlSpec {
+    /// Path to foreign YAML file.
+    ///
     pub file: PathBuf,
+
+    /// Key path to image name data.
+    ///
+    /// - Key path looks like: `path.to.key`
+    ///   + A period separated list of YAML keys to lookup.
+    ///   + Keys may only be strings of integers.
+    ///   + `jq` style referencing of arrays (`key.[0].other_key` or
+    ///     `key.[].other_key`) is _not supported_.
+    ///   + Preceding period will be read as the top level key
+    ///     being the empty string, e.g: `.path.to.key => "".path.to.key`.
+    ///
     key: String,
 }
 
@@ -38,11 +92,47 @@ fn default_context() -> PathBuf {
     ".".into()
 }
 
+/// Configure the container image to use.
+///
+/// ---
+///
+/// Back to:
+///
+/// - [Floki Config](../config/struct.FlokiConfig.html#structfield.image)
+///
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum Image {
+    /// Provide the name of a prebuilt image in a docker registry, e.g:
+    ///
+    /// ```yaml
+    /// debian:sid
+    /// ```
+    ///
     Name(String),
+
+    /// Instruct floki to build the image.
+    ///
+    /// Provide a [Build Spec](./struct.BuildSpec.html) under the `build`
+    /// key.
+    ///
+    /// ```yaml
+    /// build:
+    ///   <Build Spec>
+    /// ```
+    ///
     Build { build: BuildSpec },
+
+    /// Get the image name by referencing a field in another YAML file.
+    ///
+    /// Provide a [Yaml Image Reference](./struct.YamlSpec.html) under the
+    /// `yaml` key.
+    ///
+    /// ```yaml
+    /// yaml:
+    ///   <Yaml Image Reference>
+    /// ```
+    ///
     Yaml { yaml: YamlSpec },
     Exec { exec: ExecSpec },
 }
