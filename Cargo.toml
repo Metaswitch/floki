@@ -25,7 +25,7 @@ simplelog = "0.12"
 nix = { version = "0.24", default-features = false, features = ["user"] }
 shlex = "1.1"
 sha2 = "0.10.2"
-anyhow = "1.0.59"
+anyhow = "1.0.62"
 thiserror = "1.0.32"
 
 [dev-dependencies]
