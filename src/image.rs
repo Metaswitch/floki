@@ -7,7 +7,7 @@ use yaml_rust::YamlLoader;
 
 use crate::errors::{FlokiError, FlokiSubprocessExitStatus};
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct BuildSpec {
     name: String,
     #[serde(default = "default_dockerfile")]
@@ -17,13 +17,13 @@ pub struct BuildSpec {
     target: Option<String>,
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct YamlSpec {
     pub file: PathBuf,
     key: String,
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ExecSpec {
     command: String,
     args: Vec<String>,
@@ -38,7 +38,7 @@ fn default_context() -> PathBuf {
     ".".into()
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum Image {
     Name(String),
