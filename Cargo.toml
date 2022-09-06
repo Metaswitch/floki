@@ -26,7 +26,7 @@ nix = { version = "0.24", default-features = false, features = ["user"] }
 shlex = "1.1"
 sha2 = "0.10.3"
 anyhow = "1.0.63"
-thiserror = "1.0.33"
+thiserror = "1.0.34"
 
 [dev-dependencies]
 tempfile = "3.3.0"
