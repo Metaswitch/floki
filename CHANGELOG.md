@@ -17,6 +17,13 @@ Status: Available for use
 
 ### Fixed
 
+## [1.0.0] - 2022-09-12
+
+### Breaking Changes
+
+- Move to version 1.0.0 - so long, ZeroVer!
+  - No other functional changes.
+
 ## [0.9.1] - 2022-06-28
 
 ### Fixed
@@ -309,7 +316,8 @@ Status: Available for use
 - Initial primitive version
 ### Changed
 
-[unreleased]: https://github.com/Metaswitch/floki/compare/0.9.1...HEAD
+[unreleased]: https://github.com/Metaswitch/floki/compare/1.0.0...HEAD
+[1.0.0]: https://github.com/Metaswitch/floki/compare/0.9.1...1.0.0
 [0.9.1]: https://github.com/Metaswitch/floki/compare/0.9.0...0.9.1
 [0.9.0]: https://github.com/Metaswitch/floki/compare/0.8.0...0.9.0
 [0.8.0]: https://github.com/Metaswitch/floki/compare/0.7.1...0.8.0
