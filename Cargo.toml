@@ -24,7 +24,7 @@ yaml-rust = "0.4.4"
 simplelog = "0.12"
 nix = { version = "0.24", default-features = false, features = ["user"] }
 shlex = "1.1"
-sha2 = "0.10.5"
+sha2 = "0.10.6"
 anyhow = "1.0.66"
 thiserror = "1.0.37"
 
