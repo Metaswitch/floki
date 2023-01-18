@@ -22,7 +22,7 @@ structopt = "0.3"
 uuid = { version = "1.2", features = ["v4"] }
 yaml-rust = "0.4.4"
 simplelog = "0.12"
-nix = { version = "0.24", default-features = false, features = ["user"] }
+nix = { version = "0.26", default-features = false, features = ["user"] }
 shlex = "1.1"
 sha2 = "0.10.5"
 anyhow = "1.0.66"
