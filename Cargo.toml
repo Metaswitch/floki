@@ -24,9 +24,9 @@ yaml-rust = "0.4.4"
 simplelog = "0.12"
 nix = { version = "0.26", default-features = false, features = ["user"] }
 shlex = "1.1"
-anyhow = "1.0.69"
 sha2 = "0.10.6"
-thiserror = "1.0.37"
+anyhow = "1.0.69"
+thiserror = "1.0.39"
 
 [dev-dependencies]
 tempfile = "3.4.0"
