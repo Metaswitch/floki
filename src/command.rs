@@ -28,7 +28,7 @@ impl Drop for DaemonHandle {
     fn drop(&mut self) {
         info!("Stopping daemon docker container '{}'", self.name);
         Command::new("docker")
-            .args(&["kill", &self.name])
+            .args(["kill", &self.name])
             .stdin(Stdio::null())
             .stdout(Stdio::null())
             .stderr(Stdio::null())
@@ -78,8 +78,8 @@ impl DockerCommandBuilder {
     pub fn start_as_daemon(self, command: &[&str]) -> Result<DaemonHandle, Error> {
         debug!("Starting daemon container '{}'", self.name);
         let exit_status = Command::new("docker")
-            .args(&["run", "--rm"])
-            .args(&["--name", &self.name])
+            .args(["run", "--rm"])
+            .args(["--name", &self.name])
             .args(&self.build_volume_switches())
             .args(self.build_environment_switches())
             .args(self.build_docker_switches())
@@ -202,6 +202,6 @@ pub fn enable_docker_in_docker(
 ) -> Result<DockerCommandBuilder, Error> {
     Ok(command
         .add_docker_switch("--link")
-        .add_docker_switch(&format!("{}:floki-docker", dind.name()))
+        .add_docker_switch(format!("{}:floki-docker", dind.name()))
         .add_environment("DOCKER_HOST", "tcp://floki-docker:2375"))
 }

@@ -161,7 +161,7 @@ fn get_working_directory(
     floki_root: &path::Path,
     mount: &path::Path,
 ) -> path::PathBuf {
-    mount.join(current_directory.strip_prefix(&floki_root).expect(
+    mount.join(current_directory.strip_prefix(floki_root).expect(
         "failed to deduce working directory - \
          floki_root should always be an ancestor of current_directory",
     ))
