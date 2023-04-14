@@ -16,6 +16,7 @@ Status: Available for use
 ### Added
 
 ### Fixed
+- Don't add "-i" to docker commands when stdin is not a tty. This allows commands `floki run -- <command>` to be run from inside other scripts even if stdout looks like a tty.
 
 ## [1.0.0] - 2022-09-12
 
