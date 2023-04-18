@@ -178,7 +178,7 @@ impl DockerCommandBuilder {
 
     fn base_args(&self) -> Vec<&OsStr> {
         let mut base_args: Vec<&OsStr> = vec!["run".as_ref(), "--rm".as_ref(), "-t".as_ref()];
-        if atty::is(atty::Stream::Stdout) {
+        if atty::is(atty::Stream::Stdout) && atty::is(atty::Stream::Stdin) {
             base_args.push("-i".as_ref());
         }
         base_args
