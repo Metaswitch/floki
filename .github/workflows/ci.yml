@@ -86,7 +86,7 @@ jobs:
           CARGO_REGISTRY_TOKEN: ${{ secrets.PUBLISH_SECRET }}
       # After publishing, create a release
       - name: Download archives
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: stableartifacts
       - name: Generate release.txt
