@@ -14,6 +14,7 @@ Status: Available for use
 ### Breaking Changes
 
 ### Added
+- Floki templates are parsed with `tera` before being deserialized.
 
 ### Fixed
 

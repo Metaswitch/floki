@@ -3,9 +3,11 @@ use crate::errors;
 use crate::image;
 use anyhow::Error;
 use serde::{Deserialize, Serialize};
+use tera::Context;
+use tera::Tera;
 
 use std::collections::BTreeMap;
-use std::fs::File;
+use std::collections::HashMap;
 use std::path;
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
@@ -100,12 +102,26 @@ impl FlokiConfig {
     pub fn from_file(file: &path::Path) -> Result<FlokiConfig, Error> {
         debug!("Reading configuration file: {:?}", file);
 
-        let f = File::open(file).map_err(|e| errors::FlokiError::ProblemOpeningConfigYaml {
-            name: file.display().to_string(),
-            error: e,
+        // Read the template using tera
+        let mut tera = Tera::default();
+        tera.add_template_file(file, Some("floki")).map_err(|e| {
+            errors::FlokiError::ProblemOpeningConfigYaml {
+                name: file.display().to_string(),
+                error: e,
+            }
         })?;
 
-        let mut config: FlokiConfig = serde_yaml::from_reader(f).map_err(|e| {
+        // Read the environment variables and store them in a tera context
+        // under the `env` name.
+        let vars: HashMap<String, String> = std::env::vars().collect();
+        let mut context = Context::new();
+        context.insert("env", &vars);
+
+        // Render the floki file to string using the context.
+        let output = tera.render("floki", &context)?;
+
+        // Parse the rendered floki file from the string.
+        let mut config: FlokiConfig = serde_yaml::from_str(&output).map_err(|e| {
             errors::FlokiError::ProblemParsingConfigYaml {
                 name: file.display().to_string(),
                 error: e,
@@ -160,6 +176,9 @@ fn default_entrypoint() -> Entrypoint {
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::image::Image;
+    use std::io::Write;
+    use tempfile::NamedTempFile;
 
     #[derive(Debug, PartialEq, Serialize, Deserialize)]
     struct TestShellConfig {
@@ -242,5 +261,22 @@ mod test {
         let actual: TestEntrypointConfig = serde_yaml::from_str(yaml).unwrap();
         assert_eq!(actual, expected);
         assert_eq!(actual.entrypoint.value(), None);
+    }
+
+    #[test]
+    fn test_tera_file() -> Result<(), Box<dyn std::error::Error>> {
+        let yaml = r#"{% set var = "test" %}image: {{ var }}"#;
+
+        // Write to a temporary file.
+        let mut tmp = NamedTempFile::new()?;
+        tmp.write_all(yaml.as_bytes())?;
+        let (_file, path) = tmp.keep()?;
+
+        // Let's try and parse the file.
+        let config = FlokiConfig::from_file(&path)?;
+
+        println!("Config: {:?}", config);
+        assert_eq!(config.image, Image::Name("test".to_string()));
+        Ok(())
     }
 }

@@ -20,7 +20,7 @@ pub enum FlokiError {
     ProblemNormalizingFilePath { name: String, error: io::Error },
 
     #[error("There was a problem opening the configuration file '{name}': {error:?}")]
-    ProblemOpeningConfigYaml { name: String, error: io::Error },
+    ProblemOpeningConfigYaml { name: String, error: tera::Error },
 
     #[error("There was a problem parsing the configuration file '{name}': {error:?}")]
     ProblemParsingConfigYaml {
