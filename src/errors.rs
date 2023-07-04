@@ -19,8 +19,13 @@ pub enum FlokiError {
     #[error("Could not normalize the file path '{name}': {error:?}")]
     ProblemNormalizingFilePath { name: String, error: io::Error },
 
-    #[error("There was a problem opening the configuration file '{name}': {error:?}")]
-    ProblemOpeningConfigYaml { name: String, error: io::Error },
+    #[error("There was a problem reading the configuration file '{name}': {error:?}")]
+    ProblemReadingConfigFile { name: String, error: io::Error },
+
+    #[error(
+        "There was a problem rendering configuration from the template file '{name}': {error:?}"
+    )]
+    ProblemRenderingConfig { name: String, error: tera::Error },
 
     #[error("There was a problem parsing the configuration file '{name}': {error:?}")]
     ProblemParsingConfigYaml {

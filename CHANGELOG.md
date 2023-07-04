@@ -12,6 +12,7 @@ Status: Available for use
 ## [Unreleased]
 
 ### Breaking Changes
+- Interpret floki.yaml as a template using tera.  Among other function, this allows use of environmental variables in floki config.
 
 ### Added
 

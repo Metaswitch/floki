@@ -3,9 +3,10 @@ use crate::errors;
 use crate::image;
 use anyhow::Error;
 use serde::{Deserialize, Serialize};
+use tera::{Context, Tera};
 
 use std::collections::BTreeMap;
-use std::fs::File;
+use std::fs::read_to_string;
 use std::path;
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
@@ -98,14 +99,28 @@ pub(crate) struct FlokiConfig {
 
 impl FlokiConfig {
     pub fn from_file(file: &path::Path) -> Result<FlokiConfig, Error> {
-        debug!("Reading configuration file: {:?}", file);
+        debug!("Reading configuration file: {}", file.display());
 
-        let f = File::open(file).map_err(|e| errors::FlokiError::ProblemOpeningConfigYaml {
-            name: file.display().to_string(),
-            error: e,
+        let contents =
+            read_to_string(file).map_err(|e| errors::FlokiError::ProblemReadingConfigFile {
+                name: file.display().to_string(),
+                error: e,
+            })?;
+
+        let contents = Tera::one_off(&contents, &Context::new(), true).map_err(|e| {
+            errors::FlokiError::ProblemRenderingConfig {
+                name: file.display().to_string(),
+                error: e,
+            }
         })?;
 
-        let mut config: FlokiConfig = serde_yaml::from_reader(f).map_err(|e| {
+        debug!(
+            "Rendered '{}' into text configuration:\n{}",
+            file.display(),
+            contents
+        );
+
+        let mut config: FlokiConfig = serde_yaml::from_str(&contents).map_err(|e| {
             errors::FlokiError::ProblemParsingConfigYaml {
                 name: file.display().to_string(),
                 error: e,
@@ -160,6 +175,30 @@ fn default_entrypoint() -> Entrypoint {
 #[cfg(test)]
 mod test {
     use super::*;
+    use image::Image;
+
+    #[derive(Debug, PartialEq, Serialize, Deserialize)]
+    struct TestImageConfig {
+        image: Image,
+    }
+
+    #[test]
+    fn test_user_env_config() {
+        std::env::set_var("image", "a_local_user_variable");
+
+        let expected = TestImageConfig {
+            image: Image::Name("prefix_a_local_user_variable:1.1".into()),
+        };
+
+        let content = Tera::one_off(
+            "image: \"prefix_{{ get_env(name='image') }}:1.1\"",
+            &Context::new(),
+            true,
+        )
+        .unwrap();
+        let actual: TestImageConfig = serde_yaml::from_str(&content).unwrap();
+        assert!(actual == expected);
+    }
 
     #[derive(Debug, PartialEq, Serialize, Deserialize)]
     struct TestShellConfig {

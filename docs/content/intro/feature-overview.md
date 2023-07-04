@@ -222,3 +222,12 @@ Note that use of `docker_switches` may reduce the reproducibility and shareabili
 
 Nonetheless, it is useful to be able to add arbitrary switches in a pinch, just to be able to get something working.
 If there are things you can add with `docker_switches` which are reproducible and shareable, please raise a feature request, or go ahead and implement it yourself!
+
+# Templating
+
+`floki` supports templating using the [Tera engine](https://tera.netlify.app/).  Currently this is executed as a one-shot rendering of your `floki.yaml`.  Example uses include referencing environmental variables in the `floki` config, e.g. to mount a subdirectory of the user's home directory:
+```yaml
+docker_switches:
+  - -v {{ get_env(name='HOME') }}/.vim:/home/build/.vim
+```
+Note that extensive use may reduce the reproducibility and shareability of your `floki.yaml`
