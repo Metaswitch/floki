@@ -2,10 +2,12 @@
 use crate::errors;
 use crate::image;
 use anyhow::Error;
+use regex::{Captures, Regex};
 use serde::{Deserialize, Serialize};
 
 use std::collections::BTreeMap;
 use std::fs::File;
+use std::io::Read;
 use std::path;
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
@@ -100,12 +102,22 @@ impl FlokiConfig {
     pub fn from_file(file: &path::Path) -> Result<FlokiConfig, Error> {
         debug!("Reading configuration file: {:?}", file);
 
-        let f = File::open(file).map_err(|e| errors::FlokiError::ProblemOpeningConfigYaml {
-            name: file.display().to_string(),
-            error: e,
-        })?;
+        let mut contents = String::new();
 
-        let mut config: FlokiConfig = serde_yaml::from_reader(f).map_err(|e| {
+        File::open(file)
+            .map_err(|e| errors::FlokiError::ProblemOpeningConfigYaml {
+                name: file.display().to_string(),
+                error: e,
+            })?
+            .read_to_string(&mut contents)
+            .map_err(|e| errors::FlokiError::ProblemReadingConfigYaml {
+                name: file.display().to_string(),
+                error: e,
+            })?;
+
+        contents = Self::replace_user_env(&contents);
+
+        let mut config: FlokiConfig = serde_yaml::from_str(contents.as_str()).map_err(|e| {
             errors::FlokiError::ProblemParsingConfigYaml {
                 name: file.display().to_string(),
                 error: e,
@@ -139,6 +151,17 @@ impl FlokiConfig {
 
         Ok(config)
     }
+
+    /// Replace all instances of ${user_env:VAR} in the yaml with the value of the local environmental variable "VAR".
+    fn replace_user_env(input_string: &str) -> String {
+        let user_env_regex = Regex::new(r"\$\{user_env:([a-zA-Z0-9_]*)\}").unwrap();
+        user_env_regex
+            .replace_all(input_string, |caps: &Captures| {
+                let env_var_name = caps.get(1).unwrap().as_str();
+                std::env::var(env_var_name).unwrap_or_default()
+            })
+            .to_string()
+    }
 }
 
 fn default_shell() -> Shell {
@@ -160,6 +183,25 @@ fn default_entrypoint() -> Entrypoint {
 #[cfg(test)]
 mod test {
     use super::*;
+    use image::Image;
+
+    #[derive(Debug, PartialEq, Serialize, Deserialize)]
+    struct TestImageConfig {
+        image: Image,
+    }
+
+    #[test]
+    fn test_user_env_config() {
+        std::env::set_var("image", "a_local_user_variable");
+        let content = "image: prefix_${user_env:image}:1.1";
+
+        let expected = TestImageConfig {
+            image: Image::Name("prefix_a_local_user_variable:1.1".into()),
+        };
+        let actual: TestImageConfig =
+            serde_yaml::from_str(&FlokiConfig::replace_user_env(content)).unwrap();
+        assert!(actual == expected);
+    }
 
     #[derive(Debug, PartialEq, Serialize, Deserialize)]
     struct TestShellConfig {

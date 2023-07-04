@@ -222,3 +222,18 @@ Note that use of `docker_switches` may reduce the reproducibility and shareabili
 
 Nonetheless, it is useful to be able to add arbitrary switches in a pinch, just to be able to get something working.
 If there are things you can add with `docker_switches` which are reproducible and shareable, please raise a feature request, or go ahead and implement it yourself!
+
+# Using environmental variables in yaml
+
+Sometimes it is helpful for the `floki` config to include environment-specific values.  For example, mounting a subdirectory of the user's home directory.  `floki` supports this via templating.  Specify environmental variables in `floki.yaml` as `${user_env:<ENV>}`.  Before interpreting the config, `floki` will substitute the user's environmental variables for those values.
+
+```yaml
+docker_switches:
+  - -v ${user_env:HOME}/.vim:/home/build/.vim
+```
+
+Only alphanumeric and underscores (`[a-zA-Z0-9_]`) are supported in environmental variable names.  Inclusion of other characters afer `user_env` will prevent the substitution from taking place.
+
+Warning:
+- Use of host environmental variables may reduce the reproducibility and shareability of your `floki.yaml`.
+- If an environmental variable is not found, it is interpreted as a blank string.

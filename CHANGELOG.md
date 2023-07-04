@@ -12,6 +12,7 @@ Status: Available for use
 ## [Unreleased]
 
 ### Breaking Changes
+- Allow templating using environmental variables in `floki.yaml`, with `${user_env:VAR}` replaced with value of the user's environmental variable `VAR` before deserialization.
 
 ### Added
 
