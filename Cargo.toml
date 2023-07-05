@@ -12,10 +12,11 @@ version = "1.0.1"
 authors = ["Richard Lupton <richard.lupton@gmail.com>",
            "Max Dymond <max.dymond@metaswitch.com>"]
 edition = '2018'
+rust-version = '1.57'
 
 [dependencies]
 atty = "0.2"
-log = "0.4"
+log = "0.4,<0.4.19"
 serde = { version = "1", features = ["derive"] }
 serde_yaml = "0.9"
 structopt = "0.3"
@@ -27,6 +28,7 @@ shlex = "1.1"
 sha2 = "0.10.7"
 anyhow = "1.0.71"
 thiserror = "1.0.40"
+tera = "1"
 
 [dev-dependencies]
 tempfile = "3.6.0"
