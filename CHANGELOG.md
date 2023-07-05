@@ -15,6 +15,7 @@ Status: Available for use
 
 ### Added
 - Floki templates are parsed with `tera` before being deserialized.
+- Limit MSRV to 1.57 while using `ekidd/rust-musl-builder` - needs updating.
 
 ### Fixed
 
