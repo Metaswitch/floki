@@ -107,7 +107,7 @@ impl FlokiConfig {
                 error: e,
             })?;
 
-        let contents = Tera::one_off(&contents, &Context::new(), true).map_err(|e| {
+        let contents = Tera::one_off(&contents, &Context::new(), false).map_err(|e| {
             errors::FlokiError::ProblemRenderingConfig {
                 name: file.display().to_string(),
                 error: e,
@@ -193,7 +193,7 @@ mod test {
         let content = Tera::one_off(
             "image: \"prefix_{{ get_env(name='image') }}:1.1\"",
             &Context::new(),
-            true,
+            false,
         )
         .unwrap();
         let actual: TestImageConfig = serde_yaml::from_str(&content).unwrap();
