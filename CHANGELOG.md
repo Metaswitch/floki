@@ -14,10 +14,14 @@ Status: Available for use
 ### Breaking Changes
 
 ### Added
-- Floki templates are parsed with `tera` before being deserialized.
-- Limit MSRV to 1.57 while using `ekidd/rust-musl-builder` - needs updating.
 
 ### Fixed
+
+## [1.1.0] - 2023-07-05
+
+### Added
+- Floki templates are parsed with `tera` before being deserialized.
+- Limit MSRV to 1.57 while using `ekidd/rust-musl-builder` - needs updating.
 
 ## [1.0.1] - 2023-04-18
 
@@ -323,7 +327,8 @@ Status: Available for use
 - Initial primitive version
 ### Changed
 
-[unreleased]: https://github.com/Metaswitch/floki/compare/1.0.1...HEAD
+[unreleased]: https://github.com/Metaswitch/floki/compare/1.1.0...HEAD
+[1.1.0]: https://github.com/Metaswitch/floki/compare/1.0.1...1.1.0
 [1.0.1]: https://github.com/Metaswitch/floki/compare/1.0.0...1.0.1
 [1.0.0]: https://github.com/Metaswitch/floki/compare/0.9.1...1.0.0
 [0.9.1]: https://github.com/Metaswitch/floki/compare/0.9.0...0.9.1
