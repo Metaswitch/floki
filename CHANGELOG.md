@@ -20,6 +20,7 @@ Status: Available for use
   can use `jsonload(file="<filepath>")` in order to load values.
 - Add `tomlload` function to tera templating engine so that floki templates
   can use `tomlload(file="<filepath>")` in order to load values.
+- Add `floki render` to print out the rendered configuration template.
 
 ### Fixed
 

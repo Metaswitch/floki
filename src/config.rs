@@ -156,10 +156,7 @@ pub fn render_template(template: &str, source_filename: &Path) -> Result<String,
 }
 
 impl FlokiConfig {
-    pub fn from_file(file: &Path) -> Result<Self, Error> {
-        debug!("Reading configuration file: {:?}", file);
-
-        // Read the content from the path
+    pub fn render(file: &Path) -> Result<String, Error> {
         let content = std::fs::read_to_string(file).map_err(|e| {
             errors::FlokiError::ProblemOpeningConfigYaml {
                 name: file.display().to_string(),
@@ -168,7 +165,14 @@ impl FlokiConfig {
         })?;
 
         // Render the template first before parsing it.
-        let output = render_template(&content, file)?;
+        render_template(&content, file)
+    }
+
+    pub fn from_file(file: &Path) -> Result<Self, Error> {
+        debug!("Reading configuration file: {:?}", file);
+
+        // Render the output from the configuration file before parsing.
+        let output = Self::render(file)?;
 
         // Parse the rendered floki file from the string.
         let mut config: FlokiConfig = serde_yaml::from_str(&output).map_err(|e| {

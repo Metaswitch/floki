@@ -63,6 +63,13 @@ fn run_floki_from_args(args: &Cli) -> Result<(), Error> {
             Ok(())
         }
 
+        Some(Subcommand::Render {}) => {
+            let env = Environment::gather(&args.config_file)?;
+            let contents = FlokiConfig::render(&env.config_file)?;
+            println!("{contents}");
+            Ok(())
+        }
+
         // Launch an interactive floki shell (the default)
         None => {
             let env = Environment::gather(&args.config_file)?;

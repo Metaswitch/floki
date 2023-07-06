@@ -20,6 +20,11 @@ pub(crate) enum Subcommand {
         #[structopt(name = "SHELL", parse(try_from_str))]
         shell: structopt::clap::Shell,
     },
+
+    /// Render the configuration file to stdout, performing any templating
+    /// operations.
+    #[structopt(name = "render")]
+    Render {},
 }
 
 /// Main CLI interface
