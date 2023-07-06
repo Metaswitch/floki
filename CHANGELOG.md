@@ -16,6 +16,8 @@ Status: Available for use
 ### Added
 - Add `yamlload` function to tera templating engine so that floki templates
   can use `yamlload(file="<filepath>")` in order to load values.
+- Add `jsonload` function to tera templating engine so that floki templates
+  can use `jsonload(file="<filepath>")` in order to load values.
 
 ### Fixed
 
