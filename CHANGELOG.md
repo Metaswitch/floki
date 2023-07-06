@@ -14,6 +14,8 @@ Status: Available for use
 ### Breaking Changes
 
 ### Added
+- Add `yamlload` function to tera templating engine so that floki templates
+  can use `yamlload(file="<filepath>")` in order to load values.
 
 ### Fixed
 

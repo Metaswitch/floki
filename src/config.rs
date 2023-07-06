@@ -3,12 +3,13 @@ use crate::errors;
 use crate::image;
 use anyhow::Error;
 use serde::{Deserialize, Serialize};
+use tera::from_value;
 use tera::Context;
 use tera::Tera;
 
 use std::collections::BTreeMap;
 use std::collections::HashMap;
-use std::path;
+use std::path::{Path, PathBuf};
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
@@ -56,7 +57,7 @@ pub(crate) struct Volume {
     pub(crate) shared: bool,
     /// The mount path is the path at which the volume is mounted
     /// inside the floki container.
-    pub(crate) mount: path::PathBuf,
+    pub(crate) mount: PathBuf,
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
@@ -83,7 +84,7 @@ pub(crate) struct FlokiConfig {
     #[serde(default = "default_shell")]
     pub(crate) shell: Shell,
     #[serde(default = "default_mount")]
-    pub(crate) mount: path::PathBuf,
+    pub(crate) mount: PathBuf,
     #[serde(default = "Vec::new")]
     pub(crate) docker_switches: Vec<String>,
     #[serde(default = "default_to_false")]
@@ -98,27 +99,59 @@ pub(crate) struct FlokiConfig {
     pub(crate) entrypoint: Entrypoint,
 }
 
+fn yamlloader(args: &HashMap<String, tera::Value>) -> tera::Result<tera::Value> {
+    let file = match args.get("file") {
+        Some(file) => file,
+        None => return Err("file parameter is required".into()),
+    };
+
+    let path = from_value::<String>(file.clone())?;
+    let f = std::fs::File::open(path)?;
+    serde_yaml::from_reader(f).map_err(|_| "Failed to read file".into())
+}
+
+// Renders a template from a given string.
+pub fn render_template(template: &str, source_filename: &Path) -> Result<String, Error> {
+    let template_path = source_filename.display().to_string();
+
+    debug!("Rendering template: {template_path}");
+
+    // Read the template using tera
+    let mut tera = Tera::default();
+
+    // Allow templates to load yaml files as Values.
+    tera.register_function("yamlload", yamlloader);
+
+    tera.add_raw_template(&template_path, template)
+        .map_err(|e| errors::FlokiError::ProblemRenderingTemplate {
+            name: template_path.clone(),
+            error: e,
+        })?;
+
+    // Read the environment variables and store them in a tera context
+    // under the `env` name.
+    let vars: HashMap<String, String> = std::env::vars().collect();
+    let mut context = Context::new();
+    context.insert("env", &vars);
+
+    // Render the floki file to string using the context.
+    Ok(tera.render(&template_path, &context)?)
+}
+
 impl FlokiConfig {
-    pub fn from_file(file: &path::Path) -> Result<FlokiConfig, Error> {
+    pub fn from_file(file: &Path) -> Result<Self, Error> {
         debug!("Reading configuration file: {:?}", file);
 
-        // Read the template using tera
-        let mut tera = Tera::default();
-        tera.add_template_file(file, Some("floki")).map_err(|e| {
+        // Read the content from the path
+        let content = std::fs::read_to_string(file).map_err(|e| {
             errors::FlokiError::ProblemOpeningConfigYaml {
                 name: file.display().to_string(),
                 error: e,
             }
         })?;
 
-        // Read the environment variables and store them in a tera context
-        // under the `env` name.
-        let vars: HashMap<String, String> = std::env::vars().collect();
-        let mut context = Context::new();
-        context.insert("env", &vars);
-
-        // Render the floki file to string using the context.
-        let output = tera.render("floki", &context)?;
+        // Render the template first before parsing it.
+        let output = render_template(&content, file)?;
 
         // Parse the rendered floki file from the string.
         let mut config: FlokiConfig = serde_yaml::from_str(&output).map_err(|e| {
@@ -161,8 +194,8 @@ fn default_shell() -> Shell {
     Shell::Shell("sh".into())
 }
 
-fn default_mount() -> path::PathBuf {
-    path::Path::new("/src").to_path_buf()
+fn default_mount() -> PathBuf {
+    Path::new("/src").to_path_buf()
 }
 
 fn default_to_false() -> bool {
@@ -264,19 +297,18 @@ mod test {
     }
 
     #[test]
-    fn test_tera_file() -> Result<(), Box<dyn std::error::Error>> {
-        let yaml = r#"{% set var = "test" %}image: {{ var }}"#;
+    fn test_tera_render() -> Result<(), Box<dyn std::error::Error>> {
+        let template = r#"{% set var = "test" %}image: {{ var }}"#;
+        let config = render_template(template, Path::new("floki"))?;
+        assert_eq!(config, "image: test");
+        Ok(())
+    }
 
-        // Write to a temporary file.
-        let mut tmp = NamedTempFile::new()?;
-        tmp.write_all(yaml.as_bytes())?;
-        let (_file, path) = tmp.keep()?;
-
-        // Let's try and parse the file.
-        let config = FlokiConfig::from_file(&path)?;
-
-        println!("Config: {:?}", config);
-        assert_eq!(config.image, Image::Name("test".to_string()));
+    #[test]
+    fn test_tera_yamlload() -> Result<(), Box<dyn std::error::Error>> {
+        let template = r#"{% set values = yamlload(file="test_resources/values.yaml") %}shell: {{ values.foo }}"#;
+        let config = render_template(template, Path::new("floki"))?;
+        assert_eq!(config, "shell: bar");
         Ok(())
     }
 }
