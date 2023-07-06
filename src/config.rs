@@ -99,26 +99,30 @@ pub(crate) struct FlokiConfig {
     pub(crate) entrypoint: Entrypoint,
 }
 
-fn yamlloader(args: &HashMap<String, tera::Value>) -> tera::Result<tera::Value> {
+fn path_from_args(args: &HashMap<String, tera::Value>) -> tera::Result<String> {
     let file = match args.get("file") {
         Some(file) => file,
         None => return Err("file parameter is required".into()),
     };
+    Ok(from_value::<String>(file.clone())?)
+}
 
-    let path = from_value::<String>(file.clone())?;
+fn yamlloader(args: &HashMap<String, tera::Value>) -> tera::Result<tera::Value> {
+    let path = path_from_args(args)?;
     let f = std::fs::File::open(path)?;
     serde_yaml::from_reader(f).map_err(|_| "Failed to read file".into())
 }
 
 fn jsonloader(args: &HashMap<String, tera::Value>) -> tera::Result<tera::Value> {
-    let file = match args.get("file") {
-        Some(file) => file,
-        None => return Err("file parameter is required".into()),
-    };
-
-    let path = from_value::<String>(file.clone())?;
+    let path = path_from_args(args)?;
     let f = std::fs::File::open(path)?;
     serde_json::from_reader(f).map_err(|_| "Failed to read file".into())
+}
+
+fn tomlloader(args: &HashMap<String, tera::Value>) -> tera::Result<tera::Value> {
+    let path = path_from_args(args)?;
+    let contents = std::fs::read_to_string(path)?;
+    toml::from_str(&contents).map_err(|_| "Failed to read file".into())
 }
 
 // Renders a template from a given string.
@@ -130,9 +134,10 @@ pub fn render_template(template: &str, source_filename: &Path) -> Result<String,
     // Read the template using tera
     let mut tera = Tera::default();
 
-    // Allow templates to load yaml and json files as Values.
+    // Allow templates to load variables files as Values.
     tera.register_function("yamlload", yamlloader);
     tera.register_function("jsonload", jsonloader);
+    tera.register_function("tomlload", tomlloader);
 
     tera.add_raw_template(&template_path, template)
         .map_err(|e| errors::FlokiError::ProblemRenderingTemplate {
@@ -326,6 +331,15 @@ mod test {
         let template = r#"{% set values = jsonload(file="test_resources/values.json") %}shell: {{ values.foo }}"#;
         let config = render_template(template, Path::new("floki"))?;
         assert_eq!(config, "shell: bar");
+        Ok(())
+    }
+
+    #[test]
+    fn test_tera_tomlload() -> Result<(), Box<dyn std::error::Error>> {
+        let template =
+            r#"{% set values = tomlload(file="Cargo.toml") %}floki: {{ values.package.name }}"#;
+        let config = render_template(template, Path::new("floki"))?;
+        assert_eq!(config, "floki: floki");
         Ok(())
     }
 }
