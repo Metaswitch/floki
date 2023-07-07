@@ -21,6 +21,7 @@ Status: Available for use
 - Add `toml` function to tera templating engine so that floki templates
   can use `toml(file="<filepath>")` in order to load values.
 - Add `floki render` to print out the rendered configuration template.
+- Switch rust image to `rust:1-alpine3.18` as it's better maintained.
 
 ### Fixed
 

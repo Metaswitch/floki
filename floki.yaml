@@ -1,4 +1,12 @@
-image: ekidd/rust-musl-builder
-mount: /home/rust/src
+image:
+  build:
+    name: flokirust
+    dockerfile: .devcontainer/Dockerfile.alpine
+    context: .
+
+volumes:
+  alpine-cargo-registry:
+    mount: /usr/local/cargo/registry
+
 forward_ssh_agent: true
 shell: bash
