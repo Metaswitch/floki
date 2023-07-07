@@ -14,6 +14,12 @@ Status: Available for use
 ### Breaking Changes
 
 ### Added
+
+### Fixed
+
+## [1.2.0] - 2023-07-07
+
+### Added
 - Add `yaml` function to tera templating engine so that floki templates
   can use `yaml(file="<filepath>")` in order to load values.
 - Add `json` function to tera templating engine so that floki templates
@@ -23,8 +29,6 @@ Status: Available for use
 - Add `floki render` to print out the rendered configuration template.
 - Switch rust image to `rust:1-alpine3.18` as it's better maintained.
 - Combine errors into a single FlokiError enum.
-
-### Fixed
 
 ## [1.1.0] - 2023-07-05
 
@@ -336,7 +340,8 @@ Status: Available for use
 - Initial primitive version
 ### Changed
 
-[unreleased]: https://github.com/Metaswitch/floki/compare/1.1.0...HEAD
+[unreleased]: https://github.com/Metaswitch/floki/compare/1.2.0...HEAD
+[1.2.0]: https://github.com/Metaswitch/floki/compare/1.1.0...1.2.0
 [1.1.0]: https://github.com/Metaswitch/floki/compare/1.0.1...1.1.0
 [1.0.1]: https://github.com/Metaswitch/floki/compare/1.0.0...1.0.1
 [1.0.0]: https://github.com/Metaswitch/floki/compare/0.9.1...1.0.0
