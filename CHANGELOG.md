@@ -22,6 +22,7 @@ Status: Available for use
   can use `toml(file="<filepath>")` in order to load values.
 - Add `floki render` to print out the rendered configuration template.
 - Switch rust image to `rust:1-alpine3.18` as it's better maintained.
+- Combine errors into a single FlokiError enum.
 
 ### Fixed
 

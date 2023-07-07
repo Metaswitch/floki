@@ -65,6 +65,14 @@ pub enum FlokiError {
 
     #[error("Malformed item in docker_switches: {item}")]
     MalformedDockerSwitch { item: String },
+
+    /// Internal error for floki - these represent failed assumptions of
+    /// the developers, and shouldn't actually manifest.
+    #[error("An internal assertion failed '{description}'.  This is probably a bug!")]
+    InternalAssertionFailed { description: String },
+
+    #[error("Invalid verbosity setting of {setting:?}. Use a setting between 0 and 3 (-vvv)")]
+    InvalidVerbositySetting { setting: u8 },
 }
 
 /// Generate a summary string for a process exiting
@@ -97,19 +105,4 @@ impl fmt::Display for FlokiSubprocessExitStatus {
             exit_code_diagnosis(&self.exit_status)
         )
     }
-}
-
-/// Internal error types for floki - these represent failed assumptions of
-/// the developers, and shouldn't actually manifest.
-#[derive(Debug, thiserror::Error)]
-pub enum FlokiInternalError {
-    #[error("An internal assertion failed '{description}'.  This is probably a bug!")]
-    InternalAssertionFailed { description: String },
-}
-
-/// Errors made by floki users.
-#[derive(Debug, thiserror::Error)]
-pub enum FlokiUserError {
-    #[error("Invalid verbosity setting of {setting:?}. Use a setting between 0 and 3 (-vvv)")]
-    InvalidVerbositySetting { setting: u8 },
 }

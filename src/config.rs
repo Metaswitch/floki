@@ -1,7 +1,6 @@
 /// Configuration file format for floki
-use crate::errors;
+use crate::errors::FlokiError;
 use crate::image;
-use anyhow::Error;
 use serde::{Deserialize, Serialize};
 use tera::from_value;
 use tera::Context;
@@ -126,7 +125,7 @@ fn tomlloader(args: &HashMap<String, tera::Value>) -> tera::Result<tera::Value> 
 }
 
 // Renders a template from a given string.
-pub fn render_template(template: &str, source_filename: &Path) -> Result<String, Error> {
+pub fn render_template(template: &str, source_filename: &Path) -> Result<String, FlokiError> {
     let template_path = source_filename.display().to_string();
 
     debug!("Rendering template: {template_path}");
@@ -140,7 +139,7 @@ pub fn render_template(template: &str, source_filename: &Path) -> Result<String,
     tera.register_function("toml", tomlloader);
 
     tera.add_raw_template(&template_path, template)
-        .map_err(|e| errors::FlokiError::ProblemRenderingTemplate {
+        .map_err(|e| FlokiError::ProblemRenderingTemplate {
             name: template_path.clone(),
             error: e,
         })?;
@@ -152,35 +151,37 @@ pub fn render_template(template: &str, source_filename: &Path) -> Result<String,
     context.insert("env", &vars);
 
     // Render the floki file to string using the context.
-    Ok(tera.render(&template_path, &context)?)
+    tera.render(&template_path, &context)
+        .map_err(|e| FlokiError::ProblemRenderingTemplate {
+            name: template_path.clone(),
+            error: e,
+        })
 }
 
 impl FlokiConfig {
-    pub fn render(file: &Path) -> Result<String, Error> {
-        let content = std::fs::read_to_string(file).map_err(|e| {
-            errors::FlokiError::ProblemOpeningConfigYaml {
+    pub fn render(file: &Path) -> Result<String, FlokiError> {
+        let content =
+            std::fs::read_to_string(file).map_err(|e| FlokiError::ProblemOpeningConfigYaml {
                 name: file.display().to_string(),
                 error: e,
-            }
-        })?;
+            })?;
 
         // Render the template first before parsing it.
         render_template(&content, file)
     }
 
-    pub fn from_file(file: &Path) -> Result<Self, Error> {
+    pub fn from_file(file: &Path) -> Result<Self, FlokiError> {
         debug!("Reading configuration file: {:?}", file);
 
         // Render the output from the configuration file before parsing.
         let output = Self::render(file)?;
 
         // Parse the rendered floki file from the string.
-        let mut config: FlokiConfig = serde_yaml::from_str(&output).map_err(|e| {
-            errors::FlokiError::ProblemParsingConfigYaml {
+        let mut config: FlokiConfig =
+            serde_yaml::from_str(&output).map_err(|e| FlokiError::ProblemParsingConfigYaml {
                 name: file.display().to_string(),
                 error: e,
-            }
-        })?;
+            })?;
 
         // Ensure the path to an external yaml file is correct.
         // If the image.yaml.path file is relative, then it should
@@ -191,7 +192,7 @@ impl FlokiConfig {
             if yaml.file.is_relative() {
                 yaml.file = file
                     .parent()
-                    .ok_or_else(|| errors::FlokiInternalError::InternalAssertionFailed {
+                    .ok_or_else(|| FlokiError::InternalAssertionFailed {
                         description: format!(
                             "could not construct path to external yaml file '{:?}'",
                             &yaml.file

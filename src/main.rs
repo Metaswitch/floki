@@ -17,6 +17,7 @@ use anyhow::Error;
 use cli::{Cli, Subcommand};
 use config::FlokiConfig;
 use environment::Environment;
+use errors::FlokiError;
 use structopt::StructOpt;
 
 fn main() -> Result<(), Error> {
@@ -87,11 +88,7 @@ fn configure_logging(verbosity: u8) -> Result<(), Error> {
         1 => log::LevelFilter::Info,
         2 => log::LevelFilter::Debug,
         3 => log::LevelFilter::Trace,
-        _ => {
-            return Err(
-                errors::FlokiUserError::InvalidVerbositySetting { setting: verbosity }.into(),
-            )
-        }
+        _ => return Err(FlokiError::InvalidVerbositySetting { setting: verbosity }.into()),
     };
     simplelog::TermLogger::init(
         level,
