@@ -1,5 +1,5 @@
 /// Query the current user environment
-use crate::errors;
+use crate::errors::FlokiError;
 use anyhow::Error;
 use std::env;
 use std::ffi::OsString;
@@ -79,14 +79,14 @@ fn find_floki_yaml(current_directory: &path::Path) -> Result<path::PathBuf, Erro
         .ancestors()
         .map(|a| a.join("floki.yaml"))
         .find(|f| f.is_file())
-        .ok_or_else(|| errors::FlokiError::ProblemFindingConfigYaml {}.into())
+        .ok_or_else(|| FlokiError::ProblemFindingConfigYaml {}.into())
 }
 
 /// Take a file path, and return a tuple consisting of its parent directory and the file path
 fn locate_file_in_parents(path: path::PathBuf) -> Result<(path::PathBuf, path::PathBuf), Error> {
     let dir = path
         .parent()
-        .ok_or_else(|| errors::FlokiInternalError::InternalAssertionFailed {
+        .ok_or_else(|| FlokiError::InternalAssertionFailed {
             description: format!("config_file '{:?}' does not have a parent", &path),
         })?
         .to_path_buf();
@@ -116,11 +116,9 @@ fn get_floki_work_path(uid: nix::unistd::Uid) -> path::PathBuf {
 /// Normalize the filepath - this turns a relative path into an absolute one - to
 /// do this it must locate the file in the filesystem, and hence it may fail.
 fn normalize_path(path: path::PathBuf) -> Result<path::PathBuf, Error> {
-    let res = std::fs::canonicalize(&path).map_err(|e| {
-        errors::FlokiError::ProblemNormalizingFilePath {
-            name: path.display().to_string(),
-            error: e,
-        }
+    let res = std::fs::canonicalize(&path).map_err(|e| FlokiError::ProblemNormalizingFilePath {
+        name: path.display().to_string(),
+        error: e,
     })?;
 
     Ok(res)
