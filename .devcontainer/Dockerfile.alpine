@@ -6,5 +6,3 @@ RUN apk update && \
     apk add bash musl-dev shadow && \
     # Add a user for floki using the shadow utils
     useradd -Um -s /bin/bash floki
-
-USER floki

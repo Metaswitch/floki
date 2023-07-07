@@ -9,4 +9,6 @@ volumes:
     mount: /usr/local/cargo/registry
 
 forward_ssh_agent: true
-shell: bash
+shell:
+  outer: bash
+  inner: su floki
