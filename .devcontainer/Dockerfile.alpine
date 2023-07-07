@@ -1,0 +1,8 @@
+FROM rust:1-alpine3.18
+
+ENV CARGO_BUILD_TARGET=x86_64-unknown-linux-musl
+
+RUN apk update && \
+    apk add bash musl-dev shadow && \
+    # Add a user for floki using the shadow utils
+    useradd -Um -s /bin/bash floki

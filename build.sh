@@ -20,9 +20,15 @@ echo "Starting release build for ${LABEL}"
 if [ ${OS_ID} = "linux" ]
 then
   echo "Building statically linked linux binary"
-  docker run --rm -v $(pwd):/home/rust/src -w /home/rust/src ekidd/rust-musl-builder \
-    sh -c 'sudo chown -R rust:rust . && cargo build --release && cp target/x86_64-unknown-linux-musl/release/floki .'
+  docker build -f .devcontainer/Dockerfile.alpine -t flokirust .
+
+  docker run --rm -v $(pwd):/src -w /src flokirust \
+    sh -c 'cargo build --release && cp target/x86_64-unknown-linux-musl/release/floki .'
   sudo chown -R $(id -u):$(id -g) .
+
+  # Check that it's statically compiled!
+  ldd floki
+
   tar -cvzf floki-${LABEL}.tar.gz floki
 
 else
