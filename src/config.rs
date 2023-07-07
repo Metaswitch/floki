@@ -135,9 +135,9 @@ pub fn render_template(template: &str, source_filename: &Path) -> Result<String,
     let mut tera = Tera::default();
 
     // Allow templates to load variables files as Values.
-    tera.register_function("yamlload", yamlloader);
-    tera.register_function("jsonload", jsonloader);
-    tera.register_function("tomlload", tomlloader);
+    tera.register_function("yaml", yamlloader);
+    tera.register_function("json", jsonloader);
+    tera.register_function("toml", tomlloader);
 
     tera.add_raw_template(&template_path, template)
         .map_err(|e| errors::FlokiError::ProblemRenderingTemplate {
@@ -324,7 +324,8 @@ mod test {
 
     #[test]
     fn test_tera_yamlload() -> Result<(), Box<dyn std::error::Error>> {
-        let template = r#"{% set values = yamlload(file="test_resources/values.yaml") %}shell: {{ values.foo }}"#;
+        let template =
+            r#"{% set values = yaml(file="test_resources/values.yaml") %}shell: {{ values.foo }}"#;
         let config = render_template(template, Path::new("floki"))?;
         assert_eq!(config, "shell: bar");
         Ok(())
@@ -332,7 +333,8 @@ mod test {
 
     #[test]
     fn test_tera_jsonload() -> Result<(), Box<dyn std::error::Error>> {
-        let template = r#"{% set values = jsonload(file="test_resources/values.json") %}shell: {{ values.foo }}"#;
+        let template =
+            r#"{% set values = json(file="test_resources/values.json") %}shell: {{ values.foo }}"#;
         let config = render_template(template, Path::new("floki"))?;
         assert_eq!(config, "shell: bar");
         Ok(())
@@ -341,7 +343,7 @@ mod test {
     #[test]
     fn test_tera_tomlload() -> Result<(), Box<dyn std::error::Error>> {
         let template =
-            r#"{% set values = tomlload(file="Cargo.toml") %}floki: {{ values.package.name }}"#;
+            r#"{% set values = toml(file="Cargo.toml") %}floki: {{ values.package.name }}"#;
         let config = render_template(template, Path::new("floki"))?;
         assert_eq!(config, "floki: floki");
         Ok(())

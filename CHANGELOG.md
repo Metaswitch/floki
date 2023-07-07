@@ -14,12 +14,12 @@ Status: Available for use
 ### Breaking Changes
 
 ### Added
-- Add `yamlload` function to tera templating engine so that floki templates
-  can use `yamlload(file="<filepath>")` in order to load values.
-- Add `jsonload` function to tera templating engine so that floki templates
-  can use `jsonload(file="<filepath>")` in order to load values.
-- Add `tomlload` function to tera templating engine so that floki templates
-  can use `tomlload(file="<filepath>")` in order to load values.
+- Add `yaml` function to tera templating engine so that floki templates
+  can use `yaml(file="<filepath>")` in order to load values.
+- Add `json` function to tera templating engine so that floki templates
+  can use `json(file="<filepath>")` in order to load values.
+- Add `toml` function to tera templating engine so that floki templates
+  can use `toml(file="<filepath>")` in order to load values.
 - Add `floki render` to print out the rendered configuration template.
 
 ### Fixed
