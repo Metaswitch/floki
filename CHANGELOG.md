@@ -16,6 +16,7 @@ Status: Available for use
 ### Added
 
 ### Fixed
+- #62: Use shell_words to split the outer shell so that more complex outer shells can be used.
 
 ## [1.2.0] - 2023-07-07
 
