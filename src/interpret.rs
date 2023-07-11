@@ -53,8 +53,13 @@ pub(crate) fn run_floki_container(
         None
     };
 
+    // Calculate the outer shell command.
     let subshell_command = subshell_command(&spec.init, inner_command);
-    cmd.run(&[spec.shell.outer_shell(), "-c", &subshell_command])
+    let mut outer_shell_cmd = shell_words::split(spec.shell.outer_shell())?;
+    outer_shell_cmd.push("-c".to_string());
+    outer_shell_cmd.push(subshell_command);
+
+    cmd.run(outer_shell_cmd)
 }
 
 pub(crate) fn command_in_shell(shell: &str, command: &[String]) -> String {

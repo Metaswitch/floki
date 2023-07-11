@@ -40,11 +40,13 @@ impl Drop for DaemonHandle {
 }
 
 impl DockerCommandBuilder {
-    pub fn run(&self, command: &[&str]) -> Result<(), Error> {
-        debug!(
-            "Spawning docker command with configuration: {:?} args: {:?}",
-            self, command
-        );
+    pub fn run<I, S>(&self, command: I) -> Result<(), Error>
+    where
+        I: IntoIterator<Item = S> + std::fmt::Debug,
+        S: AsRef<OsStr>,
+    {
+        debug!("Spawning docker command with configuration: {self:?}");
+        debug!("- and args: {command:?}");
 
         let mut command = Command::new("docker")
             .args(self.base_args())
