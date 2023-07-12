@@ -106,37 +106,60 @@ fn path_from_args(args: &HashMap<String, tera::Value>) -> tera::Result<String> {
     Ok(from_value::<String>(file.clone())?)
 }
 
-fn yamlloader(args: &HashMap<String, tera::Value>) -> tera::Result<tera::Value> {
-    let path = path_from_args(args)?;
-    let f = std::fs::File::open(path)?;
-    serde_yaml::from_reader(f).map_err(|_| "Failed to read file".into())
+enum LoaderType {
+    Yaml,
+    Json,
+    Toml,
 }
 
-fn jsonloader(args: &HashMap<String, tera::Value>) -> tera::Result<tera::Value> {
-    let path = path_from_args(args)?;
-    let f = std::fs::File::open(path)?;
-    serde_json::from_reader(f).map_err(|_| "Failed to read file".into())
-}
+fn makeloader(path: &Path, loader: LoaderType) -> impl tera::Function {
+    // Get the dirname of the Path given (if a file), or just the directory.
+    let directory = if path.is_file() {
+        path.parent().expect("File should have a parent directory")
+    } else {
+        path
+    }
+    .to_path_buf();
 
-fn tomlloader(args: &HashMap<String, tera::Value>) -> tera::Result<tera::Value> {
-    let path = path_from_args(args)?;
-    let contents = std::fs::read_to_string(path)?;
-    toml::from_str(&contents).map_err(|_| "Failed to read file".into())
+    Box::new(move |args: &HashMap<String, tera::Value>| {
+        path_from_args(args)
+            // Calculate the full path using the parent directory
+            .map(|path| directory.join(path))
+            // Read the file as a string
+            .and_then(|full_path| std::fs::read_to_string(full_path).map_err(Into::into))
+            // Parse the file using the relevant parser
+            .and_then(|contents| match loader {
+                LoaderType::Yaml => serde_yaml::from_str(&contents)
+                    .map_err(|err| format!("Failed to parse file as YAML: {err}").into()),
+                LoaderType::Json => serde_json::from_str(&contents)
+                    .map_err(|err| format!("Failed to parse file as JSON: {err}").into()),
+                LoaderType::Toml => toml::from_str(&contents)
+                    .map_err(|err| format!("Failed to parse file as TOML: {err}").into()),
+            })
+    })
 }
 
 // Renders a template from a given string.
 pub fn render_template(template: &str, source_filename: &Path) -> Result<String, FlokiError> {
     let template_path = source_filename.display().to_string();
-
     debug!("Rendering template: {template_path}");
+
+    // Get the canonical path for the template.
+    let canonical_path = std::fs::canonicalize(source_filename).map_err(|err| {
+        FlokiError::ProblemNormalizingFilePath {
+            name: template_path.clone(),
+            error: err,
+        }
+    })?;
+    debug!("Canonical path: {canonical_path:?}");
 
     // Read the template using tera
     let mut tera = Tera::default();
 
     // Allow templates to load variables files as Values.
-    tera.register_function("yaml", yamlloader);
-    tera.register_function("json", jsonloader);
-    tera.register_function("toml", tomlloader);
+    tera.register_function("yaml", makeloader(&canonical_path, LoaderType::Yaml));
+    tera.register_function("json", makeloader(&canonical_path, LoaderType::Json));
+    tera.register_function("toml", makeloader(&canonical_path, LoaderType::Toml));
 
     tera.add_raw_template(&template_path, template)
         .map_err(|e| FlokiError::ProblemRenderingTemplate {
@@ -327,7 +350,7 @@ mod test {
     fn test_tera_yamlload() -> Result<(), Box<dyn std::error::Error>> {
         let template =
             r#"{% set values = yaml(file="test_resources/values.yaml") %}shell: {{ values.foo }}"#;
-        let config = render_template(template, Path::new("floki"))?;
+        let config = render_template(template, Path::new("floki.yaml"))?;
         assert_eq!(config, "shell: bar");
         Ok(())
     }
@@ -336,7 +359,7 @@ mod test {
     fn test_tera_jsonload() -> Result<(), Box<dyn std::error::Error>> {
         let template =
             r#"{% set values = json(file="test_resources/values.json") %}shell: {{ values.foo }}"#;
-        let config = render_template(template, Path::new("floki"))?;
+        let config = render_template(template, Path::new("floki.yaml"))?;
         assert_eq!(config, "shell: bar");
         Ok(())
     }
@@ -345,7 +368,7 @@ mod test {
     fn test_tera_tomlload() -> Result<(), Box<dyn std::error::Error>> {
         let template =
             r#"{% set values = toml(file="Cargo.toml") %}floki: {{ values.package.name }}"#;
-        let config = render_template(template, Path::new("floki"))?;
+        let config = render_template(template, Path::new("floki.yaml"))?;
         assert_eq!(config, "floki: floki");
         Ok(())
     }
