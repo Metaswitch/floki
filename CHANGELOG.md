@@ -19,6 +19,7 @@ Status: Available for use
 - #62: Use shell_words to split the outer shell so that more complex outer shells can be used.
 - Load values from files relative to the floki config file, not from the
   current working directory.
+- Optimise the release build for size
 
 ## [1.2.0] - 2023-07-07
 
