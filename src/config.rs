@@ -33,6 +33,12 @@ impl Shell {
     }
 }
 
+impl Default for Shell {
+    fn default() -> Self {
+        Self::Shell("sh".into())
+    }
+}
+
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 pub(crate) enum DindConfig {
@@ -40,8 +46,8 @@ pub(crate) enum DindConfig {
     Image { image: String },
 }
 
-impl DindConfig {
-    pub fn deactivated() -> Self {
+impl Default for DindConfig {
+    fn default() -> Self {
         DindConfig::Toggle(false)
     }
 }
@@ -49,7 +55,7 @@ impl DindConfig {
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 /// The Volume structure captures configuration for floki volumes
 pub(crate) struct Volume {
-    #[serde(default = "default_to_false")]
+    #[serde(default)]
     /// A shared volume is reused by containers which also use a
     /// shared volume by the same name. Volumes which are not
     /// shared are localised to a particular floki configuration file.
@@ -59,7 +65,7 @@ pub(crate) struct Volume {
     pub(crate) mount: PathBuf,
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Serialize, Deserialize, Copy, Clone)]
 #[serde(untagged)]
 pub(crate) enum Entrypoint {
     Suppress { suppress: bool },
@@ -68,9 +74,15 @@ pub(crate) enum Entrypoint {
 impl Entrypoint {
     pub fn value(&self) -> Option<&str> {
         match self {
-            Entrypoint::Suppress { suppress } if *suppress => Some(""),
+            &Entrypoint::Suppress { suppress } if suppress => Some(""),
             _ => None,
         }
+    }
+}
+
+impl Default for Entrypoint {
+    fn default() -> Self {
+        Self::Suppress { suppress: false }
     }
 }
 
@@ -78,24 +90,28 @@ impl Entrypoint {
 #[serde(deny_unknown_fields)]
 pub(crate) struct FlokiConfig {
     pub(crate) image: image::Image,
-    #[serde(default = "Vec::new")]
+    #[serde(default)]
     pub(crate) init: Vec<String>,
-    #[serde(default = "default_shell")]
+    #[serde(default)]
     pub(crate) shell: Shell,
     #[serde(default = "default_mount")]
     pub(crate) mount: PathBuf,
-    #[serde(default = "Vec::new")]
+    #[serde(default)]
     pub(crate) docker_switches: Vec<String>,
-    #[serde(default = "default_to_false")]
+    #[serde(default)]
     pub(crate) forward_ssh_agent: bool,
-    #[serde(default = "DindConfig::deactivated")]
+    #[serde(default)]
     pub(crate) dind: DindConfig,
-    #[serde(default = "default_to_false")]
+    #[serde(default)]
     pub(crate) forward_user: bool,
-    #[serde(default = "BTreeMap::new")]
+    #[serde(default)]
     pub(crate) volumes: BTreeMap<String, Volume>,
-    #[serde(default = "default_entrypoint")]
+    #[serde(default)]
     pub(crate) entrypoint: Entrypoint,
+}
+
+fn default_mount() -> PathBuf {
+    PathBuf::from("/src")
 }
 
 fn path_from_args(args: &HashMap<String, tera::Value>) -> tera::Result<String> {
@@ -235,22 +251,6 @@ impl FlokiConfig {
     }
 }
 
-fn default_shell() -> Shell {
-    Shell::Shell("sh".into())
-}
-
-fn default_mount() -> PathBuf {
-    Path::new("/src").to_path_buf()
-}
-
-fn default_to_false() -> bool {
-    false
-}
-
-fn default_entrypoint() -> Entrypoint {
-    Entrypoint::Suppress { suppress: true }
-}
-
 #[cfg(test)]
 mod test {
     use super::*;
@@ -341,7 +341,7 @@ mod test {
     #[test]
     fn test_tera_render() -> Result<(), Box<dyn std::error::Error>> {
         let template = r#"{% set var = "test" %}image: {{ var }}"#;
-        let config = render_template(template, Path::new("floki"))?;
+        let config = render_template(template, Path::new("floki.yaml"))?;
         assert_eq!(config, "image: test");
         Ok(())
     }
