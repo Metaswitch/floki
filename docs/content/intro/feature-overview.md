@@ -116,11 +116,11 @@ The commands to make the above work depend on the container you are running. `fl
 
 # Entrypoints
 
-By default `floki` will suppress the container entrypoint. This can be overridden in the configuration file with:
+Some images define entrypoints to start services or to configure run-time settings that might not be what's wanted when using the image as a development environment.  To suppress any defined entrypoint in the image use:
 
 ```yaml
 entrypoint:
-  suppress: false
+  suppress: true
 ```
 
 # Docker-in-docker
