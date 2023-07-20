@@ -16,6 +16,10 @@ Status: Available for use
 ### Added
 
 ### Fixed
+
+## [1.2.1] - 2023-07-20
+
+### Fixed
 - #62: Use shell_words to split the outer shell so that more complex outer shells can be used.
 - Load values from files relative to the floki config file, not from the
   current working directory.
@@ -344,7 +348,8 @@ Status: Available for use
 - Initial primitive version
 ### Changed
 
-[unreleased]: https://github.com/Metaswitch/floki/compare/1.2.0...HEAD
+[unreleased]: https://github.com/Metaswitch/floki/compare/1.2.1...HEAD
+[1.2.1]: https://github.com/Metaswitch/floki/compare/1.2.0...1.2.1
 [1.2.0]: https://github.com/Metaswitch/floki/compare/1.1.0...1.2.0
 [1.1.0]: https://github.com/Metaswitch/floki/compare/1.0.1...1.1.0
 [1.0.1]: https://github.com/Metaswitch/floki/compare/1.0.0...1.0.1
