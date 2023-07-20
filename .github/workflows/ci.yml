@@ -69,7 +69,7 @@ jobs:
   publish:
     name: Publish release artifact
     runs-on: ubuntu-latest
-    if: github.ref_type == "tag"
+    if: github.ref_type == 'tag'
     needs:
       - build
     steps:
@@ -106,7 +106,7 @@ jobs:
   publish-dry-run:
     name: Dry-run publish for non-release artifact
     runs-on: ubuntu-latest
-    if: github.ref_type != "tag"
+    if: github.ref_type != 'tag'
     needs:
       - build
     steps:
