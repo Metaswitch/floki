@@ -31,7 +31,7 @@ jobs:
             rust: nightly
             experimental: true
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install rust
         uses: actions-rs/toolchain@v1
         with:
@@ -61,7 +61,7 @@ jobs:
     needs:
       - build
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - run: pip3 install -U tomlq
       - name: Install rust
         uses: actions-rs/toolchain@v1
