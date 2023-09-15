@@ -35,7 +35,7 @@ impl Shell {
 
 impl Default for Shell {
     fn default() -> Self {
-        Self::Shell("sh".into())
+        Self::Shell("/bin/sh".into())
     }
 }
 
