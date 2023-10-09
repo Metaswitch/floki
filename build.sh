@@ -14,7 +14,6 @@ TAG=$(tomlq -r '.package.version' Cargo.toml)
 
 LABEL=${TAG}-${OS_ID}
 
-rm -rf target
 echo "Starting release build for ${LABEL}"
 
 if [ ${OS_ID} = "linux" ]
@@ -30,7 +29,6 @@ then
   ldd floki
 
   tar -cvzf floki-${LABEL}.tar.gz floki
-
 else
   echo "Building release binary"
   cargo build --release

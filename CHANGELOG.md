@@ -12,6 +12,7 @@ Status: Available for use
 ## [Unreleased]
 
 ### Breaking Changes
+- Change entrypoint suppression to allow entrypoints by default
 
 ### Added
 

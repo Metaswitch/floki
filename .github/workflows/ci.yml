@@ -14,7 +14,22 @@ on:
     types: [ opened, synchronize ]
 
 jobs:
+  lint:
+    name: Linting and Formatting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+      - name: Run cargo clippy to pick up any errors
+        run: cargo clippy --all-targets -- -Dwarnings
+      - name: Check code is formatted
+        run: cargo fmt -- --check
+
   build:
+    name: Build static binary for publishing
     runs-on: ${{ matrix.os }}
     continue-on-error: ${{ matrix.experimental }}
     strategy:
@@ -36,9 +51,8 @@ jobs:
         uses: dtolnay/rust-toolchain@master
         with:
             toolchain: ${{ matrix.rust }}
-      - name: Run cargo clippy to pick up any errors
-        if: ${{ matrix.rust == 'stable' }}
-        run: cargo clippy -- -Dwarnings
+      - name: Run tests
+        run: cargo test --all-features
       - run: pip3 install -U tomlq
       - run: "./build.sh"
         env:
@@ -53,22 +67,19 @@ jobs:
             floki*.tar.gz
 
   publish:
-    runs-on: ubuntu-20.04
+    name: Publish release artifact
+    runs-on: ubuntu-latest
+    if: github.ref_type == 'tag'
     needs:
       - build
     steps:
       - uses: actions/checkout@v4
-      - run: pip3 install -U tomlq
       - name: Install rust
-        uses: dtolnay/rust-toolchain@stable
-      - name: Publish to crates.io on tags
-        if: startsWith(github.ref, 'refs/tags/')
+        uses: dtolnay/rust-toolchain@master
+        with:
+            toolchain: stable
+      - name: Publish to crates.io
         run: cargo publish
-        env:
-          CARGO_REGISTRY_TOKEN: ${{ secrets.PUBLISH_SECRET }}
-      - name: Dry-run publish on non-tags
-        if: startsWith(github.ref, 'refs/tags/') != true
-        run: cargo publish --dry-run
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.PUBLISH_SECRET }}
       # After publishing, create a release
@@ -76,11 +87,11 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: stableartifacts
+      - run: pip3 install -U tomlq
       - name: Generate release.txt
         run: "./changelog.sh"
       - name: Release
         uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
         with:
           body_path: release.txt
           token: ${{ secrets.PAT_GITHUB }}
@@ -89,6 +100,20 @@ jobs:
             floki*.tar.gz
       # Announce the release
       - run: "./announce.sh"
-        if: startsWith(github.ref, 'refs/tags/')
         env:
           ANNOUNCE_HOOK: ${{ secrets.ANNOUNCE_HOOK }}
+
+  publish-dry-run:
+    name: Dry-run publish for non-release artifact
+    runs-on: ubuntu-latest
+    if: github.ref_type != 'tag'
+    needs:
+      - build
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+      - name: Dry-run publish on non-tags
+        run: cargo publish --dry-run
