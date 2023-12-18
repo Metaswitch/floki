@@ -84,7 +84,7 @@ jobs:
           CARGO_REGISTRY_TOKEN: ${{ secrets.PUBLISH_SECRET }}
       # After publishing, create a release
       - name: Download archives
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: stableartifacts
       - run: pip3 install -U tomlq
