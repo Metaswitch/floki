@@ -28,7 +28,7 @@ pub(crate) fn run_floki_container(
     if spec.user.forward {
         cmd = cmd
             .add_docker_switch("--user")
-            .add_docker_switch(&format!("{}:{}", spec.user.uid, spec.user.gid));
+            .add_docker_switch(format!("{}:{}", spec.user.uid, spec.user.gid));
     }
 
     if let Some(spec::SshAgent { path }) = &spec.ssh_agent {
@@ -36,7 +36,7 @@ pub(crate) fn run_floki_container(
     }
 
     if let Some(entrypoint) = &spec.entrypoint {
-        cmd = cmd.add_docker_switch(&format!("--entrypoint={}", entrypoint))
+        cmd = cmd.add_docker_switch(format!("--entrypoint={}", entrypoint))
     }
 
     for switch in &spec.docker_switches {
