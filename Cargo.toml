@@ -29,7 +29,7 @@ sha2 = "0.10.8"
 anyhow = "1.0.80"
 thiserror = "1.0.57"
 tera = "1"
-serde_json = "1.0.111"
+serde_json = "1.0.114"
 toml = "0.8.10"
 shell-words = "1.1.0"
 
