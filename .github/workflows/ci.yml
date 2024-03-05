@@ -61,7 +61,7 @@ jobs:
         uses: actions/upload-artifact@v3
         if: ${{ matrix.rust == 'stable' }}
         with:
-          name: stableartifacts
+          name: stableartifacts-${{ matrix.os }}
           path: |
             floki*.zip
             floki*.tar.gz
@@ -83,10 +83,14 @@ jobs:
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.PUBLISH_SECRET }}
       # After publishing, create a release
-      - name: Download archives
+      - name: Download ubuntu artifacts
         uses: actions/download-artifact@v3
         with:
-          name: stableartifacts
+          name: stableartifacts-ubuntu-20.04
+      - name: Download macos artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: stableartifacts-macos-latest
       - run: pip3 install -U tomlq
       - name: Generate release.txt
         run: "./changelog.sh"
@@ -117,3 +121,12 @@ jobs:
           toolchain: stable
       - name: Dry-run publish on non-tags
         run: cargo publish --dry-run
+      # Test downloading the artifacts
+      - name: Download ubuntu artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: stableartifacts-ubuntu-20.04
+      - name: Download macos artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: stableartifacts-macos-latest
