@@ -24,3 +24,9 @@ updates:
     schedule:
       # Check for updates to GitHub Actions every week
       interval: "weekly"
+    groups:
+      # Need to keep the up/download artifact actions in sync.
+      artifact:
+        patterns:
+          - actions/download-artifact
+          - actions/upload-artifact
