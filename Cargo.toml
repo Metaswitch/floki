@@ -34,7 +34,7 @@ toml = "0.8.10"
 shell-words = "1.1.0"
 
 [dev-dependencies]
-tempfile = "3.10.0"
+tempfile = "3.10.1"
 
 [profile.release]
 strip = true  # Automatically strip symbols from the binary.
