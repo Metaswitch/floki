@@ -58,7 +58,7 @@ jobs:
         env:
           OS_NAME: ${{ matrix.os }}
       - name: Archive artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: ${{ matrix.rust == 'stable' }}
         with:
           name: stableartifacts
