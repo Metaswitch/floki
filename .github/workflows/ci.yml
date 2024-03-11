@@ -95,7 +95,7 @@ jobs:
       - name: Generate release.txt
         run: "./changelog.sh"
       - name: Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           body_path: release.txt
           token: ${{ secrets.PAT_GITHUB }}
