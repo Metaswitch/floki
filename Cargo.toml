@@ -30,7 +30,7 @@ anyhow = "1.0.80"
 thiserror = "1.0.57"
 tera = "1"
 serde_json = "1.0.114"
-toml = "0.8.10"
+toml = "0.8.12"
 shell-words = "1.1.0"
 
 [dev-dependencies]
