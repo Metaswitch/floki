@@ -135,7 +135,11 @@ mod test {
             path.parent()
                 .ok_or_else(|| anyhow!("Unable to take parent of path"))?,
         )?;
-        fs::OpenOptions::new().create(true).write(true).open(path)?;
+        fs::OpenOptions::new()
+            .truncate(false)
+            .create(true)
+            .write(true)
+            .open(path)?;
         Ok(())
     }
 
