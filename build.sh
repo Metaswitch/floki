@@ -10,7 +10,7 @@ then
   OS_ID="osx"
 fi
 
-TAG=$(tomlq -r '.package.version' Cargo.toml)
+TAG=$(cargo get package.version)
 
 LABEL=${TAG}-${OS_ID}
 
