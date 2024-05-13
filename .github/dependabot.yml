@@ -19,6 +19,8 @@ updates:
       - dependency-name: serde_derive
         versions:
           - 1.0.123
+    assignees:
+      - maxdymond
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
@@ -30,3 +32,5 @@ updates:
         patterns:
           - actions/download-artifact
           - actions/upload-artifact
+    assignees:
+      - maxdymond

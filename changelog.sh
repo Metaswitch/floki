@@ -2,6 +2,6 @@
 
 set -euxo pipefail
 
-VERSION=$(tomlq -r '.package.version' Cargo.toml)
+VERSION=$(cargo get package.version)
 
 docker run -v $PWD:$PWD -w $PWD sean0x42/markdown-extract -r "${VERSION}" CHANGELOG.md | tee release.txt
