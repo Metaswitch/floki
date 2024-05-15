@@ -12,11 +12,19 @@ Status: Available for use
 ## [Unreleased]
 
 ### Breaking Changes
-- Change entrypoint suppression to allow entrypoints by default
 
 ### Added
 
 ### Fixed
+
+## [2.0.0] - 2024-05-15
+
+### Breaking Changes
+- Change entrypoint suppression to allow entrypoints by default
+
+### Fixed
+
+- Switch to yaml-rust2.
 
 ## [1.2.1] - 2023-07-20
 
@@ -349,7 +357,8 @@ Status: Available for use
 - Initial primitive version
 ### Changed
 
-[unreleased]: https://github.com/Metaswitch/floki/compare/1.2.1...HEAD
+[unreleased]: https://github.com/Metaswitch/floki/compare/2.0.0...HEAD
+[2.0.0]: https://github.com/Metaswitch/floki/compare/1.2.1...2.0.0
 [1.2.1]: https://github.com/Metaswitch/floki/compare/1.2.0...1.2.1
 [1.2.0]: https://github.com/Metaswitch/floki/compare/1.1.0...1.2.0
 [1.1.0]: https://github.com/Metaswitch/floki/compare/1.0.1...1.1.0
