@@ -73,6 +73,9 @@ jobs:
     if: github.ref_type == 'tag'
     needs:
       - build
+    # Required to publish a release
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
       - name: Install rust
@@ -100,7 +103,6 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           body_path: release.txt
-          token: ${{ secrets.PAT_GITHUB }}
           files: |
             floki*.zip
             floki*.tar.gz

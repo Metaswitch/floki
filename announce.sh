@@ -2,7 +2,7 @@
 
 echo "Announce changes to the world!"
 
-VERSION=$(tomlq -r '.package.version' Cargo.toml)
+VERSION=$(cargo get package.version)
 echo "Version: $VERSION"
 
 docker run \

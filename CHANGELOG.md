@@ -17,6 +17,11 @@ Status: Available for use
 
 ### Fixed
 
+## [2.0.1] - 2024-05-15
+
+### Fixed
+- Fix publishing releases
+
 ## [2.0.0] - 2024-05-15
 
 ### Breaking Changes
@@ -357,7 +362,8 @@ Status: Available for use
 - Initial primitive version
 ### Changed
 
-[unreleased]: https://github.com/Metaswitch/floki/compare/2.0.0...HEAD
+[unreleased]: https://github.com/Metaswitch/floki/compare/2.0.1...HEAD
+[2.0.1]: https://github.com/Metaswitch/floki/compare/2.0.0...2.0.1
 [2.0.0]: https://github.com/Metaswitch/floki/compare/1.2.1...2.0.0
 [1.2.1]: https://github.com/Metaswitch/floki/compare/1.2.0...1.2.1
 [1.2.0]: https://github.com/Metaswitch/floki/compare/1.1.0...1.2.0
