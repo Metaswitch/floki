@@ -50,7 +50,7 @@ impl DockerCommandBuilder {
 
         let mut command = Command::new("docker")
             .args(self.base_args())
-            .args(&self.build_volume_switches())
+            .args(self.build_volume_switches())
             .args(self.build_environment_switches())
             .args(self.build_docker_switches())
             .arg(&self.image)
@@ -82,7 +82,7 @@ impl DockerCommandBuilder {
         let exit_status = Command::new("docker")
             .args(["run", "--rm"])
             .args(["--name", &self.name])
-            .args(&self.build_volume_switches())
+            .args(self.build_volume_switches())
             .args(self.build_environment_switches())
             .args(self.build_docker_switches())
             .arg("-d")

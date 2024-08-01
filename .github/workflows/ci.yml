@@ -106,10 +106,10 @@ jobs:
           files: |
             floki*.zip
             floki*.tar.gz
-      # Announce the release
-      - run: "./announce.sh"
-        env:
-          ANNOUNCE_HOOK: ${{ secrets.ANNOUNCE_HOOK }}
+      # # Announce the release
+      # - run: "./announce.sh"
+      #   env:
+      #     ANNOUNCE_HOOK: ${{ secrets.ANNOUNCE_HOOK }}
 
   publish-dry-run:
     name: Dry-run publish for non-release artifact

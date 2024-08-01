@@ -93,14 +93,14 @@ impl Image {
                     .arg("-t")
                     .arg(self.name()?)
                     .arg("-f")
-                    .arg(&floki_root.join(&build.dockerfile));
+                    .arg(floki_root.join(&build.dockerfile));
 
                 if let Some(target) = &build.target {
                     command.arg("--target").arg(target);
                 }
 
                 let exit_status = command
-                    .arg(&floki_root.join(&build.context))
+                    .arg(floki_root.join(&build.context))
                     .spawn()?
                     .wait()?;
                 if exit_status.success() {
