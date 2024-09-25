@@ -181,7 +181,7 @@ These can be used to configure users in the container dynamically. This can be a
 
 The host path to the mounted directory is forwarded into the `floki` container as an environment variable, `FLOKI_HOST_MOUNTDIR`.
 
-You can set where this directory is mounted in the container using the `mount` key in `floki.yaml`.
+You can set where this directory is mounted in the container using the `mount` key in `floki.yaml`. The mount location is exposed in the `floki` container as an environment variable, `FLOKI_WORKING_DIR`.
 
 ## SSH agent
 
