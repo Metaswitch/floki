@@ -14,6 +14,8 @@ Status: Available for use
 ### Breaking Changes
 
 ### Added
+- Add `FLOKI_WORKING_DIR` environment variable that is accessible inside the
+  container. Can be used when `mount:` has been specified in `floki.yaml`.
 
 ### Fixed
 
