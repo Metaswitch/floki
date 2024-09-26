@@ -23,6 +23,7 @@ pub(crate) fn run_floki_container(
     cmd = cmd.add_environment("FLOKI_HOST_MOUNTDIR", &spec.paths.root);
     cmd = cmd.add_environment("FLOKI_HOST_UID", spec.user.uid.to_string());
     cmd = cmd.add_environment("FLOKI_HOST_GID", spec.user.gid.to_string());
+    cmd = cmd.add_environment("FLOKI_WORKING_DIR", &spec.paths.internal_working_directory);
     cmd = cmd.set_working_directory(&spec.paths.internal_working_directory);
 
     if spec.user.forward {
