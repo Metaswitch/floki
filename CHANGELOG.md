@@ -14,10 +14,14 @@ Status: Available for use
 ### Breaking Changes
 
 ### Added
-- Add `FLOKI_WORKING_DIR` environment variable that is accessible inside the
-  container. Can be used when `mount:` has been specified in `floki.yaml`.
 
 ### Fixed
+
+## [2.1.0] - 2024-09-26
+
+### Added
+- Add `FLOKI_WORKING_DIR` environment variable that is accessible inside the
+  container. Can be used when `mount:` has been specified in `floki.yaml`.
 
 ## [2.0.1] - 2024-05-15
 
@@ -364,7 +368,8 @@ Status: Available for use
 - Initial primitive version
 ### Changed
 
-[unreleased]: https://github.com/Metaswitch/floki/compare/2.0.1...HEAD
+[unreleased]: https://github.com/Metaswitch/floki/compare/2.1.0...HEAD
+[2.1.0]: https://github.com/Metaswitch/floki/compare/2.0.1...2.1.0
 [2.0.1]: https://github.com/Metaswitch/floki/compare/2.0.0...2.0.1
 [2.0.0]: https://github.com/Metaswitch/floki/compare/1.2.1...2.0.0
 [1.2.1]: https://github.com/Metaswitch/floki/compare/1.2.0...1.2.1
