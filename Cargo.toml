@@ -29,12 +29,12 @@ sha2 = "0.10.8"
 anyhow = "1.0.95"
 thiserror = "2.0.11"
 tera = "1"
-serde_json = "1.0.137"
+serde_json = "1.0.138"
 toml = "0.8.19"
 shell-words = "1.1.0"
 
 [dev-dependencies]
-tempfile = "3.14.0"
+tempfile = "3.16.0"
 
 [profile.release]
 strip = true  # Automatically strip symbols from the binary.
