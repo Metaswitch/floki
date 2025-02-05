@@ -20,7 +20,7 @@ log = "0.4"
 serde = { version = "1", features = ["derive"] }
 serde_yaml = "0.9"
 structopt = "0.3"
-uuid = { version = "1.12", features = ["v4"] }
+uuid = { version = "1.13", features = ["v4"] }
 yaml-rust2 = "0.9.0"
 simplelog = "0.12"
 nix = { version = "0.29", default-features = false, features = ["user"] }
@@ -30,7 +30,7 @@ anyhow = "1.0.95"
 thiserror = "2.0.11"
 tera = "1"
 serde_json = "1.0.138"
-toml = "0.8.19"
+toml = "0.8.20"
 shell-words = "1.1.0"
 
 [dev-dependencies]
