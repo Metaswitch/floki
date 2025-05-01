@@ -2,7 +2,7 @@
 
 set -ex
 
-if [ $OS_NAME = "ubuntu-20.04" ]
+if [ $OS_NAME = "ubuntu-24.04" ]
 then
   OS_ID="linux"
 elif [ $OS_NAME = "macos-latest" ]

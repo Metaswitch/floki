@@ -35,14 +35,14 @@ jobs:
     strategy:
       matrix:
         os:
-          - ubuntu-20.04
+          - ubuntu-24.04
           - macos-latest
         rust:
           - stable
           - beta
         experimental: [false]
         include:
-          - os: ubuntu-20.04
+          - os: ubuntu-24.04
             rust: nightly
             experimental: true
     steps:
@@ -92,7 +92,7 @@ jobs:
       - name: Download ubuntu artifacts
         uses: actions/download-artifact@v4
         with:
-          name: stableartifacts-ubuntu-20.04
+          name: stableartifacts-ubuntu-24.04
       - name: Download macos artifacts
         uses: actions/download-artifact@v4
         with:
@@ -131,7 +131,7 @@ jobs:
       - name: Download ubuntu artifacts
         uses: actions/download-artifact@v4
         with:
-          name: stableartifacts-ubuntu-20.04
+          name: stableartifacts-ubuntu-24.04
       - name: Download macos artifacts
         uses: actions/download-artifact@v4
         with:

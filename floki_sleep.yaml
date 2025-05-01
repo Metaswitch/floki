@@ -1,6 +1,0 @@
-image: docker-local.metaswitch.com/images.core/rust-dev/ubuntu20.04:9.3.2
-mount: /src
-forward_ssh_agent: true
-shell: bash
-init:
-  - sleep 60
