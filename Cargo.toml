@@ -12,7 +12,7 @@ version = "2.1.0"
 authors = ["Richard Lupton <richard.lupton@gmail.com>",
            "Max Dymond <max.dymond@metaswitch.com>"]
 edition = '2018'
-rust-version = '1.57'
+rust-version = '1.80'
 
 [dependencies]
 atty = "0.2"
