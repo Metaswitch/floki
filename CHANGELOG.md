@@ -14,6 +14,7 @@ Status: Available for use
 ### Breaking Changes
 
 ### Added
+- Set minimum Rust version to 1.80
 
 ### Fixed
 
