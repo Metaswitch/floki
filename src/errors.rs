@@ -78,7 +78,7 @@ pub enum FlokiError {
 /// Generate a summary string for a process exiting
 fn exit_code_diagnosis(exit_status: &ExitStatus) -> String {
     match exit_status.code() {
-        Some(rc) => format!("exited with return code {}", rc),
+        Some(rc) => format!("exited with return code {rc}"),
         None => "terminated by a signal".to_string(),
     }
 }

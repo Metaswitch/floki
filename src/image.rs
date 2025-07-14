@@ -145,7 +145,7 @@ impl Image {
 
 /// Wrapper to pull an image by it's name
 pub fn pull_image(name: &str) -> Result<(), Error> {
-    debug!("Pulling image: {}", name);
+    debug!("Pulling image: {name}");
     let exit_status = Command::new("docker")
         .arg("pull")
         .arg(name)
@@ -168,7 +168,7 @@ pub fn pull_image(name: &str) -> Result<(), Error> {
 
 /// Determine whether an image exists locally
 pub fn image_exists_locally(name: &str) -> Result<bool, Error> {
-    debug!("Checking for image: {}", name);
+    debug!("Checking for image: {name}");
     let ret = Command::new("docker")
         .args(["history", name])
         .stdin(Stdio::null())
