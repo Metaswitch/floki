@@ -37,7 +37,7 @@ pub(crate) fn run_floki_container(
     }
 
     if let Some(entrypoint) = &spec.entrypoint {
-        cmd = cmd.add_docker_switch(format!("--entrypoint={}", entrypoint))
+        cmd = cmd.add_docker_switch(format!("--entrypoint={entrypoint}"))
     }
 
     for switch in &spec.docker_switches {

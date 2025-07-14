@@ -27,7 +27,7 @@ fn main() -> Result<(), Error> {
     match run_floki_from_args(&args) {
         Ok(()) => (),
         Err(e) => {
-            error!("A problem occurred: {}", e);
+            error!("A problem occurred: {e}");
             std::process::exit(1);
         }
     }

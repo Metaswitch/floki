@@ -18,7 +18,7 @@ impl User {
     fn current() -> Self {
         let uid = nix::unistd::getuid();
         let gid = nix::unistd::getgid();
-        debug!("Current user has uid {} and group {}", uid, gid);
+        debug!("Current user has uid {uid} and group {gid}");
         Self { uid, gid }
     }
 }
@@ -109,7 +109,7 @@ fn resolve_floki_root_and_config(
 
 /// Resolve a directory for floki to use for user-global file (caches etc)
 fn get_floki_work_path(uid: nix::unistd::Uid) -> path::PathBuf {
-    let root: path::PathBuf = env::var("HOME").unwrap_or(format!("/tmp/{}/", uid)).into();
+    let root: path::PathBuf = env::var("HOME").unwrap_or(format!("/tmp/{uid}/")).into();
     root.join(".floki")
 }
 

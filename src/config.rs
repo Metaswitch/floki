@@ -210,7 +210,7 @@ impl FlokiConfig {
     }
 
     pub fn from_file(file: &Path) -> Result<Self, FlokiError> {
-        debug!("Reading configuration file: {:?}", file);
+        debug!("Reading configuration file: {file:?}");
 
         // Render the output from the configuration file before parsing.
         let output = Self::render(file)?;

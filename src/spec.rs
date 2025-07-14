@@ -133,7 +133,7 @@ impl FlokiSpec {
             paths,
         };
 
-        debug!("built spec from config and environment: {:?}", spec);
+        debug!("built spec from config and environment: {spec:?}");
 
         Ok(spec)
     }
