@@ -90,11 +90,11 @@ jobs:
           CARGO_REGISTRY_TOKEN: ${{ secrets.PUBLISH_SECRET }}
       # After publishing, create a release
       - name: Download ubuntu artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: stableartifacts-ubuntu-24.04
       - name: Download macos artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: stableartifacts-macos-latest
       - name: Generate release.txt
@@ -129,11 +129,11 @@ jobs:
         run: cargo publish --dry-run
       # Test downloading the artifacts
       - name: Download ubuntu artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: stableartifacts-ubuntu-24.04
       - name: Download macos artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: stableartifacts-macos-latest
       # Test generating release.txt
