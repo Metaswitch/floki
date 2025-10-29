@@ -15,6 +15,7 @@ Status: Available for use
 
 ### Added
 - Set minimum Rust version to 1.80
+- Add configuration for [`cargo generate-rpm`](https://crates.io/crates/cargo-generate-rpm), allowing an RPM for floki to be built using Cargo against the project
 
 ### Fixed
 
