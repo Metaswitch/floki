@@ -28,6 +28,10 @@ then
   # Check that it's statically compiled!
   ldd floki
 
+  # Strip .gnu.hash since floki is statically compiled.
+  # Required so that cargo-generate-rpm does not introduce a dependency on the RTLD.
+  strip --remove-section=.gnu.hash floki
+
   tar -cvzf floki-${LABEL}.tar.gz floki
 else
   echo "Building release binary"

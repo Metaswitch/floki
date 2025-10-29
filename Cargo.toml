@@ -42,6 +42,7 @@ assets = [
     { source = "LICENSE", dest = "/usr/share/doc/floki/LICENSE", doc = true, mode = "0644" },
 ]
 require-sh = false
+auto-req = "no" # Required to stop cargo generate-rpm introducing a dep on the RTLD
 
 [profile.release]
 strip = true  # Automatically strip symbols from the binary.
