@@ -55,7 +55,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
           fetch-depth: ${{ inputs.fetch_depth }}
 
@@ -64,7 +64,7 @@ jobs:
         with:
           toolchain: ${{ inputs.toolchain }}
       - name: Rust Cache
-        uses: Swatinem/rust-cache@v2.8.1
+        uses: Swatinem/rust-cache@f13886b937689c021905a6b90929199931d60db1 # v2.8.1
       - name: Install musl toolchain
         if: ${{ inputs.rpm }}
         run: |
@@ -122,7 +122,7 @@ jobs:
 
       - name: Upload artifacts
         if: ${{ inputs.upload_artifact && steps.build.outcome == 'success' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: ${{ inputs.artifact_name }}
           path: dist

@@ -1,8 +1,8 @@
 {
   "devDependencies": {
-    "gulp": "^5.0.0",
-    "gulp-concat": "^2.5.2",
-    "gulp-minify-css": "^1.1.0",
-    "gulp-uglify": "^3.0.0"
+    "gulp": "5.0.1",
+    "gulp-concat": "2.6.1",
+    "gulp-minify-css": "1.2.4",
+    "gulp-uglify": "3.0.2"
   }
 }
