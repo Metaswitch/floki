@@ -1,0 +1,101 @@
+name: Release
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  get-next-version:
+    uses: semantic-release-action/next-release-version/.github/workflows/next-release-version.yml@v4
+
+  build-artifacts:
+    name: Build ${{ matrix.name }} artifacts
+    needs: get-next-version
+    if: needs.get-next-version.outputs.new-release-published == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Linux
+            label: linux
+            os: ubuntu-24.04
+            artifact_glob: floki-*.tar.gz
+            rpm: true
+          - name: macOS
+            label: macos
+            os: macos-latest
+            artifact_glob: floki-*.zip
+            rpm: false
+    uses: ./.github/workflows/build-artifacts.yml
+    with:
+      runner: ${{ matrix.os }}
+      toolchain: stable
+      artifact_glob: ${{ matrix.artifact_glob }}
+      artifact_name: dist-${{ matrix.label }}
+      upload_artifact: true
+      run_tests: false
+      rpm: ${{ matrix.rpm }}
+      release_version: ${{ needs.get-next-version.outputs.new-release-version }}
+      fetch_depth: '0'
+
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    needs:
+      - get-next-version
+      - build-artifacts
+    if: needs.get-next-version.outputs.new-release-published == 'true'
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2.8.1
+
+      - name: Install semantic-release-cargo
+        run: cargo install --locked semantic-release-cargo
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "node"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: dist-*
+          merge-multiple: true
+          path: dist
+
+      - name: Generate checksums
+        run: |
+          cd dist
+          for file in *; do
+            if [ "$file" = "SHA256SUMS.txt" ]; then
+              continue
+            fi
+            shasum -a 256 "$file"
+          done > SHA256SUMS.txt
+
+      - name: Release
+        run: npx semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CARGO_REGISTRY_TOKEN: ${{ secrets.PUBLISH_SECRET }}

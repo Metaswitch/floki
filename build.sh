@@ -2,10 +2,10 @@
 
 set -ex
 
-if [ $OS_NAME = "ubuntu-24.04" ]
+if [ $RUNNER = "ubuntu-24.04" ]
 then
   OS_ID="linux"
-elif [ $OS_NAME = "macos-latest" ]
+elif [ $RUNNER = "macos-latest" ]
 then
   OS_ID="osx"
 fi
@@ -18,21 +18,22 @@ echo "Starting release build for ${LABEL}"
 
 if [ ${OS_ID} = "linux" ]
 then
-  echo "Building statically linked linux binary"
-  docker build -f .devcontainer/Dockerfile.alpine -t flokirust .
+  echo "Building linux binary"
+  cargo build --release
 
-  docker run --rm -v $(pwd):/src -w /src flokirust \
-    sh -c 'cargo build --release && cp target/x86_64-unknown-linux-musl/release/floki .'
-  sudo chown -R $(id -u):$(id -g) .
+  FLOKI_BINARY=$(find target/ -name "floki")
+  echo "FLOKI_BINARY is $FLOKI_BINARY"
+  FLOKI_DIR=$(dirname $FLOKI_BINARY)
 
   # Check that it's statically compiled!
-  ldd floki
+  ldd $FLOKI_BINARY || true
 
   # Strip .gnu.hash since floki is statically compiled.
   # Required so that cargo-generate-rpm does not introduce a dependency on the RTLD.
-  strip --remove-section=.gnu.hash floki
+  strip --remove-section=.gnu.hash $FLOKI_BINARY
 
-  tar -cvzf floki-${LABEL}.tar.gz floki
+  tar -cvzf floki-${LABEL}.tar.gz -C $FLOKI_DIR floki
+  tar -tvzf floki-${LABEL}.tar.gz
 else
   echo "Building release binary"
   cargo build --release

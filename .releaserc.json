@@ -1,0 +1,38 @@
+{
+  "tagFormat": "${version}",
+  "plugins": [
+    "@semantic-release/commit-analyzer",
+    "@semantic-release/release-notes-generator",
+    [
+      "@semantic-release/exec",
+      {
+        "verifyConditionsCmd": "semantic-release-cargo verify-conditions",
+        "prepareCmd": "semantic-release-cargo prepare ${nextRelease.version}",
+        "publishCmd": "semantic-release-cargo publish"
+      }
+    ],
+    [
+      "@semantic-release/github",
+      {
+        "assets": [
+          {
+            "path": "dist/floki-*-linux.tar.gz",
+            "label": "Linux tarball"
+          },
+          {
+            "path": "dist/floki-*-osx.zip",
+            "label": "macOS zip"
+          },
+          {
+            "path": "dist/floki*.rpm",
+            "label": "RPM package"
+          },
+          {
+            "path": "dist/SHA256SUMS.txt",
+            "label": "SHA256SUMS.txt"
+          }
+        ]
+      }
+    ]
+  ]
+}

@@ -1,5 +1,0 @@
-{
-	"name": "floki",
-	"build": { "dockerfile": "Dockerfile.alpine" },
-	"remoteUser": "floki"
-}

@@ -1,10 +1,12 @@
+
 # Changelog
 
-All notable changes to this project will be documented in this file.
+Releases are now automated with [semantic-release](https://semantic-release.gitbook.io/semantic-release/).
 
-This file's format is based on [Keep a Changelog](http://keepachangelog.com/)
-and this project adheres to [Semantic Versioning](http://semver.org/). The
-version number is tracked in the file `Cargo.toml`.
+- Head to the [GitHub Releases](https://github.com/Metaswitch/floki/releases) page for the latest notes and downloadable artifacts.
+- The full pre-automation changelog remains in the Git history of this file if you need to reference historic entries.
+
+Going forward, new release notes are generated directly by the release workflow.
 
 Contact: See Cargo.toml authors
 Status: Available for use

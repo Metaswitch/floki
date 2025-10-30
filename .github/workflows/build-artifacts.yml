@@ -1,0 +1,128 @@
+name: Build Artifacts
+on:
+  workflow_call:
+    inputs:
+      runner:
+        description: GitHub-hosted runner label
+        required: true
+        type: string
+      toolchain:
+        description: Rust toolchain channel to install
+        required: true
+        type: string
+      artifact_glob:
+        description: Glob pattern for build artifacts produced by build.sh
+        required: true
+        type: string
+      artifact_name:
+        description: Name to use when uploading artifacts
+        required: true
+        type: string
+      upload_artifact:
+        description: Whether to upload build artifacts
+        required: true
+        type: boolean
+      run_tests:
+        description: Run cargo test before building
+        required: false
+        type: boolean
+        default: false
+      allow_failure:
+        description: Treat build/test failures as non-fatal
+        required: false
+        type: boolean
+        default: false
+      rpm:
+        description: Generate an RPM artifact (Linux only)
+        required: false
+        type: boolean
+        default: false
+      release_version:
+        description: Release version to prepare with semantic-release-cargo
+        required: false
+        type: string
+        default: ""
+      fetch_depth:
+        description: Fetch depth for the checkout step
+        required: false
+        type: string
+        default: "0"
+
+jobs:
+  build:
+    runs-on: ${{ inputs.runner }}
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: ${{ inputs.fetch_depth }}
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ inputs.toolchain }}
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2.8.1
+      - name: Install musl toolchain
+        if: ${{ inputs.rpm }}
+        run: |
+          set -euxo pipefail
+          sudo apt-get update
+          sudo apt-get install -y musl-tools
+          rustup target add x86_64-unknown-linux-musl
+          echo "CARGO_BUILD_TARGET=x86_64-unknown-linux-musl" >> $GITHUB_ENV
+
+      - name: Run tests
+        if: ${{ inputs.run_tests }}
+        continue-on-error: ${{ inputs.allow_failure }}
+        run: cargo test --all-features
+
+      - name: Install cargo-get
+        run: cargo install --locked cargo-get
+
+      - name: Install semantic-release-cargo
+        if: ${{ inputs.release_version != '' }}
+        run: cargo install --locked semantic-release-cargo
+
+      - name: Install cargo-generate-rpm
+        if: ${{ inputs.rpm }}
+        run: cargo install --locked cargo-generate-rpm
+
+      - name: Prepare release version
+        if: ${{ inputs.release_version != '' }}
+        run: semantic-release-cargo prepare ${{ inputs.release_version }}
+
+      - name: Build artifacts
+        id: build
+        continue-on-error: ${{ inputs.allow_failure }}
+        run: ./build.sh
+        env:
+          RUNNER: ${{ inputs.runner }}
+
+      - name: Generate RPM
+        if: ${{ inputs.rpm && steps.build.outcome == 'success' }}
+        run: |
+          cargo generate-rpm --target ${CARGO_BUILD_TARGET}
+
+      - name: Collect archives
+        if: ${{ steps.build.outcome == 'success' }}
+        run: |
+          set -euxo pipefail
+          rm -rf dist
+          mkdir dist
+          mv ${{ inputs.artifact_glob }} dist/
+
+      - name: Collect RPM
+        if: ${{ inputs.rpm && steps.build.outcome == 'success' }}
+        run: |
+          set -euxo pipefail
+          find target/ -name "floki*.rpm" -exec cp -v "{}" dist/ \;
+
+      - name: Upload artifacts
+        if: ${{ inputs.upload_artifact && steps.build.outcome == 'success' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.artifact_name }}
+          path: dist
