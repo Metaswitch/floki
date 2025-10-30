@@ -25,7 +25,7 @@ Precompiled binaries for linux and OSX can be downloaded from the [releases](htt
 For example, to obtain the latest binary with `curl` and extract it, run
 
 ```shell
-$ curl -L https://github.com/Metaswitch/floki/releases/download/2.1.0/floki-2.1.0-linux.tar.gz | tar xzvf -
+$ curl -L https://github.com/Metaswitch/floki/releases/download/2.2.0/floki-2.2.0-linux.tar.gz | tar xzvf -
 ```
 
 in a shell. You should now be able to run `floki` from your working directory:

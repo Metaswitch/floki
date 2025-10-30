@@ -14,10 +14,14 @@ Status: Available for use
 ### Breaking Changes
 
 ### Added
-- Set minimum Rust version to 1.80
-- Add configuration for [`cargo generate-rpm`](https://crates.io/crates/cargo-generate-rpm), allowing an RPM for floki to be built using Cargo against the project
 
 ### Fixed
+
+## [2.2.0] - 2025-10-30
+
+### Added
+- Set minimum Rust version to 1.80
+- Add configuration for [`cargo generate-rpm`](https://crates.io/crates/cargo-generate-rpm), allowing an RPM for floki to be built using Cargo against the project
 
 ## [2.1.0] - 2024-09-26
 
@@ -370,7 +374,8 @@ Status: Available for use
 - Initial primitive version
 ### Changed
 
-[unreleased]: https://github.com/Metaswitch/floki/compare/2.1.0...HEAD
+[unreleased]: https://github.com/Metaswitch/floki/compare/2.2.0...HEAD
+[2.2.0]: https://github.com/Metaswitch/floki/compare/2.1.0...2.2.0
 [2.1.0]: https://github.com/Metaswitch/floki/compare/2.0.1...2.1.0
 [2.0.1]: https://github.com/Metaswitch/floki/compare/2.0.0...2.0.1
 [2.0.0]: https://github.com/Metaswitch/floki/compare/1.2.1...2.0.0
