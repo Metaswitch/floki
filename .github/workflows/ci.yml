@@ -59,7 +59,7 @@ jobs:
         env:
           OS_NAME: ${{ matrix.os }}
       - name: Archive artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: ${{ matrix.rust == 'stable' }}
         with:
           name: stableartifacts-${{ matrix.os }}
@@ -82,7 +82,7 @@ jobs:
         run: cargo install cargo-generate-rpm
       # Download the ubuntu artifact instead of rebuilding.
       - name: Download artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: stableartifacts-ubuntu-24.04
       - name: Build RPM
@@ -103,7 +103,7 @@ jobs:
       - name: Test installation
         run: floki -V
       - name: Archive artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: rpm
           path: |
@@ -133,15 +133,15 @@ jobs:
           CARGO_REGISTRY_TOKEN: ${{ secrets.PUBLISH_SECRET }}
       # After publishing, create a release
       - name: Download ubuntu artifacts
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: stableartifacts-ubuntu-24.04
       - name: Download macos artifacts
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: stableartifacts-macos-latest
       - name: Download RPM
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: rpm
       - name: Generate release.txt
@@ -178,15 +178,15 @@ jobs:
         run: cargo publish --dry-run
       # Test downloading the artifacts
       - name: Download ubuntu artifacts
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: stableartifacts-ubuntu-24.04
       - name: Download macos artifacts
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: stableartifacts-macos-latest
       - name: Download rpm
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: rpm
       # Test generating release.txt
