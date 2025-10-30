@@ -198,7 +198,7 @@ mod test {
 
         assert!(
             get_working_directory(&current_directory, &floki_root, &mount)
-                == path::PathBuf::from("/guest/workingdir/")
+                == path::Path::new("/guest/workingdir/")
         )
     }
 }
