@@ -67,12 +67,55 @@ jobs:
             floki*.zip
             floki*.tar.gz
 
+    
+  rpm:
+    name: Build and test RPM using cargo generate-rpm
+    runs-on: ubuntu-24.04
+    needs: build
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+            toolchain: stable
+      - name: Install cargo-generate-rpm
+        run: cargo install cargo-generate-rpm
+      # Download the ubuntu artifact instead of rebuilding.
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: stableartifacts-ubuntu-24.04
+      - name: Build RPM
+        run: |
+          tar -xzvf floki*.tar.gz
+          mkdir -p target/release
+          cp floki target/release/floki
+          cargo generate-rpm
+      - name: Debug
+        run: |
+          set -ex
+
+          ls -ltR .
+          ls -l /usr/bin
+
+      - name: Install RPM
+        run: find . -name "floki*.rpm" | xargs sudo rpm -ivh 
+      - name: Test installation
+        run: floki -V
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: rpm
+          path: |
+            target/generate-rpm/floki*.rpm
+
   publish:
     name: Publish release artifact
     runs-on: ubuntu-latest
     if: github.ref_type == 'tag'
     needs:
       - build
+      - rpm
     # Required to publish a release
     permissions:
       contents: write
@@ -97,6 +140,10 @@ jobs:
         uses: actions/download-artifact@v5
         with:
           name: stableartifacts-macos-latest
+      - name: Download RPM
+        uses: actions/download-artifact@v5
+        with:
+          name: rpm
       - name: Generate release.txt
         run: "./changelog.sh"
       - name: Release
@@ -106,6 +153,7 @@ jobs:
           files: |
             floki*.zip
             floki*.tar.gz
+            floki*.rpm
       # # Announce the release
       # - run: "./announce.sh"
       #   env:
@@ -117,6 +165,7 @@ jobs:
     if: github.ref_type != 'tag'
     needs:
       - build
+      - rpm
     steps:
       - uses: actions/checkout@v5
       - name: Install rust
@@ -136,6 +185,10 @@ jobs:
         uses: actions/download-artifact@v5
         with:
           name: stableartifacts-macos-latest
+      - name: Download rpm
+        uses: actions/download-artifact@v5
+        with:
+          name: rpm
       # Test generating release.txt
       - name: Generate release.txt
         run: "./changelog.sh"
