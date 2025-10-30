@@ -1,11 +1,8 @@
 name: floki-ci
 on:
   push:
-    tags:
-      # Full version
-      - "[0-9]+.[0-9]+.[0-9]+"
-      # Prerelease version
-      - "[0-9]+.[0-9]+.[0-9]+-*"
+    branches:
+      - main
 
   pull_request:
     branches:
@@ -23,172 +20,83 @@ jobs:
         uses: dtolnay/rust-toolchain@master
         with:
           toolchain: stable
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2.8.1
       - name: Run cargo clippy to pick up any errors
         run: cargo clippy --all-targets -- -Dwarnings
       - name: Check code is formatted
         run: cargo fmt -- --check
 
   build:
-    name: Build static binary for publishing
-    runs-on: ${{ matrix.os }}
-    continue-on-error: ${{ matrix.experimental }}
+    name: Build ${{ matrix.name }}
     strategy:
       matrix:
-        os:
-          - ubuntu-24.04
-          - macos-latest
-        rust:
-          - stable
-          - beta
-        experimental: [false]
         include:
-          - os: ubuntu-24.04
+          - name: linux-stable
+            os: ubuntu-24.04
+            rust: stable
+            artifact_glob: floki-*.tar.gz
+            artifact_name: dist-linux
+            upload_artifact: true
+            rpm: true
+            allow_failure: false
+          - name: linux-beta
+            os: ubuntu-24.04
+            rust: beta
+            artifact_glob: floki-*.tar.gz
+            artifact_name: linux-beta
+            upload_artifact: false
+            rpm: false
+            allow_failure: false
+          - name: linux-nightly
+            os: ubuntu-24.04
             rust: nightly
-            experimental: true
-    steps:
-      - uses: actions/checkout@v5
-      - name: Install rust
-        uses: dtolnay/rust-toolchain@master
-        with:
-            toolchain: ${{ matrix.rust }}
-      - name: Install cargo-get
-        run: cargo install cargo-get
-      - name: Run tests
-        run: cargo test --all-features
-      - run: "./build.sh"
-        env:
-          OS_NAME: ${{ matrix.os }}
-      - name: Archive artifacts
-        uses: actions/upload-artifact@v5
-        if: ${{ matrix.rust == 'stable' }}
-        with:
-          name: stableartifacts-${{ matrix.os }}
-          path: |
-            floki*.zip
-            floki*.tar.gz
+            artifact_glob: floki-*.tar.gz
+            artifact_name: linux-nightly
+            upload_artifact: false
+            rpm: false
+            allow_failure: true
+          - name: macos-stable
+            os: macos-latest
+            rust: stable
+            artifact_glob: floki-*.zip
+            artifact_name: dist-macos
+            upload_artifact: true
+            rpm: false
+            allow_failure: false
+          - name: macos-beta
+            os: macos-latest
+            rust: beta
+            artifact_glob: floki-*.zip
+            artifact_name: macos-beta
+            upload_artifact: false
+            rpm: false
+            allow_failure: false
+    uses: ./.github/workflows/build-artifacts.yml
+    with:
+      runner: ${{ matrix.os }}
+      toolchain: ${{ matrix.rust }}
+      artifact_glob: ${{ matrix.artifact_glob }}
+      artifact_name: ${{ matrix.artifact_name }}
+      upload_artifact: ${{ matrix.upload_artifact }}
+      run_tests: true
+      rpm: ${{ matrix.rpm }}
+      allow_failure: ${{ matrix.allow_failure }}
+      fetch_depth: '1'
 
-    
   rpm:
-    name: Build and test RPM using cargo generate-rpm
+    name: Verify RPM installation
     runs-on: ubuntu-24.04
     needs: build
     steps:
-      - uses: actions/checkout@v5
-      - name: Install rust
-        uses: dtolnay/rust-toolchain@master
-        with:
-            toolchain: stable
-      - name: Install cargo-generate-rpm
-        run: cargo install cargo-generate-rpm
-      # Download the ubuntu artifact instead of rebuilding.
-      - name: Download artifacts
+      - name: Download linux artifacts
         uses: actions/download-artifact@v6
         with:
-          name: stableartifacts-ubuntu-24.04
-      - name: Build RPM
-        run: |
-          tar -xzvf floki*.tar.gz
-          mkdir -p target/release
-          cp floki target/release/floki
-          cargo generate-rpm
-      - name: Debug
-        run: |
-          set -ex
-
-          ls -ltR .
-          ls -l /usr/bin
-
+          name: dist-linux
+          path: dist-linux
       - name: Install RPM
-        run: find . -name "floki*.rpm" | xargs sudo rpm -ivh 
+        run: |
+          set -euxo pipefail
+          find dist-linux -name "floki*.rpm" -exec sudo rpm -ivh {} \;
       - name: Test installation
         run: floki -V
-      - name: Archive artifacts
-        uses: actions/upload-artifact@v5
-        with:
-          name: rpm
-          path: |
-            target/generate-rpm/floki*.rpm
-
-  publish:
-    name: Publish release artifact
-    runs-on: ubuntu-latest
-    if: github.ref_type == 'tag'
-    needs:
-      - build
-      - rpm
-    # Required to publish a release
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v5
-      - name: Install rust
-        uses: dtolnay/rust-toolchain@master
-        with:
-            toolchain: stable
-      - name: Install cargo-get
-        run: cargo install cargo-get
-      - name: Publish to crates.io
-        run: cargo publish
-        env:
-          CARGO_REGISTRY_TOKEN: ${{ secrets.PUBLISH_SECRET }}
-      # After publishing, create a release
-      - name: Download ubuntu artifacts
-        uses: actions/download-artifact@v6
-        with:
-          name: stableartifacts-ubuntu-24.04
-      - name: Download macos artifacts
-        uses: actions/download-artifact@v6
-        with:
-          name: stableartifacts-macos-latest
-      - name: Download RPM
-        uses: actions/download-artifact@v6
-        with:
-          name: rpm
-      - name: Generate release.txt
-        run: "./changelog.sh"
-      - name: Release
-        uses: softprops/action-gh-release@v2
-        with:
-          body_path: release.txt
-          files: |
-            floki*.zip
-            floki*.tar.gz
-            floki*.rpm
-      # # Announce the release
-      # - run: "./announce.sh"
-      #   env:
-      #     ANNOUNCE_HOOK: ${{ secrets.ANNOUNCE_HOOK }}
-
-  publish-dry-run:
-    name: Dry-run publish for non-release artifact
-    runs-on: ubuntu-latest
-    if: github.ref_type != 'tag'
-    needs:
-      - build
-      - rpm
-    steps:
-      - uses: actions/checkout@v5
-      - name: Install rust
-        uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: stable
-      - name: Install cargo-get
-        run: cargo install cargo-get
-      - name: Dry-run publish on non-tags
-        run: cargo publish --dry-run
-      # Test downloading the artifacts
-      - name: Download ubuntu artifacts
-        uses: actions/download-artifact@v6
-        with:
-          name: stableartifacts-ubuntu-24.04
-      - name: Download macos artifacts
-        uses: actions/download-artifact@v6
-        with:
-          name: stableartifacts-macos-latest
-      - name: Download rpm
-        uses: actions/download-artifact@v6
-        with:
-          name: rpm
-      # Test generating release.txt
-      - name: Generate release.txt
-        run: "./changelog.sh"

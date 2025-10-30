@@ -107,6 +107,12 @@ $ cargo install floki
 
 Contributors will need to sign their commits to acknowledge the [DCO](DCO)
 
+### Release process
+
+- Releases run automatically from `main` via [semantic-release](https://semantic-release.gitbook.io/semantic-release/).
+- Follow the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) message format so that new versions and changelogs can be generated.
+- Publishing to crates.io and GitHub Releases happens as part of the release workflow; no manual steps are required once a change lands on `main`.
+
 ## TODO
 
 See issues.

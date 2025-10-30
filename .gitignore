@@ -1,3 +1,4 @@
 public
 /target/
 release.txt
+node_modules/

@@ -8,7 +8,8 @@ keywords = ["docker"]
 categories = ["command-line-utilities"]
 license = "MIT"
 
-version = "2.2.0"
+# This version gets set automatically by semantic-release during publishing.
+version = "0.0.0"
 authors = ["Richard Lupton <richard.lupton@gmail.com>",
            "Max Dymond <max.dymond@metaswitch.com>"]
 edition = '2018'
