@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   get-next-version:
-    uses: semantic-release-action/next-release-version/.github/workflows/next-release-version.yml@v4
+    uses: semantic-release-action/next-release-version/.github/workflows/next-release-version.yml@0cdefe1224944c23645e5131f7a5189672c0df92 # v4
 
   build-artifacts:
     name: Build ${{ matrix.name }} artifacts
@@ -54,7 +54,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
           fetch-depth: 0
 
@@ -64,13 +64,13 @@ jobs:
           toolchain: stable
 
       - name: Rust Cache
-        uses: Swatinem/rust-cache@v2.8.1
+        uses: Swatinem/rust-cache@f13886b937689c021905a6b90929199931d60db1 # v2.8.1
 
       - name: Install semantic-release-cargo
         run: cargo install --locked semantic-release-cargo
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: "node"
 
@@ -78,7 +78,7 @@ jobs:
         run: npm ci
 
       - name: Download build artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           pattern: dist-*
           merge-multiple: true
