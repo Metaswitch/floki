@@ -1,0 +1,5 @@
+.shared_template:
+  script:
+    - echo template
+job:
+  script: !reference [.shared_template, script]

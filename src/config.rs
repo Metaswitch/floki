@@ -2,6 +2,7 @@
 use crate::errors::FlokiError;
 use crate::image;
 use serde::{Deserialize, Serialize};
+use serde_yaml::{Mapping as YamlMapping, Value as YamlValue};
 use tera::from_value;
 use tera::Context;
 use tera::Tera;
@@ -128,6 +129,30 @@ enum LoaderType {
     Toml,
 }
 
+fn strip_yaml_tags(value: &YamlValue) -> YamlValue {
+    match value {
+        // For tagged values, we just return the inner value.
+        YamlValue::Tagged(tagged) => strip_yaml_tags(&tagged.value),
+
+        // For sequences and mappings, we need to recursively strip tags.
+        YamlValue::Sequence(items) => {
+            let mut stripped = Vec::with_capacity(items.len());
+            for item in items {
+                stripped.push(strip_yaml_tags(item));
+            }
+            YamlValue::Sequence(stripped)
+        }
+        YamlValue::Mapping(map) => {
+            let mut stripped = YamlMapping::with_capacity(map.len());
+            for (key, value) in map {
+                stripped.insert(strip_yaml_tags(key), strip_yaml_tags(value));
+            }
+            YamlValue::Mapping(stripped)
+        }
+        _ => value.clone(),
+    }
+}
+
 fn makeloader(path: &Path, loader: LoaderType) -> impl tera::Function {
     // Get the dirname of the Path given (if a file), or just the directory.
     let directory = if path.is_file() {
@@ -145,8 +170,15 @@ fn makeloader(path: &Path, loader: LoaderType) -> impl tera::Function {
             .and_then(|full_path| std::fs::read_to_string(full_path).map_err(Into::into))
             // Parse the file using the relevant parser
             .and_then(|contents| match loader {
-                LoaderType::Yaml => serde_yaml::from_str(&contents)
-                    .map_err(|err| format!("Failed to parse file as YAML: {err}").into()),
+                LoaderType::Yaml => {
+                    let raw: YamlValue = serde_yaml::from_str(&contents).map_err(|err| {
+                        tera::Error::msg(format!("Failed to parse file as YAML: {err}"))
+                    })?;
+                    let stripped = strip_yaml_tags(&raw);
+                    serde_yaml::from_value::<tera::Value>(stripped).map_err(|err| {
+                        tera::Error::msg(format!("Failed to convert YAML value: {err}"))
+                    })
+                }
                 LoaderType::Json => serde_json::from_str(&contents)
                     .map_err(|err| format!("Failed to parse file as JSON: {err}").into()),
                 LoaderType::Toml => toml::from_str(&contents)
@@ -370,6 +402,38 @@ mod test {
             r#"{% set values = toml(file="Cargo.toml") %}floki: {{ values.package.name }}"#;
         let config = render_template(template, Path::new("floki.yaml"))?;
         assert_eq!(config, "floki: floki");
+        Ok(())
+    }
+
+    #[test]
+    fn test_strip_yaml_tags_drops_reference_tag() {
+        let yaml = "value: !reference [template, script]";
+        let raw: YamlValue = serde_yaml::from_str(yaml).unwrap();
+        let stripped = strip_yaml_tags(&raw);
+
+        let map = match stripped {
+            YamlValue::Mapping(map) => map,
+            other => panic!("expected mapping, got {:?}", other),
+        };
+
+        let key = YamlValue::String("value".into());
+        let field = map.get(&key).expect("missing value key");
+
+        match field {
+            YamlValue::Sequence(items) => {
+                assert_eq!(items.len(), 2);
+                assert_eq!(items[0], YamlValue::String("template".into()));
+                assert_eq!(items[1], YamlValue::String("script".into()));
+            }
+            other => panic!("expected sequence, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_tera_yamlload_with_gitlab_reference() -> Result<(), Box<dyn std::error::Error>> {
+        let template = r#"{% set values = yaml(file="test_resources/gitlab_reference.yaml") %}script0: {{ values.job.script[0] }} script1: {{ values.job.script[1] }}"#;
+        let rendered = render_template(template, Path::new("floki.yaml"))?;
+        assert_eq!(rendered, "script0: .shared_template script1: script");
         Ok(())
     }
 }
