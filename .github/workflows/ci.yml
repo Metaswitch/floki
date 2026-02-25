@@ -9,6 +9,8 @@ on:
       # Trigger on pull requests into main
       - main
     types: [ opened, synchronize ]
+  # Enable merge queues
+  merge_group:
 
 jobs:
   lint:
