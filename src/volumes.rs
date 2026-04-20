@@ -44,7 +44,11 @@ fn prefix_cache(shared: bool, config_filepath: &path::Path) -> String {
 fn hash_path(path: &path::Path) -> String {
     let mut hasher = Sha256::new();
     hasher.update(path.as_os_str().as_bytes());
-    format!("{:x}", hasher.finalize())
+    hasher
+        .finalize()
+        .iter()
+        .map(|byte| format!("{byte:02x}"))
+        .collect()
 }
 
 #[cfg(test)]
