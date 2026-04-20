@@ -1,5 +1,6 @@
 use std::path;
 use std::{collections::BTreeMap, os::unix::prelude::OsStrExt};
+use std::fmt::Write;
 
 use sha2::{Digest, Sha256};
 
@@ -44,11 +45,11 @@ fn prefix_cache(shared: bool, config_filepath: &path::Path) -> String {
 fn hash_path(path: &path::Path) -> String {
     let mut hasher = Sha256::new();
     hasher.update(path.as_os_str().as_bytes());
-    hasher
-        .finalize()
-        .iter()
-        .map(|byte| format!("{byte:02x}"))
-        .collect()
+    let mut hex = String::with_capacity(64);
+    for byte in hasher.finalize() {
+        let _ = write!(&mut hex, "{byte:02x}");
+    }
+    hex
 }
 
 #[cfg(test)]
