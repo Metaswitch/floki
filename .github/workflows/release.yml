@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   get-next-version:
-    uses: semantic-release-action/next-release-version/.github/workflows/next-release-version.yml@0cdefe1224944c23645e5131f7a5189672c0df92 # v4
+    uses: semantic-release-action/next-release-version/.github/workflows/next-release-version.yml@3afa0258b980a53b23f8e18a388981dff12d8888 # v4
 
   build-artifacts:
     name: Build ${{ matrix.name }} artifacts
