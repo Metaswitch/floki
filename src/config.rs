@@ -266,7 +266,7 @@ impl FlokiConfig {
                     .ok_or_else(|| FlokiError::InternalAssertionFailed {
                         description: format!(
                             "could not construct path to external yaml file '{:?}'",
-                            &yaml.file
+                            yaml.file
                         ),
                     })?
                     .join(yaml.file.clone());
@@ -276,7 +276,7 @@ impl FlokiConfig {
         debug!(
             "Parsed '{}' into configuration: {:?}",
             file.display(),
-            &config
+            config
         );
 
         Ok(config)

@@ -36,7 +36,7 @@ fn main() -> Result<(), Error> {
 
 /// Decide which commands to run given the input from the shell
 fn run_floki_from_args(args: &Cli) -> Result<(), Error> {
-    debug!("Got command line arguments: {:?}", &args);
+    debug!("Got command line arguments: {:?}", args);
 
     if args.local {
         warn!("-l/--local is deprecated and may be removed in a future release");
