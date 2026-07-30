@@ -3,7 +3,7 @@ use crate::errors::FlokiError;
 use crate::image;
 use serde::{Deserialize, Serialize};
 use serde_yaml::{Mapping as YamlMapping, Value as YamlValue};
-use tera::from_value;
+
 use tera::Context;
 use tera::Tera;
 
@@ -115,14 +115,6 @@ fn default_mount() -> PathBuf {
     PathBuf::from("/src")
 }
 
-fn path_from_args(args: &HashMap<String, tera::Value>) -> tera::Result<String> {
-    let file = match args.get("file") {
-        Some(file) => file,
-        None => return Err("file parameter is required".into()),
-    };
-    Ok(from_value::<String>(file.clone())?)
-}
-
 enum LoaderType {
     Yaml,
     Json,
@@ -153,7 +145,10 @@ fn strip_yaml_tags(value: &YamlValue) -> YamlValue {
     }
 }
 
-fn makeloader(path: &Path, loader: LoaderType) -> impl tera::Function {
+fn makeloader(
+    path: &Path,
+    loader: LoaderType,
+) -> impl Fn(tera::Kwargs, &tera::State) -> tera::TeraResult<tera::Value> {
     // Get the dirname of the Path given (if a file), or just the directory.
     let directory = if path.is_file() {
         path.parent().expect("File should have a parent directory")
@@ -162,29 +157,39 @@ fn makeloader(path: &Path, loader: LoaderType) -> impl tera::Function {
     }
     .to_path_buf();
 
-    Box::new(move |args: &HashMap<String, tera::Value>| {
-        path_from_args(args)
-            // Calculate the full path using the parent directory
-            .map(|path| directory.join(path))
-            // Read the file as a string
-            .and_then(|full_path| std::fs::read_to_string(full_path).map_err(Into::into))
-            // Parse the file using the relevant parser
-            .and_then(|contents| match loader {
-                LoaderType::Yaml => {
-                    let raw: YamlValue = serde_yaml::from_str(&contents).map_err(|err| {
-                        tera::Error::msg(format!("Failed to parse file as YAML: {err}"))
-                    })?;
-                    let stripped = strip_yaml_tags(&raw);
-                    serde_yaml::from_value::<tera::Value>(stripped).map_err(|err| {
-                        tera::Error::msg(format!("Failed to convert YAML value: {err}"))
-                    })
-                }
-                LoaderType::Json => serde_json::from_str(&contents)
-                    .map_err(|err| format!("Failed to parse file as JSON: {err}").into()),
-                LoaderType::Toml => toml::from_str(&contents)
-                    .map_err(|err| format!("Failed to parse file as TOML: {err}").into()),
-            })
-    })
+    move |kwargs: tera::Kwargs, _: &tera::State| {
+        let file: String = kwargs.must_get("file")?;
+        let contents = std::fs::read_to_string(directory.join(file))?;
+
+        // Parse the file using the relevant parser. Each format is parsed into its own
+        // value type, then converted to a tera::Value by serializing through it.
+        match loader {
+            LoaderType::Yaml => {
+                let raw: YamlValue = serde_yaml::from_str(&contents).map_err(|err| {
+                    tera::Error::message(format!("Failed to parse file as YAML: {err}"))
+                })?;
+                tera::Value::try_from_serializable(&strip_yaml_tags(&raw)).map_err(|err| {
+                    tera::Error::message(format!("Failed to convert YAML value: {err}"))
+                })
+            }
+            LoaderType::Json => {
+                let raw: serde_json::Value = serde_json::from_str(&contents).map_err(|err| {
+                    tera::Error::message(format!("Failed to parse file as JSON: {err}"))
+                })?;
+                tera::Value::try_from_serializable(&raw).map_err(|err| {
+                    tera::Error::message(format!("Failed to convert JSON value: {err}"))
+                })
+            }
+            LoaderType::Toml => {
+                let raw: toml::Value = toml::from_str(&contents).map_err(|err| {
+                    tera::Error::message(format!("Failed to parse file as TOML: {err}"))
+                })?;
+                tera::Value::try_from_serializable(&raw).map_err(|err| {
+                    tera::Error::message(format!("Failed to convert TOML value: {err}"))
+                })
+            }
+        }
+    }
 }
 
 // Renders a template from a given string.
