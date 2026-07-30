@@ -56,7 +56,7 @@ impl Environment {
             floki_workspace: get_floki_work_path(user.uid),
         };
 
-        debug!("Got environment {:?}", &env);
+        debug!("Got environment {:?}", env);
 
         Ok(env)
     }
@@ -87,7 +87,7 @@ fn locate_file_in_parents(path: path::PathBuf) -> Result<(path::PathBuf, path::P
     let dir = path
         .parent()
         .ok_or_else(|| FlokiError::InternalAssertionFailed {
-            description: format!("config_file '{:?}' does not have a parent", &path),
+            description: format!("config_file '{:?}' does not have a parent", path),
         })?
         .to_path_buf();
     Ok((dir, path))
