@@ -159,7 +159,10 @@ fn makeloader(
 
     move |kwargs: tera::Kwargs, _: &tera::State| {
         let file: String = kwargs.must_get("file")?;
-        let contents = std::fs::read_to_string(directory.join(file))?;
+        let full_path = directory.join(file);
+        let contents = std::fs::read_to_string(&full_path).map_err(|err| {
+            tera::Error::message(format!("Failed to read '{}': {err}", full_path.display()))
+        })?;
 
         // Parse the file using the relevant parser. Each format is parsed into its own
         // value type, then converted to a tera::Value by serializing through it.
@@ -431,6 +434,34 @@ mod test {
                 assert_eq!(items[1], YamlValue::String("script".into()));
             }
             other => panic!("expected sequence, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_tera_load_errors_are_reported() {
+        // Loader failures must surface, not render as empty values.
+        for (template, expected) in [
+            (
+                r#"{% set v = yaml() %}x"#,
+                "Missing keyword argument `file`",
+            ),
+            (
+                r#"{% set v = yaml(file="test_resources/nonexistent.yaml") %}x"#,
+                "Failed to read",
+            ),
+            (
+                r#"{% set v = json(file="Cargo.toml") %}x"#,
+                "Failed to parse file as JSON",
+            ),
+            (
+                r#"{% set v = toml(file="test_resources/values.json") %}x"#,
+                "Failed to parse file as TOML",
+            ),
+        ] {
+            let err = render_template(template, Path::new("floki.yaml"))
+                .expect_err("expected template to fail");
+            let msg = format!("{err:?}");
+            assert!(msg.contains(expected), "expected {:?} in {}", expected, msg);
         }
     }
 
