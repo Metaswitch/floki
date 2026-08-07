@@ -232,4 +232,6 @@ Example uses include referencing environmental variables in the `floki` config, 
 docker_switches:
   - -v {{ env.HOME }}/.vim:/home/build/.vim
 ```
+`get_env(name="HOME")` is also available, and takes an optional `default` for when the variable isn't set.
+
 Note that extensive use may reduce the reproducibility and shareability of your `floki.yaml`.

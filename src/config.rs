@@ -195,6 +195,20 @@ fn makeloader(
     }
 }
 
+// Reimplementation of tera 1's `get_env`, which was dropped in tera 2.
+fn get_env(kwargs: tera::Kwargs, _: &tera::State) -> tera::TeraResult<tera::Value> {
+    let name: String = kwargs.must_get("name")?;
+    match std::env::var(&name) {
+        Ok(value) => Ok(value.into()),
+        Err(_) => match kwargs.get::<tera::Value>("default")? {
+            Some(default) => Ok(default),
+            None => Err(tera::Error::message(format!(
+                "Environment variable `{name}` not found"
+            ))),
+        },
+    }
+}
+
 // Renders a template from a given string.
 pub fn render_template(template: &str, source_filename: &Path) -> Result<String, FlokiError> {
     let template_path = source_filename.display().to_string();
@@ -216,6 +230,7 @@ pub fn render_template(template: &str, source_filename: &Path) -> Result<String,
     tera.register_function("yaml", makeloader(&canonical_path, LoaderType::Yaml));
     tera.register_function("json", makeloader(&canonical_path, LoaderType::Json));
     tera.register_function("toml", makeloader(&canonical_path, LoaderType::Toml));
+    tera.register_function("get_env", get_env);
 
     tera.add_raw_template(&template_path, template)
         .map_err(|e| FlokiError::ProblemRenderingTemplate {
@@ -411,6 +426,34 @@ mod test {
         let config = render_template(template, Path::new("floki.yaml"))?;
         assert_eq!(config, "floki: floki");
         Ok(())
+    }
+
+    #[test]
+    fn test_tera_get_env() -> Result<(), Box<dyn std::error::Error>> {
+        // Uses PATH rather than setting a var, as set_var is unsound in a threaded
+        // test binary.
+        let template = r#"shell: {{ get_env(name="PATH") }}"#;
+        assert_eq!(
+            render_template(template, Path::new("floki.yaml"))?,
+            format!("shell: {}", std::env::var("PATH")?)
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn test_tera_get_env_default() -> Result<(), Box<dyn std::error::Error>> {
+        let template = r#"shell: {{ get_env(name="FLOKI_TEST_UNSET", default="bar") }}"#;
+        assert_eq!(
+            render_template(template, Path::new("floki.yaml"))?,
+            "shell: bar"
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn test_tera_get_env_missing_errors() {
+        let template = r#"shell: {{ get_env(name="FLOKI_TEST_UNSET") }}"#;
+        assert!(render_template(template, Path::new("floki.yaml")).is_err());
     }
 
     #[test]
