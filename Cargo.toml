@@ -22,7 +22,7 @@ serde = { version = "1", features = ["derive"] }
 serde_yaml = "0.9"
 structopt = "0.3"
 uuid = { version = "1.16", features = ["v4"] }
-yaml-rust2 = "0.11.0"
+yaml-rust2 = "0.12.0"
 simplelog = "0.12"
 nix = { version = "0.31", default-features = false, features = ["user"] }
 shlex = "2.0"
