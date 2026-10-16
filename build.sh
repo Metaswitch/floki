@@ -21,7 +21,7 @@ then
   echo "Building linux binary"
   cargo build --release
 
-  FLOKI_BINARY=$(find target/ -name "floki")
+  FLOKI_BINARY=$(find target/ -type f -path "*/release/floki")
   echo "FLOKI_BINARY is $FLOKI_BINARY"
   FLOKI_DIR=$(dirname $FLOKI_BINARY)
 
