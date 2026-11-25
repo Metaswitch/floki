@@ -24,7 +24,7 @@ structopt = "0.3"
 uuid = { version = "1.16", features = ["v4"] }
 yaml-rust2 = "0.13.0"
 simplelog = "0.12"
-nix = { version = "0.31", default-features = false, features = ["user"] }
+nix = { version = "0.32", default-features = false, features = ["user"] }
 shlex = "2.0"
 sha2 = "0.11.0"
 anyhow = "1.0.98"
